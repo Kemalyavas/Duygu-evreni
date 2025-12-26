@@ -1,0 +1,196 @@
+@import "tailwindcss";
+
+:root {
+  /* Soft Nebula Theme Colors */
+  --background: #0D1129;
+  --background-dark: #050810;
+  --foreground: #F8F6FF;
+  --foreground-muted: #A8A3C0;
+
+  /* Nebula Accent Colors */
+  --nebula-purple: #B37DEA;
+  --nebula-lavender: #9A80C6;
+  --nebula-blue: #8CBDF8;
+  --nebula-pink: #D99BE7;
+  --nebula-cream: #ECCDF3;
+
+  /* Glass morphism - softer */
+  --glass-bg: rgba(180, 160, 220, 0.08);
+  --glass-border: rgba(180, 160, 220, 0.15);
+  --glass-glow: rgba(179, 125, 234, 0.1);
+
+  /* Planet Colors - VIBRANT and VISIBLE */
+  --joy: #FFD700;
+  --sadness: #4169E1;
+  --anger: #FF3333;
+  --fear: #9333EA;
+  --love: #FF1493;
+  --hope: #00CED1;
+  --surprise: #BA55D3;
+  --peace: #32CD32;
+  --depression: #708090;
+
+  /* Fonts */
+  --font-sans: var(--font-inter);
+  --font-heading: var(--font-jakarta);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-inter);
+  --font-heading: var(--font-jakarta);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow-x: hidden;
+}
+
+body {
+  background: linear-gradient(180deg, var(--background) 0%, var(--background-dark) 100%);
+  color: var(--foreground);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  min-height: 100vh;
+}
+
+/* Heading font */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading), system-ui, sans-serif;
+}
+
+/* Glass morphism utility - softer */
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border);
+  box-shadow:
+    0 4px 30px var(--glass-glow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+/* Glass tooltip for planets */
+.glass-tooltip {
+  background: linear-gradient(
+    135deg,
+    rgba(13, 17, 41, 0.9) 0%,
+    rgba(30, 25, 50, 0.85) 100%
+  );
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(179, 125, 234, 0.25);
+  border-radius: 16px;
+  padding: 16px 24px;
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.4),
+    0 0 20px rgba(179, 125, 234, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  white-space: nowrap;
+}
+
+/* Nebula background - clean dark */
+.nebula-background {
+  background: linear-gradient(180deg, #0D1129 0%, #050810 100%);
+}
+
+/* Glow effects - softer */
+.glow {
+  box-shadow: 0 0 30px rgba(179, 125, 234, 0.15);
+}
+
+.glow-strong {
+  box-shadow:
+    0 0 20px rgba(179, 125, 234, 0.2),
+    0 0 40px rgba(140, 189, 248, 0.1);
+}
+
+/* Hide scrollbar but allow scrolling */
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Cosmic gradient text - softer pastel */
+.cosmic-text {
+  background: linear-gradient(
+    135deg,
+    var(--nebula-cream) 0%,
+    var(--nebula-pink) 35%,
+    var(--nebula-lavender) 65%,
+    var(--nebula-blue) 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Soft button glow on hover */
+.btn-glow:hover {
+  box-shadow:
+    0 0 15px rgba(179, 125, 234, 0.3),
+    0 0 30px rgba(179, 125, 234, 0.15);
+  transition: box-shadow 0.3s ease;
+}
+
+/* Smooth transitions */
+.transition-smooth {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Dreamy animation */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+/* Soft pulse animation */
+@keyframes soft-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.animate-soft-pulse {
+  animation: soft-pulse 3s ease-in-out infinite;
+}
+
+/* Custom scrollbar for webkit browsers */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(13, 17, 41, 0.5);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(179, 125, 234, 0.3);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(179, 125, 234, 0.5);
+}

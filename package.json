@@ -1,0 +1,48 @@
+{
+  "name": "duygu-evreni",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:coverage": "vitest run --coverage"
+  },
+  "dependencies": {
+    "@react-spring/three": "^10.0.3",
+    "@react-three/drei": "^10.7.7",
+    "@react-three/fiber": "^9.4.2",
+    "@react-three/postprocessing": "^3.0.4",
+    "@supabase/ssr": "^0.8.0",
+    "@supabase/supabase-js": "^2.89.0",
+    "clsx": "^2.1.1",
+    "date-fns": "^4.1.0",
+    "framer-motion": "^12.23.26",
+    "next": "16.1.0",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "tailwind-merge": "^3.4.0",
+    "three": "^0.182.0",
+    "zustand": "^5.0.9"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.1",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@types/three": "^0.182.0",
+    "@vitejs/plugin-react": "^5.1.2",
+    "eslint": "^9",
+    "eslint-config-next": "16.1.0",
+    "jsdom": "^27.3.0",
+    "tailwindcss": "^4",
+    "typescript": "^5",
+    "vitest": "^4.0.16"
+  }
+}
