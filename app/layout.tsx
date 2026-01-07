@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { Analytics } from "@vercel/analytics/react";
 import { Inter, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 
@@ -106,6 +107,7 @@ export default function RootLayout({
         className={`${inter.variable} ${plusJakarta.variable} antialiased`}
       >
         {children}
+        <Analytics />
       </body>
     </html>
   );
