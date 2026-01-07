@@ -355,7 +355,7 @@ export function OrbitingStars({
       lastReportedStarId.current = null
     }
 
-    // Update material opacity for fade-in effect
+    // Update material opacity - always set to ensure correct values after mesh recreation
     if (appearProgressRef.current < 1) {
       // Quick opacity fade-in (reaches full opacity at 40% of animation)
       const opacityProgress = Math.min(1, appearProgressRef.current * 2.5)
@@ -366,6 +366,14 @@ export function OrbitingStars({
       }
       if (readMaterialRef.current) {
         readMaterialRef.current.opacity = opacity * 0.5
+      }
+    } else {
+      // Animation complete - ensure full opacity (fixes mesh recreation bug)
+      if (normalMaterialRef.current && normalMaterialRef.current.opacity !== 0.95) {
+        normalMaterialRef.current.opacity = 0.95
+      }
+      if (readMaterialRef.current && readMaterialRef.current.opacity !== 0.5) {
+        readMaterialRef.current.opacity = 0.5
       }
     }
   })
