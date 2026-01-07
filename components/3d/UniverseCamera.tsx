@@ -35,7 +35,7 @@ export function CameraAnimator({
   // Animation state refs
   const isAnimating = useRef(false)
   const animationStartTime = useRef(0)
-  const animationDuration = useRef(CAMERA.MAX_DURATION)
+  const animationDuration = useRef<number>(CAMERA.MAX_DURATION)
   const startCameraPos = useRef(new THREE.Vector3())
   const startTargetPos = useRef(new THREE.Vector3())
   const endCameraPos = useRef(new THREE.Vector3())

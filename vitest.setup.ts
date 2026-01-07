@@ -43,7 +43,7 @@ Object.defineProperty(window, 'ResizeObserver', {
 
 // Mock WebGL context for Three.js
 HTMLCanvasElement.prototype.getContext = ((originalGetContext) => {
-  return function (this: HTMLCanvasElement, contextId: string, options?: any) {
+  return function (this: HTMLCanvasElement, contextId: any, options?: any): any {
     if (contextId === 'webgl' || contextId === 'webgl2' || contextId === 'experimental-webgl') {
       return {
         canvas: this,
@@ -99,6 +99,6 @@ HTMLCanvasElement.prototype.getContext = ((originalGetContext) => {
         isContextLost: () => false,
       } as unknown as WebGLRenderingContext
     }
-    return originalGetContext.call(this, contextId, options)
+    return (originalGetContext as any).call(this, contextId, options)
   }
-})(HTMLCanvasElement.prototype.getContext)
+})(HTMLCanvasElement.prototype.getContext) as unknown as typeof HTMLCanvasElement.prototype.getContext

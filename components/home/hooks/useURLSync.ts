@@ -50,7 +50,7 @@ export function useURLSync({
           setSelectedStar(star)
           markAsRead(star.id)
         }
-      }, STAR_INTERACTION.CLICK_DELAY)
+      }, STAR_INTERACTION.URL_STAR_SELECT_DELAY)
 
       return () => clearTimeout(timer)
     }

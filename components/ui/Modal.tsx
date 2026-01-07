@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useCallback } from 'react'
+import { useEffect, useCallback, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { clsx } from 'clsx'
 
@@ -19,6 +19,9 @@ export function Modal({
   title,
   className,
 }: ModalProps) {
+  const modalRef = useRef<HTMLDivElement>(null)
+  const previousActiveElement = useRef<HTMLElement | null>(null)
+
   // Close on escape key
   const handleEscape = useCallback(
     (e: KeyboardEvent) => {
@@ -29,16 +32,61 @@ export function Modal({
     [onClose]
   )
 
+  // Focus trap - keep focus within modal
+  const handleTabKey = useCallback((e: KeyboardEvent) => {
+    if (e.key !== 'Tab' || !modalRef.current) return
+
+    const focusableElements = modalRef.current.querySelectorAll<HTMLElement>(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    )
+    const firstElement = focusableElements[0]
+    const lastElement = focusableElements[focusableElements.length - 1]
+
+    if (!firstElement) return
+
+    if (e.shiftKey) {
+      // Shift + Tab
+      if (document.activeElement === firstElement) {
+        e.preventDefault()
+        lastElement.focus()
+      }
+    } else {
+      // Tab
+      if (document.activeElement === lastElement) {
+        e.preventDefault()
+        firstElement.focus()
+      }
+    }
+  }, [])
+
   useEffect(() => {
     if (isOpen) {
+      // Store previously focused element
+      previousActiveElement.current = document.activeElement as HTMLElement
+
       document.addEventListener('keydown', handleEscape)
+      document.addEventListener('keydown', handleTabKey)
       document.body.style.overflow = 'hidden'
+
+      // Focus first focusable element in modal
+      setTimeout(() => {
+        const firstFocusable = modalRef.current?.querySelector<HTMLElement>(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        )
+        firstFocusable?.focus()
+      }, 50)
     }
     return () => {
       document.removeEventListener('keydown', handleEscape)
+      document.removeEventListener('keydown', handleTabKey)
       document.body.style.overflow = 'unset'
+
+      // Restore focus to previously focused element
+      previousActiveElement.current?.focus()
     }
-  }, [isOpen, handleEscape])
+  }, [isOpen, handleEscape, handleTabKey])
+
+  const modalTitleId = 'modal-title'
 
   return (
     <AnimatePresence>
@@ -53,6 +101,7 @@ export function Modal({
             transition={{ duration: 0.2 }}
             className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"
             onClick={onClose}
+            aria-hidden="true"
           />
 
           {/* Modal */}
@@ -65,6 +114,10 @@ export function Modal({
             className="fixed inset-0 z-50 flex items-center justify-center p-4"
           >
             <div
+              ref={modalRef}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby={title ? modalTitleId : undefined}
               className={clsx(
                 'relative w-full max-w-lg',
                 'glass rounded-2xl p-6',
@@ -76,6 +129,7 @@ export function Modal({
               {/* Close button */}
               <button
                 onClick={onClose}
+                aria-label="Kapat"
                 className="absolute top-4 right-4 p-2 rounded-full text-white/60 hover:text-white hover:bg-white/10 transition-colors"
               >
                 <svg
@@ -84,6 +138,7 @@ export function Modal({
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
+                  aria-hidden="true"
                 >
                   <path
                     strokeLinecap="round"
@@ -96,7 +151,10 @@ export function Modal({
 
               {/* Title */}
               {title && (
-                <h2 className="text-xl font-bold text-white mb-4 pr-8">
+                <h2
+                  id={modalTitleId}
+                  className="text-xl font-bold text-white mb-4 pr-8"
+                >
                   {title}
                 </h2>
               )}

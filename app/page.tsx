@@ -6,7 +6,7 @@ import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Button } from '@/components/ui'
+import { Button, ErrorBoundary } from '@/components/ui'
 import { Onboarding } from '@/components/Onboarding'
 import { StarCreationModal } from '@/components/StarCreationModal'
 import { StarViewPanel } from '@/components/StarViewPanel'
@@ -251,19 +251,21 @@ function HomePageContent() {
             {planetsError && <div className="text-red-400 text-sm">{planetsError}</div>}
           </div>
         ) : (
-          <UnifiedUniverse
-            planets={planets}
-            stars={stars}
-            focusedPlanetId={focusedPlanetId}
-            onPlanetClick={handlePlanetClick}
-            onStarClick={handleStarClick}
-            onBackToUniverse={handleBackToUniverse}
-            selectedStarId={selectedStar?.id}
-            readStarIds={readStarIds}
-            starCounts={starCounts}
-            starsLoading={starsLoading && !initialLoadComplete}
-            onStarsReady={handleStarsReady}
-          />
+          <ErrorBoundary>
+            <UnifiedUniverse
+              planets={planets}
+              stars={stars}
+              focusedPlanetId={focusedPlanetId}
+              onPlanetClick={handlePlanetClick}
+              onStarClick={handleStarClick}
+              onBackToUniverse={handleBackToUniverse}
+              selectedStarId={selectedStar?.id}
+              readStarIds={readStarIds}
+              starCounts={starCounts}
+              starsLoading={starsLoading && !initialLoadComplete}
+              onStarsReady={handleStarsReady}
+            />
+          </ErrorBoundary>
         )}
       </div>
 
