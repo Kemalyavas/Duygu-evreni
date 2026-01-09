@@ -152,6 +152,15 @@ const VIOLENCE_KEYWORDS = [
   'geberteceğim',
   'gebertir',
 
+  // Death wishes
+  'ölsün',
+  'ölmeli',
+  'gebermeli',
+  'gebersin',
+  'kahrolsun',
+  'yok olsun',
+  'yok edilmeli',
+
   // Physical violence
   'döveceğim',
   'döverim',
@@ -210,6 +219,13 @@ const SEXUAL_EXPLICIT_KEYWORDS = [
   'zorla seks',
   'cinsel saldırı',
   'cinsel istismar',
+  // Rape/assault slang
+  'zorla becer',
+  'zorla sik',
+  'zorla yat',
+  'zorla soy',
+  'ırzına geç',
+  'irzina gec',
 ]
 
 // ============================================

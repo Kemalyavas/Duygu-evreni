@@ -59,9 +59,9 @@ KONTROL KRİTERLERİ:
    - Örnek SERBEST: "Bir dönem çok kötüydüm", "Yaşamak zor geliyor bazen"
 
 2. TÜRK SİYASİ FİGÜRLER (Atatürk, Cumhurbaşkanı, parti liderleri vb.):
-   - YASAK: Hakaret, küfür, aşağılama, nefret söylemi
+   - YASAK: Hakaret, küfür, aşağılama, nefret söylemi, ÖLÜM DİLEĞİ/TEHDİDİ
    - SERBEST: Nötr bahsetme, olumlu ifadeler, tarihsel referanslar
-   - Örnek YASAK: "Erdoğan bir diktatör, g*tüne s*kayım", "Atatürk'ün a*"
+   - Örnek YASAK: "Erdoğan bir diktatör", "Cumhurbaşkanı ölsün", "Atatürk'e lanet olsun", "X gebermeli"
    - Örnek SERBEST: "Atatürk'ü çok seviyorum", "Cumhurbaşkanı bugün konuşma yaptı"
 
 3. ŞİDDET TEHDİTLERİ:
@@ -71,9 +71,9 @@ KONTROL KRİTERLERİ:
    - Örnek SERBEST: "İçim yanıyor", "Patlayacak gibi hissediyorum", "Kafayı yiyeceğim"
 
 4. CİNSEL İÇERİK:
-   - YASAK: Grafik/detaylı cinsel tasvirler, pornografik içerik, tecavüz/taciz övme
+   - YASAK: Grafik/detaylı cinsel tasvirler, pornografik içerik, tecavüz/taciz övme, CİNSEL SALDIRI İTİRAFI
    - SERBEST: Romantik duygular, özlem, sevgi ifadeleri
-   - Örnek YASAK: Detaylı cinsel eylem tasvirleri
+   - Örnek YASAK: "Onu zorla becerdim", "Tecavüz ettim", "Zorla ilişkiye girdim", detaylı cinsel eylem tasvirleri
    - Örnek SERBEST: "Dokunuşlarını özledim", "O geceyi unutamıyorum", "Bedenini özlüyorum"
 
 5. KÜFÜR:
