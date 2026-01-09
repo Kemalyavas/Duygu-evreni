@@ -82,13 +82,13 @@ export const ORBIT_RADIUS = {
 // Camera Distance
 export const CAMERA_DISTANCE = {
   /** Multiplier for orbit radius to camera distance */
-  ORBIT_MULTIPLIER: 2.5 * 2.2,
+  ORBIT_MULTIPLIER: 2.5 * 1.6,
   /** Base offset added to camera distance */
-  BASE_OFFSET: 8,
+  BASE_OFFSET: 5,
   /** Height offset multiplier for camera position */
-  HEIGHT_OFFSET: 0.3,
+  HEIGHT_OFFSET: 0.25,
   /** Max distance multiplier in planet view */
-  MAX_DISTANCE_MULTIPLIER: 1.8,
+  MAX_DISTANCE_MULTIPLIER: 1.6,
 } as const
 
 // OrbitControls Limits

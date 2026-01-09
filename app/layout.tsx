@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Analytics } from "@vercel/analytics/react";
 import { Inter, Plus_Jakarta_Sans } from "next/font/google";
 import { Providers } from "@/components/Providers";
+import { HomePageJsonLd } from "@/components/seo/JsonLd";
 import "./globals.css";
 
 const inter = Inter({
@@ -104,6 +105,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="tr">
+      <head>
+        <HomePageJsonLd />
+      </head>
       <body
         className={`${inter.variable} ${plusJakarta.variable} antialiased`}
       >

@@ -126,8 +126,9 @@ export function useSceneState({
   }, [focusedPlanetId, planets, starsByPlanet])
 
   // Handle star deselection - return camera to planet
+  // Note: Removed !isTransitioning check to allow canceling star zoom animation
   useEffect(() => {
-    if (prevSelectedStarId.current && !selectedStarId && focusedPlanetId && !isTransitioning) {
+    if (prevSelectedStarId.current && !selectedStarId && focusedPlanetId) {
       const planet = planets.find(p => p.id === focusedPlanetId)
       if (planet) {
         const planetStars = starsByPlanet[planet.id] || []
@@ -141,7 +142,7 @@ export function useSceneState({
       }
     }
     prevSelectedStarId.current = selectedStarId
-  }, [selectedStarId, focusedPlanetId, planets, starsByPlanet, isTransitioning])
+  }, [selectedStarId, focusedPlanetId, planets, starsByPlanet])
 
   // Transition complete handler
   const handleTransitionComplete = useCallback(() => {
