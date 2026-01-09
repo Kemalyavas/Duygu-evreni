@@ -6,7 +6,7 @@ import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Button, ErrorBoundary } from '@/components/ui'
+import { Button, ErrorBoundary, MusicToggle } from '@/components/ui'
 import { Onboarding } from '@/components/Onboarding'
 import { StarCreationModal } from '@/components/StarCreationModal'
 import { StarViewPanel } from '@/components/StarViewPanel'
@@ -237,12 +237,13 @@ function HomePageContent() {
         </button>
       </motion.div>
 
-      {/* Floating Header - Auth Buttons */}
+      {/* Floating Header - Auth Buttons & Music Toggle */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="absolute top-4 sm:top-6 right-3 sm:right-6 z-20 flex items-center space-x-4"
+        className="absolute top-4 sm:top-6 right-3 sm:right-6 z-20 flex items-center space-x-3 sm:space-x-4"
       >
+        <MusicToggle />
         {authLoading ? (
           <div className="w-20 h-8 bg-white/10 rounded-lg animate-pulse" />
         ) : user ? (
