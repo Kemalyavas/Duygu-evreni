@@ -218,7 +218,7 @@ function HomePageContent() {
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="absolute top-3 sm:top-6 left-2 sm:left-4 z-20"
+        className="absolute top-4 sm:top-6 left-2 sm:left-4 z-20"
       >
         <button
           onClick={isInPlanetMode ? handleBackToUniverse : undefined}
@@ -354,17 +354,17 @@ function HomePageContent() {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
               transition={{ delay: 0.2 }}
-              className="absolute top-36 left-4 md:left-6 z-10"
+              className="absolute top-32 sm:top-36 left-3 sm:left-6 z-10"
             >
-              <div className="glass rounded-xl p-4 max-w-xs">
+              <div className="glass rounded-lg sm:rounded-xl p-2.5 sm:p-4 max-w-[180px] sm:max-w-xs">
                 <h1
-                  className="text-xl font-bold mb-2"
+                  className="text-base sm:text-xl font-bold mb-1 sm:mb-2"
                   style={{ color: focusedPlanet.color }}
                 >
                   {focusedPlanet.name_tr}
                 </h1>
-                <p className="text-sm text-white/60">{focusedPlanet.description_tr}</p>
-                <p className="text-xs text-white/40 mt-2">
+                <p className="text-xs sm:text-sm text-white/60">{focusedPlanet.description_tr}</p>
+                <p className="text-[10px] sm:text-xs text-white/40 mt-1 sm:mt-2">
                   {starCounts[focusedPlanetId] ?? stars.filter(s => s.planet_id === focusedPlanetId).length} yıldız
                 </p>
               </div>
