@@ -155,13 +155,13 @@ export default function LoginPage() {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4"
+            className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50 p-4"
             onClick={() => setShowForgotPassword(false)}
           >
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              className="glass rounded-2xl p-6 w-full max-w-md"
+              className="bg-[#1a1f3c] border border-white/10 rounded-2xl p-6 w-full max-w-md shadow-2xl"
               onClick={(e) => e.stopPropagation()}
             >
               {resetSuccess ? (
