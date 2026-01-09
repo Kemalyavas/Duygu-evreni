@@ -90,11 +90,49 @@ export async function POST(request: NextRequest): Promise<NextResponse<Moderatio
   } catch (error) {
     console.error('[Moderation API] Error:', error)
 
-    // Fail open on server errors (allow content but log)
-    return NextResponse.json(
-      { allowed: true },
-      { status: 200 }
-    )
+    // Fail-safe: On server errors, run local filter and use its result
+    try {
+      const body = await request.clone().json() as ModerationRequest
+      const localResult = runLocalFilter(body.content || '')
+
+      // If local filter says block, block it
+      if (localResult.blockImmediately) {
+        return NextResponse.json({
+          allowed: false,
+          reason: 'Bu içerik platformumuzda paylaşılamaz',
+        })
+      }
+
+      // If local filter triggered categories that need review, be cautious
+      if (localResult.requiresAIReview && localResult.triggeredCategories.length > 0) {
+        // Block high-risk categories when AI is unavailable
+        const highRiskCategories = ['SUICIDE_SELF_HARM', 'VIOLENCE_THREATS', 'SEXUAL_EXPLICIT']
+        const hasHighRisk = localResult.triggeredCategories.some(cat => highRiskCategories.includes(cat))
+
+        if (hasHighRisk) {
+          const response: ModerationResponse = {
+            allowed: false,
+            reason: 'İçerik şu anda kontrol edilemiyor. Lütfen daha sonra tekrar deneyin.',
+          }
+
+          // Show help resources for suicide-related content
+          if (localResult.triggeredCategories.includes('SUICIDE_SELF_HARM')) {
+            response.helpResources = getSuicidePreventionResources()
+          }
+
+          return NextResponse.json(response)
+        }
+      }
+
+      // Allow content that passed local filter
+      return NextResponse.json({ allowed: true })
+    } catch {
+      // If even local filter fails, block for safety
+      return NextResponse.json({
+        allowed: false,
+        reason: 'İçerik şu anda kontrol edilemiyor. Lütfen daha sonra tekrar deneyin.',
+      })
+    }
   }
 }
 

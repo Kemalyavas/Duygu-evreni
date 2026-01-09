@@ -83,20 +83,26 @@ export async function moderateContent(content: string): Promise<ModerationResult
           }
         }
       } catch {
-        // If we can't parse error, fail open
+        // If we can't parse error, log it
         console.error('[Moderation] API returned error:', response.status)
       }
 
-      // Fail open on server errors (allow content)
-      return { allowed: true }
+      // Fail-safe on server errors
+      return {
+        allowed: false,
+        reason: 'İçerik şu anda kontrol edilemiyor. Lütfen daha sonra tekrar deneyin.',
+      }
     }
 
     const result: ModerationResult = await response.json()
     return result
   } catch (error) {
-    // Network error - fail open but log
+    // Network error - fail-safe, don't allow potentially harmful content
     console.error('[Moderation] Network error:', error)
-    return { allowed: true }
+    return {
+      allowed: false,
+      reason: 'İçerik şu anda kontrol edilemiyor. Lütfen daha sonra tekrar deneyin.',
+    }
   }
 }
 

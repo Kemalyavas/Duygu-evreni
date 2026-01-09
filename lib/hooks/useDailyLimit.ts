@@ -7,12 +7,6 @@ import type { Profile } from '@/types'
 
 const MAX_DAILY_STARS = 3
 
-// Admin emails from environment variable (comma-separated)
-const ADMIN_EMAILS = (process.env.NEXT_PUBLIC_ADMIN_EMAILS || '')
-  .split(',')
-  .map(email => email.trim().toLowerCase())
-  .filter(Boolean)
-
 // Get local date in YYYY-MM-DD format
 function getLocalDateString(): string {
   const now = new Date()
@@ -25,16 +19,41 @@ function getLocalDateString(): string {
 export function useDailyLimit() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [isAdmin, setIsAdmin] = useState(false)
+  const [adminChecked, setAdminChecked] = useState(false)
   const { profile, setProfile, user } = useStore()
   const hasChecked = useRef(false)
 
   // Profile loaded state
   const profileLoaded = !!profile
 
-  // Check if current user is admin
-  const isAdmin = user?.email
-    ? ADMIN_EMAILS.includes(user.email.toLowerCase())
-    : false
+  // Check admin status from server-side API (secure)
+  useEffect(() => {
+    if (!user || adminChecked) return
+
+    const checkAdminStatus = async () => {
+      try {
+        const response = await fetch('/api/admin/check')
+        if (response.ok) {
+          const data = await response.json()
+          setIsAdmin(data.isAdmin === true)
+        }
+      } catch {
+        // Silent fail - default to non-admin
+        setIsAdmin(false)
+      } finally {
+        setAdminChecked(true)
+      }
+    }
+
+    checkAdminStatus()
+  }, [user, adminChecked])
+
+  // Reset admin check when user changes
+  useEffect(() => {
+    setAdminChecked(false)
+    setIsAdmin(false)
+  }, [user?.id])
 
   // Check and reset if new day
   const checkAndResetDaily = useCallback(async () => {

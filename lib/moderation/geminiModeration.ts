@@ -105,7 +105,21 @@ export async function moderateWithGemini(
   const apiKey = process.env.GEMINI_API_KEY
 
   if (!apiKey) {
-    console.warn('[Gemini Moderation] API key not configured, allowing content')
+    console.warn('[Gemini Moderation] API key not configured')
+    // Fail-safe: Block high-risk categories when AI is unavailable
+    const highRiskCategories: FilterCategory[] = ['SUICIDE_SELF_HARM', 'VIOLENCE_THREATS', 'SEXUAL_EXPLICIT']
+    const hasHighRisk = triggeredCategories.some(cat => highRiskCategories.includes(cat))
+
+    if (hasHighRisk) {
+      return {
+        allowed: false,
+        confidence: 'LOW',
+        reason: 'İçerik şu anda kontrol edilemiyor. Lütfen daha sonra tekrar deneyin.',
+        showHelpResources: triggeredCategories.includes('SUICIDE_SELF_HARM'),
+      }
+    }
+
+    // Allow low-risk categories (like political mentions without context)
     return {
       allowed: true,
       confidence: 'LOW',
@@ -159,11 +173,22 @@ JSON formatında yanıt ver.`
     if (!response.ok) {
       const errorText = await response.text()
       console.error('[Gemini Moderation] API error:', response.status, errorText)
-      // On API error, allow content (fail open) but log for monitoring
+      // Fail-safe: Block high-risk categories when API fails
+      const highRiskCategories: FilterCategory[] = ['SUICIDE_SELF_HARM', 'VIOLENCE_THREATS', 'SEXUAL_EXPLICIT']
+      const hasHighRisk = triggeredCategories.some(cat => highRiskCategories.includes(cat))
+
+      if (hasHighRisk) {
+        return {
+          allowed: false,
+          confidence: 'LOW',
+          reason: 'İçerik şu anda kontrol edilemiyor. Lütfen daha sonra tekrar deneyin.',
+          showHelpResources: triggeredCategories.includes('SUICIDE_SELF_HARM'),
+        }
+      }
+
       return {
         allowed: true,
         confidence: 'LOW',
-        reason: 'Moderation service unavailable',
       }
     }
 
@@ -174,6 +199,19 @@ JSON formatında yanıt ver.`
 
     if (!responseText) {
       console.error('[Gemini Moderation] Empty response from API')
+      // Fail-safe: Block high-risk categories when response is empty
+      const highRiskCategories: FilterCategory[] = ['SUICIDE_SELF_HARM', 'VIOLENCE_THREATS', 'SEXUAL_EXPLICIT']
+      const hasHighRisk = triggeredCategories.some(cat => highRiskCategories.includes(cat))
+
+      if (hasHighRisk) {
+        return {
+          allowed: false,
+          confidence: 'LOW',
+          reason: 'İçerik şu anda kontrol edilemiyor. Lütfen daha sonra tekrar deneyin.',
+          showHelpResources: triggeredCategories.includes('SUICIDE_SELF_HARM'),
+        }
+      }
+
       return {
         allowed: true,
         confidence: 'LOW',
@@ -192,6 +230,19 @@ JSON formatında yanıt ver.`
       }
     } catch (parseError) {
       console.error('[Gemini Moderation] Failed to parse response:', responseText)
+      // Fail-safe: Block high-risk categories when parsing fails
+      const highRiskCategories: FilterCategory[] = ['SUICIDE_SELF_HARM', 'VIOLENCE_THREATS', 'SEXUAL_EXPLICIT']
+      const hasHighRisk = triggeredCategories.some(cat => highRiskCategories.includes(cat))
+
+      if (hasHighRisk) {
+        return {
+          allowed: false,
+          confidence: 'LOW',
+          reason: 'İçerik şu anda kontrol edilemiyor. Lütfen daha sonra tekrar deneyin.',
+          showHelpResources: triggeredCategories.includes('SUICIDE_SELF_HARM'),
+        }
+      }
+
       return {
         allowed: true,
         confidence: 'LOW',
@@ -199,7 +250,19 @@ JSON formatında yanıt ver.`
     }
   } catch (error) {
     console.error('[Gemini Moderation] Request failed:', error)
-    // Fail open on network errors
+    // Fail-safe: Block high-risk categories on network errors
+    const highRiskCategories: FilterCategory[] = ['SUICIDE_SELF_HARM', 'VIOLENCE_THREATS', 'SEXUAL_EXPLICIT']
+    const hasHighRisk = triggeredCategories.some(cat => highRiskCategories.includes(cat))
+
+    if (hasHighRisk) {
+      return {
+        allowed: false,
+        confidence: 'LOW',
+        reason: 'İçerik şu anda kontrol edilemiyor. Lütfen daha sonra tekrar deneyin.',
+        showHelpResources: triggeredCategories.includes('SUICIDE_SELF_HARM'),
+      }
+    }
+
     return {
       allowed: true,
       confidence: 'LOW',
