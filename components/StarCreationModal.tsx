@@ -24,14 +24,16 @@ export function StarCreationModal({
 }: StarCreationModalProps) {
   const [content, setContent] = useState('')
   const [error, setError] = useState('')
+  const [helpResources, setHelpResources] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
-  const { canShareStar, remainingStars, incrementStarCount } = useDailyLimit()
+  const { canShareStar, remainingStars, incrementStarCount, isAdmin } = useDailyLimit()
   const { createStar } = useStars()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
+    setHelpResources(null)
     setLoading(true)
 
     try {
@@ -43,6 +45,12 @@ export function StarCreationModal({
 
       // Content moderation
       const moderationResult = await moderateContent(content)
+
+      // Show help resources if provided (even if allowed)
+      if (moderationResult.helpResources) {
+        setHelpResources(moderationResult.helpResources)
+      }
+
       if (!moderationResult.allowed) {
         setError(moderationResult.reason || 'İçerik uygun değil')
         return
@@ -112,7 +120,9 @@ export function StarCreationModal({
             {/* Character counter */}
             <div className="flex justify-between items-center mt-2">
               <span className="text-xs text-white/40">
-                {remainingStars > 0
+                {isAdmin
+                  ? '👑 Admin - Sınırsız yıldız'
+                  : remainingStars > 0
                   ? `Bugün ${remainingStars} yıldız paylaşabilirsin`
                   : 'Günlük limitine ulaştın'}
               </span>
@@ -139,6 +149,19 @@ export function StarCreationModal({
             >
               {error}
             </motion.p>
+          )}
+
+          {/* Help resources (shown for sensitive content) */}
+          {helpResources && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3"
+            >
+              <p className="text-blue-300 text-sm text-center">
+                {helpResources}
+              </p>
+            </motion.div>
           )}
 
           {/* Submit button */}

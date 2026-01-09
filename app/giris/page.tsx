@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { Button, Input, Card } from '@/components/ui'
 import { useAuth } from '@/lib/hooks'
+import { createClient } from '@/lib/supabase/fetch'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -14,6 +15,13 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+
+  // Forgot password state
+  const [showForgotPassword, setShowForgotPassword] = useState(false)
+  const [resetEmail, setResetEmail] = useState('')
+  const [resetLoading, setResetLoading] = useState(false)
+  const [resetSuccess, setResetSuccess] = useState(false)
+  const [resetError, setResetError] = useState('')
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -28,6 +36,29 @@ export default function LoginPage() {
       setError(err instanceof Error ? err.message : 'Giriş yapılamadı')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setResetError('')
+    setResetLoading(true)
+
+    try {
+      const supabase = createClient()
+      const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
+        redirectTo: `${window.location.origin}/auth/callback?type=recovery`,
+      })
+
+      if (error) {
+        throw error
+      }
+
+      setResetSuccess(true)
+    } catch (err) {
+      setResetError(err instanceof Error ? err.message : 'Bir hata oluştu')
+    } finally {
+      setResetLoading(false)
     }
   }
 
@@ -65,14 +96,26 @@ export default function LoginPage() {
               required
             />
 
-            <Input
-              label="Şifre"
-              type="password"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
+            <div>
+              <Input
+                label="Şifre"
+                type="password"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  setShowForgotPassword(true)
+                  setResetEmail(email)
+                }}
+                className="text-sm text-purple-400 hover:text-purple-300 transition-colors mt-2"
+              >
+                Şifremi unuttum
+              </button>
+            </div>
 
             {error && (
               <motion.p
@@ -106,6 +149,90 @@ export default function LoginPage() {
             </Link>
           </p>
         </Card>
+
+        {/* Forgot Password Modal */}
+        {showForgotPassword && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4"
+            onClick={() => setShowForgotPassword(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              className="glass rounded-2xl p-6 w-full max-w-md"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {resetSuccess ? (
+                <div className="text-center">
+                  <div className="text-green-400 text-4xl mb-4">✓</div>
+                  <h3 className="text-xl font-bold text-white mb-2">
+                    Email Gönderildi!
+                  </h3>
+                  <p className="text-white/60 mb-4">
+                    Şifre sıfırlama linki <strong>{resetEmail}</strong> adresine gönderildi.
+                    Lütfen email kutunu kontrol et.
+                  </p>
+                  <Button
+                    variant="ghost"
+                    onClick={() => {
+                      setShowForgotPassword(false)
+                      setResetSuccess(false)
+                    }}
+                  >
+                    Kapat
+                  </Button>
+                </div>
+              ) : (
+                <>
+                  <h3 className="text-xl font-bold text-white mb-2">
+                    Şifreni Sıfırla
+                  </h3>
+                  <p className="text-white/60 mb-4 text-sm">
+                    Email adresini gir, şifre sıfırlama linki gönderelim.
+                  </p>
+
+                  <form onSubmit={handleForgotPassword} className="space-y-4">
+                    <Input
+                      label="E-posta"
+                      type="email"
+                      placeholder="ornek@email.com"
+                      value={resetEmail}
+                      onChange={(e) => setResetEmail(e.target.value)}
+                      required
+                    />
+
+                    {resetError && (
+                      <p className="text-red-400 text-sm text-center">
+                        {resetError}
+                      </p>
+                    )}
+
+                    <div className="flex gap-3">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        className="flex-1"
+                        onClick={() => setShowForgotPassword(false)}
+                      >
+                        İptal
+                      </Button>
+                      <Button
+                        type="submit"
+                        variant="primary"
+                        className="flex-1"
+                        isLoading={resetLoading}
+                      >
+                        Gönder
+                      </Button>
+                    </div>
+                  </form>
+                </>
+              )}
+            </motion.div>
+          </motion.div>
+        )}
       </motion.div>
     </div>
   )

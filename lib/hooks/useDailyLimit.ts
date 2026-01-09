@@ -7,6 +7,12 @@ import type { Profile } from '@/types'
 
 const MAX_DAILY_STARS = 3
 
+// Admin emails from environment variable (comma-separated)
+const ADMIN_EMAILS = (process.env.NEXT_PUBLIC_ADMIN_EMAILS || '')
+  .split(',')
+  .map(email => email.trim().toLowerCase())
+  .filter(Boolean)
+
 // Get local date in YYYY-MM-DD format
 function getLocalDateString(): string {
   const now = new Date()
@@ -19,11 +25,16 @@ function getLocalDateString(): string {
 export function useDailyLimit() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const { profile, setProfile } = useStore()
+  const { profile, setProfile, user } = useStore()
   const hasChecked = useRef(false)
 
   // Profile loaded state
   const profileLoaded = !!profile
+
+  // Check if current user is admin
+  const isAdmin = user?.email
+    ? ADMIN_EMAILS.includes(user.email.toLowerCase())
+    : false
 
   // Check and reset if new day
   const checkAndResetDaily = useCallback(async () => {
@@ -86,18 +97,27 @@ export function useDailyLimit() {
   }, [])
 
   const canShareStar = useCallback(() => {
+    // Admins have unlimited stars
+    if (isAdmin) return true
     if (!profile) return true // Allow while loading (will be checked server-side anyway)
     const added = profile.daily_stars_added ?? 0
     return added < MAX_DAILY_STARS
-  }, [profile])
+  }, [profile, isAdmin])
 
   const getRemainingStars = useCallback(() => {
+    // Admins have unlimited stars
+    if (isAdmin) return Infinity
     if (!profile) return MAX_DAILY_STARS // Return max while loading
     const added = profile.daily_stars_added ?? 0
     return Math.max(0, MAX_DAILY_STARS - added)
-  }, [profile])
+  }, [profile, isAdmin])
 
   const incrementStarCount = useCallback(async () => {
+    // Admins don't need to track star count
+    if (isAdmin) {
+      return profile
+    }
+
     try {
       setLoading(true)
       setError(null)
@@ -151,12 +171,13 @@ export function useDailyLimit() {
     } finally {
       setLoading(false)
     }
-  }, [setProfile])
+  }, [setProfile, isAdmin, profile])
 
   return {
     loading,
     error,
     profileLoaded,
+    isAdmin,
     canShareStar: canShareStar(),
     remainingStars: getRemainingStars(),
     maxStars: MAX_DAILY_STARS,

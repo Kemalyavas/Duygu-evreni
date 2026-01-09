@@ -37,7 +37,7 @@ function HomePageContent() {
   const { planets, loading: planetsLoading, error: planetsError } = usePlanets()
   const { stars, loading: starsLoading, fetchAllStars, fetchStarsByPlanet } = useStars()
   const { starCounts, refetchCounts } = useStarCounts()
-  const { remainingStars } = useDailyLimit()
+  const { remainingStars, isAdmin } = useDailyLimit()
   const { readStarIds, markAsRead } = useReadStars()
 
   const [focusedPlanetId, setFocusedPlanetId] = useState<string | null>(planetIdFromUrl)
@@ -351,7 +351,7 @@ function HomePageContent() {
                 onClick={() => setIsModalOpen(true)}
                 className="shadow-lg shadow-purple-500/25"
               >
-                Yıldız Paylaş ({remainingStars} kaldı)
+                Yıldız Paylaş {isAdmin ? '(∞)' : `(${remainingStars} kaldı)`}
               </Button>
             </motion.div>
 
