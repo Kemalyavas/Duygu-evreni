@@ -4,7 +4,6 @@ import { Suspense, useMemo, useRef, useState, useEffect } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls, PerspectiveCamera, Html } from '@react-three/drei'
 import { EffectComposer, Bloom } from '@react-three/postprocessing'
-import * as THREE from 'three'
 
 // Components
 import { StarField } from './StarField'
@@ -45,6 +44,7 @@ interface UnifiedUniverseProps {
   starCounts?: Record<string, number>
   starsLoading?: boolean
   onStarsReady?: () => void
+  isMobile?: boolean
 }
 
 interface SceneProps {
@@ -71,6 +71,7 @@ interface SceneProps {
   onSelectedStarPosition?: (position: [number, number, number]) => void
   isFocusedOnStar?: boolean
   onStarsReady?: () => void
+  isMobile?: boolean
 }
 
 // ============================================
@@ -97,7 +98,9 @@ function Scene({
   onSelectedStarPosition,
   isFocusedOnStar,
   onStarsReady,
+  isMobile,
 }: SceneProps) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const orbitControlsRef = useRef<any>(null)
 
   // Track which planets have completed vortex animation
@@ -204,8 +207,8 @@ function Scene({
         position={[-20, -10, -30]}
       />
 
-      {/* Background stars - universe mode only */}
-      {viewMode === 'universe' && <StarField count={STAR_FIELD.COUNT} />}
+      {/* Background stars - universe mode only, reduced on mobile */}
+      {viewMode === 'universe' && <StarField count={isMobile ? 800 : STAR_FIELD.COUNT} />}
 
       {/* Planets */}
       {planets.map((planet) => {
@@ -300,12 +303,13 @@ export function UnifiedUniverse({
   focusedPlanetId,
   onPlanetClick,
   onStarClick,
-  onBackToUniverse,
+  onBackToUniverse: _onBackToUniverse,
   selectedStarId,
   readStarIds,
   starCounts,
   starsLoading,
   onStarsReady,
+  isMobile = false,
 }: UnifiedUniverseProps) {
   // Use scene state hook for camera and transitions
   const {
@@ -329,7 +333,7 @@ export function UnifiedUniverse({
   return (
     <div className="w-full h-full bg-gradient-to-b from-[#0a0a15] to-[#000000] relative">
       <Canvas
-        dpr={[1, 2]}
+        dpr={isMobile ? 1 : [1, 2]}
         gl={{
           antialias: true,
           powerPreference: 'high-performance',
@@ -357,6 +361,7 @@ export function UnifiedUniverse({
             onSelectedStarPosition={handleSelectedStarPosition}
             isFocusedOnStar={isFocusedOnStar}
             onStarsReady={onStarsReady}
+            isMobile={isMobile}
           />
         </Suspense>
       </Canvas>

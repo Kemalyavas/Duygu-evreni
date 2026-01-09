@@ -16,6 +16,7 @@ interface CameraAnimatorProps {
   /** Callback when transition animation completes */
   onTransitionComplete: () => void
   /** Reference to OrbitControls */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   orbitControlsRef: React.RefObject<any>
 }
 

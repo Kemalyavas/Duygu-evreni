@@ -7,7 +7,6 @@ import { usePathname } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { clsx } from 'clsx'
 import { Button } from './Button'
-import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/lib/hooks'
 
 export function Navbar() {

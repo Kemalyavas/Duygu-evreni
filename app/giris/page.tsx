@@ -2,14 +2,12 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { Button, Input, Card } from '@/components/ui'
 import { useAuth } from '@/lib/hooks'
 import { createClient } from '@/lib/supabase/fetch'
 
 export default function LoginPage() {
-  const router = useRouter()
   const { signIn } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')

@@ -47,8 +47,8 @@ export function Planet3D({
     },
   })
 
-  // Visibility spring
-  const { opacity } = useSpring({
+  // Visibility spring (opacity currently unused but kept for future use)
+  const { opacity: _opacity } = useSpring({
     opacity: isVisible ? 1 : 0,
     config: { duration: UI_ANIMATION.FADE_DURATION },
   })

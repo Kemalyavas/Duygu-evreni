@@ -2,13 +2,11 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { Button, Input, Card } from '@/components/ui'
 import { useAuth } from '@/lib/hooks'
 
 export default function SignupPage() {
-  const router = useRouter()
   const { signUp } = useAuth()
   const [username, setUsername] = useState('')
   const [email, setEmail] = useState('')

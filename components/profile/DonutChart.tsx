@@ -49,7 +49,14 @@ export function DonutChart({ data, size = 200, strokeWidth = 28 }: DonutChartPro
     )
   }
 
-  let cumulativePercent = 0
+  // Pre-calculate cumulative percentages to avoid mutation during render
+  const segmentsWithRotation = filteredData.map((item, index) => {
+    const percent = item.value / total
+    const cumulativePercent = filteredData
+      .slice(0, index)
+      .reduce((sum, d) => sum + d.value / total, 0)
+    return { ...item, percent, rotation: cumulativePercent * 360 - 90 }
+  })
 
   return (
     <div className="flex flex-col items-center">
@@ -69,26 +76,23 @@ export function DonutChart({ data, size = 200, strokeWidth = 28 }: DonutChartPro
           />
 
           {/* Data segments */}
-          {filteredData.map((item, index) => {
-            const percent = item.value / total
+          {segmentsWithRotation.map((segment, index) => {
             const strokeDasharray = circumference
-            const strokeDashoffset = circumference * (1 - percent)
-            const rotation = cumulativePercent * 360 - 90
-            cumulativePercent += percent
+            const strokeDashoffset = circumference * (1 - segment.percent)
 
             return (
               <motion.circle
-                key={item.label}
+                key={segment.label}
                 cx={center}
                 cy={center}
                 r={radius}
                 fill="none"
-                stroke={item.color}
+                stroke={segment.color}
                 strokeWidth={strokeWidth}
                 strokeDasharray={strokeDasharray}
                 strokeDashoffset={strokeDashoffset}
                 strokeLinecap="round"
-                transform={`rotate(${rotation} ${center} ${center})`}
+                transform={`rotate(${segment.rotation} ${center} ${center})`}
                 initial={{ strokeDashoffset: circumference }}
                 animate={{ strokeDashoffset }}
                 transition={{
@@ -97,7 +101,7 @@ export function DonutChart({ data, size = 200, strokeWidth = 28 }: DonutChartPro
                   ease: 'easeOut'
                 }}
                 style={{
-                  filter: `drop-shadow(0 0 6px ${item.color}50)`
+                  filter: `drop-shadow(0 0 6px ${segment.color}50)`
                 }}
               />
             )

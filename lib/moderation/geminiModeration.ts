@@ -228,7 +228,7 @@ JSON formatında yanıt ver.`
         confidence: result.confidence ?? 'MEDIUM',
         showHelpResources: result.showHelpResources ?? false,
       }
-    } catch (parseError) {
+    } catch {
       console.error('[Gemini Moderation] Failed to parse response:', responseText)
       // Fail-safe: Block high-risk categories when parsing fails
       const highRiskCategories: FilterCategory[] = ['SUICIDE_SELF_HARM', 'VIOLENCE_THREATS', 'SEXUAL_EXPLICIT']

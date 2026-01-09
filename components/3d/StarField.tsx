@@ -63,7 +63,7 @@ const nebulaColors = [
 
 export function StarField({ count = 2500 }: StarFieldProps) {
   const pointsRef = useRef<THREE.Points>(null)
-  const materialRef = useRef<THREE.ShaderMaterial>(null)
+  const _materialRef = useRef<THREE.ShaderMaterial>(null)
 
   // Create geometry with positions, colors, and twinkle attributes
   const { geometry, material } = useMemo(() => {

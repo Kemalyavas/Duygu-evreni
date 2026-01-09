@@ -73,17 +73,15 @@ export function usePageState(planetIdFromUrl: string | null): UsePageStateReturn
   const [focusedPlanetId, setFocusedPlanetId] = useState<string | null>(planetIdFromUrl)
   const [selectedStar, setSelectedStar] = useState<Star | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [hasClickedStar, setHasClickedStar] = useState(true) // Default true to hide prompt until checked
+  // Lazy initialize from localStorage
+  const [hasClickedStar, setHasClickedStar] = useState(() => {
+    if (typeof window === 'undefined') return true
+    return localStorage.getItem('duygu-evreni-star-clicked') === 'true'
+  })
 
   // Loading state machine
   const [loadState, setLoadState] = useState<LoadState>('idle')
   const [starsVisuallyReady, setStarsVisuallyReady] = useState(false)
-
-  // Check if user has clicked a star before
-  useEffect(() => {
-    const clicked = localStorage.getItem('duygu-evreni-star-clicked')
-    setHasClickedStar(clicked === 'true')
-  }, [])
 
   // Get focused planet object
   const focusedPlanet = useMemo(

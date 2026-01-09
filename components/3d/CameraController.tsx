@@ -9,6 +9,7 @@ interface CameraControllerProps {
   isAnimating: boolean
   onAnimationComplete: () => void
   onProgress?: (progress: number) => void
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   orbitControlsRef: React.RefObject<any>
 }
 

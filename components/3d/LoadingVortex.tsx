@@ -81,7 +81,8 @@ export function LoadingVortex({
       initialAngles[i] = theta
       initialRadii[i] = radius
       speeds[i] = 0.6 + (i % 10) * 0.1
-      heights[i] = (Math.random() - 0.5) * 1.5
+      // Use deterministic pseudo-random based on index for purity
+      heights[i] = (Math.sin(i * 12.9898) * 0.5) * 1.5
     }
 
     const geometry = new THREE.BufferGeometry()

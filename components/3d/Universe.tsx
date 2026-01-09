@@ -50,6 +50,7 @@ function Scene({
   onAnimationComplete,
   onProgress,
 }: SceneProps) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const orbitControlsRef = useRef<any>(null)
 
   // Group stars by planet

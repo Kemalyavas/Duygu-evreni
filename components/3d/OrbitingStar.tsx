@@ -7,12 +7,7 @@ import type { Star } from '@/types'
 
 // Utils & Constants
 import { getOrbitRadius, getCameraDistance, getLayerMultiplier } from '@/lib/utils/orbit'
-import { STAR_APPEAR, STAR_INTERACTION } from '@/lib/constants/animation'
-import {
-  STAR_VISUAL,
-  ORBIT_RADIUS,
-  MATERIALS,
-} from '@/lib/constants/ui'
+import { STAR_VISUAL } from '@/lib/constants/ui'
 
 // Re-export for backward compatibility
 export { getOrbitRadius, getCameraDistance }

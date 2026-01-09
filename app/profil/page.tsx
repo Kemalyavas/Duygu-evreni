@@ -89,7 +89,7 @@ export default function ProfilPage() {
         }
 
         // Map stars with planet info
-        const starsWithPlanetInfo: UserStar[] = data.map((star: any) => {
+        const starsWithPlanetInfo: UserStar[] = data.map((star: { id: string; content: string; planet_id: string; created_at: string }) => {
           const planet = planets.find(p => p.id === star.planet_id)
           return {
             id: star.id,

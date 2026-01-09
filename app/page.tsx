@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback, Suspense } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -10,7 +10,7 @@ import { Button, ErrorBoundary } from '@/components/ui'
 import { Onboarding } from '@/components/Onboarding'
 import { StarCreationModal } from '@/components/StarCreationModal'
 import { StarViewPanel } from '@/components/StarViewPanel'
-import { useAuth, usePlanets, useStars, useStarCounts, useDailyLimit, useReadStars } from '@/lib/hooks'
+import { useAuth, usePlanets, useStars, useStarCounts, useDailyLimit, useReadStars, useMobile } from '@/lib/hooks'
 import type { Planet, Star } from '@/types'
 
 // Dynamic import for 3D component (client-side only)
@@ -28,7 +28,6 @@ const UnifiedUniverse = dynamic(
 
 // Wrapper component to handle useSearchParams with Suspense
 function HomePageContent() {
-  const router = useRouter()
   const searchParams = useSearchParams()
   const planetIdFromUrl = searchParams.get('planet')
   const starIdFromUrl = searchParams.get('star')
@@ -39,20 +38,19 @@ function HomePageContent() {
   const { starCounts, refetchCounts } = useStarCounts()
   const { remainingStars, isAdmin } = useDailyLimit()
   const { readStarIds, markAsRead } = useReadStars()
+  const isMobile = useMobile()
 
   const [focusedPlanetId, setFocusedPlanetId] = useState<string | null>(planetIdFromUrl)
   const [selectedStar, setSelectedStar] = useState<Star | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [hasClickedStar, setHasClickedStar] = useState(true) // Default true to hide prompt until checked
+  // Lazy initialize from localStorage to avoid useEffect setState
+  const [hasClickedStar, setHasClickedStar] = useState(() => {
+    if (typeof window === 'undefined') return true
+    return localStorage.getItem('duygu-evreni-star-clicked') === 'true'
+  })
   const [initialLoadComplete, setInitialLoadComplete] = useState(false) // Track if initial stars load is done
   const [hasStartedLoading, setHasStartedLoading] = useState(false) // Track if loading has started for current planet
   const [starsVisuallyReady, setStarsVisuallyReady] = useState(false) // Track when stars are visible (after vortex)
-
-  // Check if user has clicked a star before
-  useEffect(() => {
-    const clicked = localStorage.getItem('duygu-evreni-star-clicked')
-    setHasClickedStar(clicked === 'true')
-  }, [])
 
   // Welcome message for first-time visitors to Umut planet
   const UMUT_PLANET_ID = '1ad9ca47-4ead-4a55-aa3a-5d048fd9f6c5'
@@ -132,7 +130,7 @@ function HomePageContent() {
     if (urlPlanetId !== focusedPlanetId) {
       setFocusedPlanetId(urlPlanetId)
     }
-  }, [searchParams])
+  }, [searchParams, focusedPlanetId])
 
   // Handle star from URL - wait for stars to be visually ready, then delay before selecting
   useEffect(() => {
@@ -220,7 +218,7 @@ function HomePageContent() {
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="absolute top-6 left-4 z-20"
+        className="absolute top-3 sm:top-6 left-2 sm:left-4 z-20"
       >
         <button
           onClick={isInPlanetMode ? handleBackToUniverse : undefined}
@@ -231,9 +229,9 @@ function HomePageContent() {
             alt="Duygu Evreni"
             width={75}
             height={75}
-            className="w-[75px] h-[75px]"
+            className="w-[55px] h-[55px] sm:w-[75px] sm:h-[75px]"
           />
-          <span className="font-bold text-[17px] -ml-1 bg-gradient-to-r from-purple-400 via-pink-400 to-purple-300 bg-clip-text text-transparent group-hover:opacity-80 transition-opacity">
+          <span className="font-bold text-[15px] sm:text-[17px] -ml-1 bg-gradient-to-r from-purple-400 via-pink-400 to-purple-300 bg-clip-text text-transparent group-hover:opacity-80 transition-opacity">
             Duygu Evreni
           </span>
         </button>
@@ -243,7 +241,7 @@ function HomePageContent() {
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="absolute top-6 right-6 z-20 flex items-center space-x-4"
+        className="absolute top-4 sm:top-6 right-3 sm:right-6 z-20 flex items-center space-x-4"
       >
         {authLoading ? (
           <div className="w-20 h-8 bg-white/10 rounded-lg animate-pulse" />
@@ -298,6 +296,7 @@ function HomePageContent() {
               starCounts={starCounts}
               starsLoading={starsLoading && !initialLoadComplete}
               onStarsReady={handleStarsReady}
+              isMobile={isMobile}
             />
           </ErrorBoundary>
         )}
