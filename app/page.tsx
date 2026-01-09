@@ -54,6 +54,40 @@ function HomePageContent() {
     setHasClickedStar(clicked === 'true')
   }, [])
 
+  // Welcome message for first-time visitors to Umut planet
+  const UMUT_PLANET_ID = '1ad9ca47-4ead-4a55-aa3a-5d048fd9f6c5'
+  const WELCOME_STAR_ID = '2b533690-baf6-4bbc-9ff1-57bf98683afe'
+
+  useEffect(() => {
+    // Only trigger for Umut planet
+    if (focusedPlanetId !== UMUT_PLANET_ID) return
+    // Only trigger when stars are loaded and visually ready
+    if (!starsVisuallyReady || stars.length === 0) return
+    // Don't trigger if there's already a star in URL
+    if (starIdFromUrl) return
+
+    // Check if user has seen the welcome message before
+    const hasSeenWelcome = localStorage.getItem('duygu-evreni-welcomed')
+    if (hasSeenWelcome) return
+
+    // Find the welcome star
+    const welcomeStar = stars.find(s => s.id === WELCOME_STAR_ID)
+    if (!welcomeStar) return
+
+    // Auto-select the welcome star after a short delay
+    const timer = setTimeout(() => {
+      setSelectedStar(welcomeStar)
+      markAsRead(welcomeStar.id)
+      // Mark as welcomed so it doesn't show again
+      localStorage.setItem('duygu-evreni-welcomed', 'true')
+      // Also mark that user has clicked a star
+      setHasClickedStar(true)
+      localStorage.setItem('duygu-evreni-star-clicked', 'true')
+    }, 1000)
+
+    return () => clearTimeout(timer)
+  }, [focusedPlanetId, starsVisuallyReady, stars, starIdFromUrl, markAsRead])
+
   // Get focused planet object
   const focusedPlanet = planets.find(p => p.id === focusedPlanetId) || null
 
