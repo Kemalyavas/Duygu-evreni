@@ -6,6 +6,7 @@ import { OrbitControls, PerspectiveCamera, Html, useGLTF } from '@react-three/dr
 import { useSpring, animated } from '@react-spring/three'
 import { EffectComposer, Bloom } from '@react-three/postprocessing'
 import { OrbitingStars } from './OrbitingStar'
+import { useMobile } from '@/lib/hooks/useMobile'
 import * as THREE from 'three'
 import type { Planet as PlanetType, Star } from '@/types'
 import { PLANET_MODELS } from '@/lib/planetModels'
@@ -16,6 +17,10 @@ interface PlanetSceneProps {
   onStarClick?: (star: Star) => void
   selectedStarId?: string
   readStarIds?: Set<string>
+}
+
+interface SceneProps extends PlanetSceneProps {
+  isMobile: boolean
 }
 
 // Custom 3D Model Planet for detail view
@@ -210,7 +215,7 @@ function LoadingFallback() {
   )
 }
 
-function Scene({ planet, stars, onStarClick, selectedStarId, readStarIds }: PlanetSceneProps) {
+function Scene({ planet, stars, onStarClick, selectedStarId, readStarIds, isMobile }: SceneProps) {
   const isHope = planet.name === 'Hope'
 
   return (
@@ -261,32 +266,37 @@ function Scene({ planet, stars, onStarClick, selectedStarId, readStarIds }: Plan
         readStarIds={readStarIds}
       />
 
-      {/* Bloom effect - matches Universe settings */}
-      <EffectComposer>
-        <Bloom
-          intensity={1.2}
-          luminanceThreshold={0.1}
-          luminanceSmoothing={0.4}
-          mipmapBlur
-          radius={0.4}
-        />
-      </EffectComposer>
+      {/* Bloom effect - disabled on mobile for performance */}
+      {!isMobile && (
+        <EffectComposer>
+          <Bloom
+            intensity={1.2}
+            luminanceThreshold={0.1}
+            luminanceSmoothing={0.4}
+            mipmapBlur
+            radius={0.4}
+          />
+        </EffectComposer>
+      )}
     </>
   )
 }
 
 export function PlanetScene(props: PlanetSceneProps) {
+  const isMobile = useMobile()
+
   return (
     <div className="w-full h-full bg-gradient-to-b from-[#0a0a15] to-[#000000]">
       <Canvas
-        dpr={[1, 2]}
+        dpr={isMobile ? 1 : [1, 2]}
         gl={{
-          antialias: true,
+          antialias: !isMobile,
           powerPreference: 'high-performance',
+          alpha: false,
         }}
       >
         <Suspense fallback={<LoadingFallback />}>
-          <Scene {...props} />
+          <Scene {...props} isMobile={isMobile} />
         </Suspense>
       </Canvas>
     </div>

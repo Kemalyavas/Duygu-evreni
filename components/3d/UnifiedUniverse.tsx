@@ -265,16 +265,18 @@ function Scene({
         )
       })}
 
-      {/* Bloom effect */}
-      <EffectComposer>
-        <Bloom
-          intensity={BLOOM.INTENSITY}
-          luminanceThreshold={BLOOM.LUMINANCE_THRESHOLD}
-          luminanceSmoothing={BLOOM.LUMINANCE_SMOOTHING}
-          mipmapBlur
-          radius={BLOOM.RADIUS}
-        />
-      </EffectComposer>
+      {/* Bloom effect - disabled on mobile for performance */}
+      {!isMobile && (
+        <EffectComposer>
+          <Bloom
+            intensity={BLOOM.INTENSITY}
+            luminanceThreshold={BLOOM.LUMINANCE_THRESHOLD}
+            luminanceSmoothing={BLOOM.LUMINANCE_SMOOTHING}
+            mipmapBlur
+            radius={BLOOM.RADIUS}
+          />
+        </EffectComposer>
+      )}
     </>
   )
 }

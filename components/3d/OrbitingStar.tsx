@@ -276,13 +276,15 @@ export function OrbitingStars({
       // Billboard rotation (face camera)
       tempQuaternion.copy(camera.quaternion)
 
-      // Scale with pulse effect - selected star is bigger
-      const pulse = 1 + Math.sin(elapsedTime * 1.5 + data.phase) * 0.15
+      // Scale with pulse effect - only for unread stars
+      const isRead = readStarIds?.has(stars[starIndex].id) ?? false
+      // Read stars don't pulse - they're "consumed"
+      const pulse = isRead ? 1 : (1 + Math.sin(elapsedTime * 1.5 + data.phase) * 0.15)
       const isHovered = starIndex === hoveredIndex
       const isSelected = starIndex === selectedIndex
 
-      // Selected star is bigger, others normal size
-      const baseScale = isSelected ? 0.14 : 0.07
+      // Selected star is bigger, read stars slightly smaller
+      const baseScale = isSelected ? 0.14 : (isRead ? 0.055 : 0.07)
 
       // Scale animation: quick pop at start, then normal
       // explosionProgress is already calculated above for position
@@ -413,7 +415,7 @@ export function OrbitingStars({
     return closestIndex
   }
 
-  // Mouse event handlers
+  // Mouse and touch event handlers
   useEffect(() => {
     const canvas = gl.domElement
 
@@ -445,12 +447,49 @@ export function OrbitingStars({
       }
     }
 
+    // Touch event handlers for mobile
+    const handleTouchMove = (e: TouchEvent) => {
+      if (e.touches.length === 0) return
+      const touch = e.touches[0]
+      const rect = canvas.getBoundingClientRect()
+      const x = touch.clientX - rect.left
+      const y = touch.clientY - rect.top
+
+      const closest = findClosestStar(x, y)
+
+      if (closest !== null) {
+        setHoveredIndex(closest)
+      } else {
+        setHoveredIndex(null)
+      }
+    }
+
+    const handleTouchEnd = (e: TouchEvent) => {
+      if (e.changedTouches.length === 0) return
+      const touch = e.changedTouches[0]
+      const rect = canvas.getBoundingClientRect()
+      const x = touch.clientX - rect.left
+      const y = touch.clientY - rect.top
+
+      const closest = findClosestStar(x, y)
+
+      if (closest !== null && stars[closest]) {
+        onStarClick?.(stars[closest])
+      }
+      // Reset hover state after touch
+      setHoveredIndex(null)
+    }
+
     canvas.addEventListener('mousemove', handleMouseMove)
     canvas.addEventListener('click', handleClick)
+    canvas.addEventListener('touchmove', handleTouchMove, { passive: true })
+    canvas.addEventListener('touchend', handleTouchEnd)
 
     return () => {
       canvas.removeEventListener('mousemove', handleMouseMove)
       canvas.removeEventListener('click', handleClick)
+      canvas.removeEventListener('touchmove', handleTouchMove)
+      canvas.removeEventListener('touchend', handleTouchEnd)
     }
   }, [gl, camera, stars, onStarClick])
 

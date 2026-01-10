@@ -186,12 +186,14 @@ function DefaultPlanet({
   color,
   scale,
   hovered,
-  floatOffset = 0
+  floatOffset = 0,
+  isMobile = false
 }: {
   color: THREE.Color
   scale: number
   hovered: boolean
   floatOffset?: number
+  isMobile?: boolean
 }) {
   const meshRef = useRef<THREE.Mesh>(null)
   const groupRef = useRef<THREE.Group>(null)
@@ -201,6 +203,10 @@ function DefaultPlanet({
     c.lerp(new THREE.Color('#ffffff'), 0.3)
     return c
   }, [color])
+
+  // Reduce polygon count on mobile for better performance
+  const sphereSegments = isMobile ? 32 : 64
+  const glowSegments = isMobile ? 16 : 32
 
   useFrame((state, delta) => {
     if (meshRef.current) {
@@ -219,7 +225,7 @@ function DefaultPlanet({
     <group ref={groupRef} scale={scale}>
       {/* Main sphere */}
       <mesh ref={meshRef}>
-        <sphereGeometry args={[1, 64, 64]} />
+        <sphereGeometry args={[1, sphereSegments, sphereSegments]} />
         <meshStandardMaterial
           color={color}
           emissive={color}
@@ -231,7 +237,7 @@ function DefaultPlanet({
 
       {/* Glow */}
       <mesh>
-        <sphereGeometry args={[1.15, 32, 32]} />
+        <sphereGeometry args={[1.15, glowSegments, glowSegments]} />
         <meshBasicMaterial
           color={lighterColor}
           transparent
@@ -339,10 +345,10 @@ export function Planet({ planet, starCount = 0, onClick, isSelected = false }: P
           document.body.style.cursor = 'auto'
         }}
       >
-        {/* Invisible click sphere */}
-        <mesh visible={false}>
+        {/* Invisible click sphere - visible but fully transparent for raycasting */}
+        <mesh>
           <sphereGeometry args={[planet.scale * 1.2, 16, 16]} />
-          <meshBasicMaterial transparent opacity={0} />
+          <meshBasicMaterial transparent opacity={0} side={THREE.DoubleSide} depthWrite={false} />
         </mesh>
 
         {/* Planet visual */}
@@ -358,7 +364,7 @@ export function Planet({ planet, starCount = 0, onClick, isSelected = false }: P
             />
           </Suspense>
         ) : (
-          <DefaultPlanet color={baseColor} scale={planet.scale} hovered={hovered} floatOffset={floatOffset} />
+          <DefaultPlanet color={baseColor} scale={planet.scale} hovered={hovered} floatOffset={floatOffset} isMobile={isMobile} />
         )}
       </animated.group>
 
