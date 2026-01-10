@@ -114,7 +114,7 @@ export default function SignupPage() {
       setSuccess(true)
       setTimeout(() => {
         router.push('/')
-      }, 2000)
+      }, 4000)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Kayıt olunamadı')
     } finally {
@@ -220,7 +220,13 @@ export default function SignupPage() {
               <h2 className="text-xl font-semibold text-white mb-2">
                 Kayıt Başarılı!
               </h2>
-              <p className="text-white/60">
+              <p className="text-white/60 mb-3">
+                <strong className="text-cyan-300">{email}</strong> adresine doğrulama maili gönderildi.
+              </p>
+              <p className="text-white/40 text-sm mb-4">
+                Hesabını aktifleştirmek için mailini kontrol et.
+              </p>
+              <p className="text-white/50 text-sm">
                 Evrene yönlendiriliyorsunuz...
               </p>
             </motion.div>
@@ -260,6 +266,7 @@ export default function SignupPage() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
+                    autoComplete="new-password"
                     className="w-full px-4 py-3 bg-white/[0.03] border border-white/[0.08] rounded-xl text-white placeholder-white/30 focus:outline-none focus:border-cyan-500/50 focus:bg-white/[0.05] transition-all duration-300"
                   />
                 </div>
@@ -272,6 +279,7 @@ export default function SignupPage() {
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     required
+                    autoComplete="new-password"
                     className="w-full px-4 py-3 bg-white/[0.03] border border-white/[0.08] rounded-xl text-white placeholder-white/30 focus:outline-none focus:border-cyan-500/50 focus:bg-white/[0.05] transition-all duration-300"
                   />
                 </div>
