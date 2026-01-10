@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useMemo, useState, Suspense } from 'react'
+import { useRef, useMemo, useState, Suspense, useEffect } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { useSpring, animated } from '@react-spring/three'
 import { Html, useGLTF } from '@react-three/drei'
@@ -86,9 +86,22 @@ function CustomPlanetModel({
   const groupRef = useRef<THREE.Group>(null)
   const { scene } = useGLTF(modelPath)
   const initialY = useRef<number | null>(null)
+  const createdMaterials = useRef<THREE.Material[]>([])
 
   // Clone scene - keep original materials
-  const clonedScene = useMemo(() => scene.clone(), [scene])
+  const clonedScene = useMemo(() => {
+    // Clear previously created materials
+    createdMaterials.current = []
+    return scene.clone()
+  }, [scene])
+
+  // Cleanup materials on unmount
+  useEffect(() => {
+    return () => {
+      createdMaterials.current.forEach(mat => mat.dispose())
+      createdMaterials.current = []
+    }
+  }, [])
 
   // Rotation + Floating
   useFrame((state, delta) => {
@@ -113,13 +126,15 @@ function CustomPlanetModel({
     clonedScene.traverse((child) => {
       if (child instanceof THREE.Mesh && child.material) {
         const oldMat = child.material as THREE.MeshStandardMaterial
-        child.material = new THREE.MeshBasicMaterial({
+        const newMat = new THREE.MeshBasicMaterial({
           color: oldMat.color || '#ffffff',
           map: oldMat.map || null,
           alphaMap: oldMat.alphaMap || null,
           transparent: oldMat.transparent || false,
           opacity: oldMat.opacity || 1,
         })
+        child.material = newMat
+        createdMaterials.current.push(newMat)
       }
     })
 
@@ -136,12 +151,14 @@ function CustomPlanetModel({
     clonedScene.traverse((child) => {
       if (child instanceof THREE.Mesh && child.material) {
         const oldMat = child.material as THREE.MeshStandardMaterial
-        child.material = new THREE.MeshBasicMaterial({
+        const newMat = new THREE.MeshBasicMaterial({
           color: '#ffffff',
           transparent: true,
           opacity: 0.95,
           map: oldMat.map || null,
         })
+        child.material = newMat
+        createdMaterials.current.push(newMat)
       }
     })
 
