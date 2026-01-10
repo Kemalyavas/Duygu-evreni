@@ -192,6 +192,33 @@ export function useDailyLimit() {
     }
   }, [setProfile, isAdmin, profile])
 
+  // Increment view count (for statistics only, no limit)
+  const incrementViewCount = useCallback(async () => {
+    if (!profile) return
+
+    try {
+      const supabase = createClient()
+      const { data: { session } } = await supabase.auth.getSession()
+
+      if (!session?.user) return
+
+      const currentViews = profile.daily_views_used ?? 0
+
+      const { data } = await supabaseUpdate<Profile>(
+        'profiles',
+        `id=eq.${session.user.id}`,
+        { daily_views_used: currentViews + 1 },
+        session.access_token
+      )
+
+      if (data) {
+        setProfile(data)
+      }
+    } catch {
+      // Silent fail - stats are not critical
+    }
+  }, [profile, setProfile])
+
   return {
     loading,
     error,
@@ -201,5 +228,6 @@ export function useDailyLimit() {
     remainingStars: getRemainingStars(),
     maxStars: MAX_DAILY_STARS,
     incrementStarCount,
+    incrementViewCount,
   }
 }

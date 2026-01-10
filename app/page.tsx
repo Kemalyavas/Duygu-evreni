@@ -36,7 +36,7 @@ function HomePageContent() {
   const { planets, loading: planetsLoading, error: planetsError } = usePlanets()
   const { stars, loading: starsLoading, fetchAllStars, fetchStarsByPlanet } = useStars()
   const { starCounts, refetchCounts } = useStarCounts()
-  const { remainingStars, isAdmin } = useDailyLimit()
+  const { remainingStars, isAdmin, incrementViewCount } = useDailyLimit()
   const { readStarIds, markAsRead } = useReadStars()
   const isMobile = useMobile()
   const { playPlanetClick, playStarClick, playAddStar } = useSoundEffects()
@@ -169,12 +169,13 @@ function HomePageContent() {
     playStarClick()
     setSelectedStar(star)
     markAsRead(star.id)
+    incrementViewCount() // Track view for statistics
     // Mark that user has clicked a star (hides the hint prompt)
     if (!hasClickedStar) {
       setHasClickedStar(true)
       localStorage.setItem('duygu-evreni-star-clicked', 'true')
     }
-  }, [markAsRead, hasClickedStar, playStarClick])
+  }, [markAsRead, hasClickedStar, playStarClick, incrementViewCount])
 
   const handleClosePanel = useCallback(() => {
     setSelectedStar(null)
