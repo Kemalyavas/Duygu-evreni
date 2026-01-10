@@ -1,6 +1,6 @@
 'use client'
 
-import { Suspense, useMemo, useRef, useState, useEffect } from 'react'
+import { Suspense, useMemo, useRef, useState, useEffect, useCallback } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls, PerspectiveCamera, Html } from '@react-three/drei'
 import { EffectComposer, Bloom } from '@react-three/postprocessing'
@@ -72,6 +72,8 @@ interface SceneProps {
   isFocusedOnStar?: boolean
   onStarsReady?: () => void
   isMobile?: boolean
+  activeMobileTooltipId: string | null
+  setActiveMobileTooltipId: (id: string | null) => void
 }
 
 // ============================================
@@ -99,6 +101,8 @@ function Scene({
   isFocusedOnStar,
   onStarsReady,
   isMobile,
+  activeMobileTooltipId,
+  setActiveMobileTooltipId,
 }: SceneProps) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const orbitControlsRef = useRef<any>(null)
@@ -229,6 +233,10 @@ function Scene({
               isFocused={isFocused}
               isVisible={isVisible}
               onClick={() => onPlanetClick?.(planet)}
+              showMobileTooltip={activeMobileTooltipId === planet.id}
+              onMobileTooltipChange={(show) => {
+                setActiveMobileTooltipId(show ? planet.id : null)
+              }}
             />
 
             {/* Stars - only in planet mode */}
@@ -313,6 +321,9 @@ export function UnifiedUniverse({
   onStarsReady,
   isMobile = false,
 }: UnifiedUniverseProps) {
+  // Track which planet's mobile tooltip is showing (only one at a time)
+  const [activeMobileTooltipId, setActiveMobileTooltipId] = useState<string | null>(null)
+
   // Use scene state hook for camera and transitions
   const {
     viewMode,
@@ -332,6 +343,13 @@ export function UnifiedUniverse({
     selectedStarId,
   })
 
+  // Close mobile tooltip when clicking empty space
+  const handlePointerMissed = useCallback(() => {
+    if (activeMobileTooltipId) {
+      setActiveMobileTooltipId(null)
+    }
+  }, [activeMobileTooltipId])
+
   return (
     <div className="w-full h-full bg-gradient-to-b from-[#0a0a15] to-[#000000] relative">
       <Canvas
@@ -341,6 +359,7 @@ export function UnifiedUniverse({
           powerPreference: 'high-performance',
           alpha: false,
         }}
+        onPointerMissed={handlePointerMissed}
       >
         <Suspense fallback={<LoadingFallback />}>
           <Scene
@@ -364,6 +383,8 @@ export function UnifiedUniverse({
             isFocusedOnStar={isFocusedOnStar}
             onStarsReady={onStarsReady}
             isMobile={isMobile}
+            activeMobileTooltipId={activeMobileTooltipId}
+            setActiveMobileTooltipId={setActiveMobileTooltipId}
           />
         </Suspense>
       </Canvas>

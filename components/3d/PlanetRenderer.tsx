@@ -18,6 +18,8 @@ interface Planet3DProps {
   isFocused: boolean
   isVisible: boolean
   onClick: () => void
+  showMobileTooltip?: boolean
+  onMobileTooltipChange?: (show: boolean) => void
 }
 
 /**
@@ -31,9 +33,10 @@ export function Planet3D({
   isFocused,
   isVisible,
   onClick,
+  showMobileTooltip = false,
+  onMobileTooltipChange,
 }: Planet3DProps) {
   const [hovered, setHovered] = useState(false)
-  const [showMobileTooltip, setShowMobileTooltip] = useState(false)
   const mobileTooltipTimeout = useRef<NodeJS.Timeout | null>(null)
   const isMobile = useMobile()
 
@@ -49,24 +52,27 @@ export function Planet3D({
     if (isMobile) {
       if (showMobileTooltip) {
         // Second tap - enter planet
-        setShowMobileTooltip(false)
+        onMobileTooltipChange?.(false)
         if (mobileTooltipTimeout.current) {
           clearTimeout(mobileTooltipTimeout.current)
         }
         onClick()
       } else {
-        // First tap - show tooltip
-        setShowMobileTooltip(true)
+        // First tap - show tooltip (this will close other tooltips via parent state)
+        onMobileTooltipChange?.(true)
         // Auto-hide tooltip after 3 seconds
+        if (mobileTooltipTimeout.current) {
+          clearTimeout(mobileTooltipTimeout.current)
+        }
         mobileTooltipTimeout.current = setTimeout(() => {
-          setShowMobileTooltip(false)
+          onMobileTooltipChange?.(false)
         }, 3000)
       }
     } else {
       // Desktop - direct click
       onClick()
     }
-  }, [isMobile, showMobileTooltip, onClick])
+  }, [isMobile, showMobileTooltip, onClick, onMobileTooltipChange])
 
   // Cleanup timeout on unmount
   useEffect(() => {
@@ -76,6 +82,14 @@ export function Planet3D({
       }
     }
   }, [])
+
+  // Clear timeout when tooltip is closed externally
+  useEffect(() => {
+    if (!showMobileTooltip && mobileTooltipTimeout.current) {
+      clearTimeout(mobileTooltipTimeout.current)
+      mobileTooltipTimeout.current = null
+    }
+  }, [showMobileTooltip])
 
   // Show tooltip if hovered (desktop) or showMobileTooltip (mobile)
   const shouldShowTooltip = hovered || showMobileTooltip
