@@ -58,10 +58,11 @@ KONTROL KRİTERLERİ:
    - Örnek YASAK: "Bu gece kendimi öldüreceğim", "Damarlarımı kesmek istiyorum"
    - Örnek SERBEST: "Bir dönem çok kötüydüm", "Yaşamak zor geliyor bazen"
 
-2. TÜRK SİYASİ FİGÜRLER (Atatürk, Cumhurbaşkanı, parti liderleri vb.):
+2. TÜRK SİYASİ FİGÜRLER (Atatürk, Cumhurbaşkanı, parti liderleri, "rte", "reis" vb.):
    - YASAK: Hakaret, küfür, aşağılama, nefret söylemi, ÖLÜM DİLEĞİ/TEHDİDİ
+   - YASAK: Kısaltılmış küfürler de dahil (amk, aq, aw, mk, oç, sg, skt vb.)
    - SERBEST: Nötr bahsetme, olumlu ifadeler, tarihsel referanslar
-   - Örnek YASAK: "Erdoğan bir diktatör", "Cumhurbaşkanı ölsün", "Atatürk'e lanet olsun", "X gebermeli"
+   - Örnek YASAK: "Erdoğan bir diktatör", "rte'nin aw", "Cumhurbaşkanı ölsün", "Atatürk'e lanet olsun", "reis amk"
    - Örnek SERBEST: "Atatürk'ü çok seviyorum", "Cumhurbaşkanı bugün konuşma yaptı"
 
 3. ŞİDDET TEHDİTLERİ:
@@ -84,7 +85,7 @@ YANIT FORMATI (sadece JSON, başka bir şey yazma):
 {
   "allowed": true/false,
   "reason": "Engelleme sebebi veya null",
-  "category": "SUICIDE_SELF_HARM" | "POLITICAL_FIGURES" | "VIOLENCE_THREATS" | "SEXUAL_EXPLICIT" | null,
+  "category": "SUICIDE_SELF_HARM" | "POLITICAL_FIGURES" | "VIOLENCE_THREATS" | "SEXUAL_EXPLICIT" | "PROFANITY_SLANG" | null,
   "confidence": "HIGH" | "MEDIUM" | "LOW",
   "showHelpResources": true/false (sadece intihar içeriği için true)
 }

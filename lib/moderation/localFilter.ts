@@ -17,6 +17,7 @@ export type FilterCategory =
   | 'VIOLENCE_THREATS'
   | 'CHILD_ABUSE'
   | 'SEXUAL_EXPLICIT'
+  | 'PROFANITY_SLANG'
 
 export interface LocalFilterResult {
   requiresAIReview: boolean
@@ -228,6 +229,61 @@ const SEXUAL_EXPLICIT_KEYWORDS = [
   'irzina gec',
 ]
 
+/**
+ * Profanity and Slang Keywords (Turkish abbreviations)
+ * Trigger AI review for context - may be used casually or as insults
+ */
+const PROFANITY_SLANG_KEYWORDS = [
+  // Common abbreviations
+  'amk',
+  'aq',
+  'mk',
+  'aw',
+  'am',
+  'amq',
+  'a.q',
+  'a.m.k',
+
+  // Insults abbreviated
+  'oç',
+  'oc',
+  'orospu',
+  'oruspu',
+  'orsp',
+  'piç',
+  'pic',
+
+  // Dismissive/vulgar
+  'sg',
+  'skt',
+  'sktr',
+  'siktir',
+  'siktr',
+  's.g',
+  's.k.t',
+
+  // Other common profanity
+  'yarrak',
+  'yarak',
+  'taşak',
+  'tasak',
+  'göt',
+  'got',
+  'meme',
+  'sik',
+  'sikim',
+
+  // Compound insults
+  'amına koy',
+  'amina koy',
+  'ananı',
+  'anani',
+  'ananın',
+  'ananin',
+  'bacını',
+  'bacini',
+]
+
 // ============================================
 // HELPER FUNCTIONS
 // ============================================
@@ -345,6 +401,14 @@ export function runLocalFilter(content: string): LocalFilterResult {
     result.requiresAIReview = true
     result.triggeredCategories.push('SEXUAL_EXPLICIT')
     result.matchedTerms.push(...sexualMatches)
+  }
+
+  // Check profanity/slang - requires AI review
+  const profanityMatches = containsKeywords(content, PROFANITY_SLANG_KEYWORDS)
+  if (profanityMatches.length > 0) {
+    result.requiresAIReview = true
+    result.triggeredCategories.push('PROFANITY_SLANG')
+    result.matchedTerms.push(...profanityMatches)
   }
 
   return result
