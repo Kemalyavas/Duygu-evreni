@@ -1,7 +1,7 @@
 'use client'
 
-import { useRef, useMemo, useState, Suspense, useEffect } from 'react'
-import { useFrame } from '@react-three/fiber'
+import { useRef, useMemo, useState, Suspense, useEffect, useCallback } from 'react'
+import { useFrame, ThreeEvent } from '@react-three/fiber'
 import { useSpring, animated } from '@react-spring/three'
 import { Html, useGLTF } from '@react-three/drei'
 import * as THREE from 'three'
@@ -247,12 +247,21 @@ function DefaultPlanet({
 
 export function Planet({ planet, starCount = 0, onClick, isSelected = false }: PlanetProps) {
   const [hovered, setHovered] = useState(false)
+  const [showMobileTooltip, setShowMobileTooltip] = useState(false)
+  const mobileTooltipTimeout = useRef<NodeJS.Timeout | null>(null)
 
   const baseColor = useMemo(() => new THREE.Color(planet.color), [planet.color])
   const modelPath = PLANET_MODELS[planet.name]
   const hasCustomModel = !!modelPath
   const isHope = planet.name === 'Hope'
   const isDepression = planet.name === 'Depression'
+
+  // Detect mobile device
+  const isMobile = useMemo(() => {
+    if (typeof window === 'undefined') return false
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+      window.matchMedia('(pointer: coarse)').matches
+  }, [])
 
   // Generate unique float offset based on planet id for varied floating phases
   const floatOffset = useMemo(() => {
@@ -264,9 +273,47 @@ export function Planet({ planet, starCount = 0, onClick, isSelected = false }: P
     return (hash % 628) / 100 // 0 to ~6.28 (2π)
   }, [planet.id])
 
+  // Handle click - on mobile: first tap shows tooltip, second tap enters
+  const handleClick = useCallback((e: ThreeEvent<MouseEvent>) => {
+    e.stopPropagation()
+
+    if (isMobile) {
+      if (showMobileTooltip) {
+        // Second tap - enter planet
+        setShowMobileTooltip(false)
+        if (mobileTooltipTimeout.current) {
+          clearTimeout(mobileTooltipTimeout.current)
+        }
+        onClick?.()
+      } else {
+        // First tap - show tooltip
+        setShowMobileTooltip(true)
+        // Auto-hide tooltip after 3 seconds
+        mobileTooltipTimeout.current = setTimeout(() => {
+          setShowMobileTooltip(false)
+        }, 3000)
+      }
+    } else {
+      // Desktop - direct click
+      onClick?.()
+    }
+  }, [isMobile, showMobileTooltip, onClick])
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (mobileTooltipTimeout.current) {
+        clearTimeout(mobileTooltipTimeout.current)
+      }
+    }
+  }, [])
+
+  // Show tooltip if hovered (desktop) or showMobileTooltip (mobile)
+  const shouldShowTooltip = hovered || showMobileTooltip
+
   // Spring animation
   const { scale } = useSpring({
-    scale: hovered ? 1.08 : isSelected ? 1.04 : 1,
+    scale: hovered || showMobileTooltip ? 1.08 : isSelected ? 1.04 : 1,
     config: { mass: 1, tension: 200, friction: 20 },
   })
 
@@ -281,10 +328,7 @@ export function Planet({ planet, starCount = 0, onClick, isSelected = false }: P
       {/* Clickable area */}
       <animated.group
         scale={scale}
-        onClick={(e) => {
-          e.stopPropagation()
-          onClick?.()
-        }}
+        onClick={handleClick}
         onPointerOver={(e) => {
           e.stopPropagation()
           setHovered(true)
@@ -322,14 +366,14 @@ export function Planet({ planet, starCount = 0, onClick, isSelected = false }: P
       {!isDepression && !isHope && (
         <pointLight
           color={baseColor}
-          intensity={hovered ? 2.5 : 1.5}
+          intensity={shouldShowTooltip ? 2.5 : 1.5}
           distance={planet.scale * 10}
           decay={2}
         />
       )}
 
-      {/* Hover tooltip */}
-      {hovered && (
+      {/* Hover/Tap tooltip */}
+      {shouldShowTooltip && (
         <Html
           center
           style={{
@@ -341,6 +385,9 @@ export function Planet({ planet, starCount = 0, onClick, isSelected = false }: P
           <div className="glass-tooltip">
             <p className="text-white font-bold text-xl">{planet.name_tr}</p>
             <p className="text-white/70 text-base">{starCount} yıldız</p>
+            {showMobileTooltip && (
+              <p className="text-cyan-400/80 text-xs mt-1">Girmek için tekrar dokun</p>
+            )}
           </div>
         </Html>
       )}
