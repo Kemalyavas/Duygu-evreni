@@ -43,6 +43,17 @@ export function useAuth() {
         if (error) {
           // Handle fetch errors gracefully (network issues, etc.)
           console.warn('[Auth] Could not fetch session:', error.message)
+
+          // If refresh token is invalid, clear the session
+          const errorCode = (error as { code?: string }).code
+          if (error.message?.includes('Refresh Token') || errorCode === 'refresh_token_not_found') {
+            try {
+              await supabase.auth.signOut()
+            } catch {
+              // Ignore signOut errors
+            }
+          }
+
           if (isMounted) {
             authChecked = true
             setIsLoading(false)

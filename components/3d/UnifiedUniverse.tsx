@@ -180,12 +180,12 @@ function Scene({
         orbitControlsRef={orbitControlsRef}
       />
 
-      {/* Lighting */}
-      <ambientLight color="#ffffff" intensity={LIGHTING.AMBIENT_INTENSITY} />
+      {/* Lighting - increased ambient on mobile since Bloom is disabled */}
+      <ambientLight color="#ffffff" intensity={isMobile ? 0.7 : LIGHTING.AMBIENT_INTENSITY} />
       <hemisphereLight
         color="#b0c4de"
         groundColor="#2a1a4a"
-        intensity={LIGHTING.HEMISPHERE_INTENSITY}
+        intensity={isMobile ? 0.6 : LIGHTING.HEMISPHERE_INTENSITY}
       />
 
       {/* Hope as main light source */}
@@ -202,17 +202,31 @@ function Scene({
       {/* Fill and rim lights */}
       <directionalLight
         color="#4a6080"
-        intensity={LIGHTING.FILL_INTENSITY}
+        intensity={isMobile ? 0.5 : LIGHTING.FILL_INTENSITY}
         position={[-15, 5, -20]}
       />
       <directionalLight
         color="#4a0080"
-        intensity={LIGHTING.RIM_INTENSITY}
+        intensity={isMobile ? 0.4 : LIGHTING.RIM_INTENSITY}
         position={[-20, -10, -30]}
       />
 
-      {/* Background stars - universe mode only, reduced on mobile */}
-      {viewMode === 'universe' && <StarField count={isMobile ? 800 : STAR_FIELD.COUNT} />}
+      {/* Extra fill light for mobile - illuminates dark sides of planets */}
+      {isMobile && (
+        <directionalLight
+          color="#6080a0"
+          intensity={0.4}
+          position={[20, -5, 25]}
+        />
+      )}
+
+      {/* Background stars - universe mode only, reduced count but brighter on mobile */}
+      {viewMode === 'universe' && (
+        <StarField
+          count={isMobile ? 800 : STAR_FIELD.COUNT}
+          brightness={isMobile ? 1.8 : 1.0}
+        />
+      )}
 
       {/* Planets */}
       {planets.map((planet) => {

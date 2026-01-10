@@ -6,6 +6,7 @@ import * as THREE from 'three'
 
 interface StarFieldProps {
   count?: number
+  brightness?: number // 1.0 = normal, higher = brighter (for mobile without bloom)
 }
 
 // Custom shader for twinkling, colorful stars
@@ -36,6 +37,7 @@ const starVertexShader = `
 const starFragmentShader = `
   varying vec3 vColor;
   varying float vTwinkle;
+  uniform float brightness;
 
   void main() {
     // Soft circular point
@@ -46,7 +48,9 @@ const starFragmentShader = `
     float alpha = 1.0 - smoothstep(0.0, 0.5, dist);
     alpha *= vTwinkle;
 
-    gl_FragColor = vec4(vColor, alpha * 0.9);
+    // Apply brightness boost (for mobile without bloom)
+    vec3 boostedColor = vColor * brightness;
+    gl_FragColor = vec4(boostedColor, alpha * 0.9 * min(brightness, 1.5));
   }
 `
 
@@ -61,7 +65,7 @@ const nebulaColors = [
   new THREE.Color('#FFE4B5'),   // Moccasin (warm)
 ]
 
-export function StarField({ count = 2500 }: StarFieldProps) {
+export function StarField({ count = 2500, brightness = 1.0 }: StarFieldProps) {
   const pointsRef = useRef<THREE.Points>(null)
   const _materialRef = useRef<THREE.ShaderMaterial>(null)
 
@@ -116,6 +120,7 @@ export function StarField({ count = 2500 }: StarFieldProps) {
     const mat = new THREE.ShaderMaterial({
       uniforms: {
         time: { value: 0 },
+        brightness: { value: brightness },
       },
       vertexShader: starVertexShader,
       fragmentShader: starFragmentShader,
@@ -125,7 +130,7 @@ export function StarField({ count = 2500 }: StarFieldProps) {
     })
 
     return { geometry: geo, material: mat }
-  }, [count])
+  }, [count, brightness])
 
   // Animate rotation and twinkling
   useFrame((state, delta) => {
