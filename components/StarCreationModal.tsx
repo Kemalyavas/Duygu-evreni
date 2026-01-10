@@ -68,15 +68,15 @@ export function StarCreationModal({
         position_z,
       })
 
-      // Increment daily limit
-      await incrementStarCount()
-
-      // Reset and close
-      setContent('')
+      // Only increment daily limit if star was created successfully
       if (newStar) {
+        await incrementStarCount()
+        setContent('')
         onSuccess?.(newStar)
+        onClose()
+      } else {
+        setError('Yıldız oluşturulamadı, lütfen tekrar dene')
       }
-      onClose()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Yıldız oluşturulamadı')
     } finally {
