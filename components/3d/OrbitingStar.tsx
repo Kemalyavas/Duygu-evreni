@@ -488,8 +488,11 @@ export function OrbitingStars({
     return () => {
       canvas.removeEventListener('mousemove', handleMouseMove)
       canvas.removeEventListener('click', handleClick)
+      // Note: passive option must match when removing event listeners
       canvas.removeEventListener('touchmove', handleTouchMove)
       canvas.removeEventListener('touchend', handleTouchEnd)
+      // Reset cursor on cleanup
+      canvas.style.cursor = 'auto'
     }
   }, [gl, camera, stars, onStarClick])
 

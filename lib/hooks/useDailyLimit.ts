@@ -24,6 +24,18 @@ export function useDailyLimit() {
   const { profile, setProfile, user } = useStore()
   const hasChecked = useRef(false)
 
+  // Use refs to avoid stale closures and infinite loops
+  const profileRef = useRef(profile)
+  const setProfileRef = useRef(setProfile)
+  const isAdminRef = useRef(isAdmin)
+
+  // Keep refs in sync
+  useEffect(() => {
+    profileRef.current = profile
+    setProfileRef.current = setProfile
+    isAdminRef.current = isAdmin
+  }, [profile, setProfile, isAdmin])
+
   // Profile loaded state
   const profileLoaded = !!profile
 
@@ -55,18 +67,25 @@ export function useDailyLimit() {
     setIsAdmin(false)
   }, [user?.id])
 
-  // Check and reset if new day
-  const checkAndResetDaily = useCallback(async () => {
-    if (!profile) return
+  // Check and reset if new day - only runs once per profile load
+  useEffect(() => {
+    // Skip if already checked or no profile
+    if (hasChecked.current || !profile?.id) return
 
     const today = getLocalDateString()
-
-    // Compare dates - handle both string formats and null
     const lastReset = profile.last_reset_date ? profile.last_reset_date.split('T')[0] : null
 
-    if (lastReset !== today) {
+    // Skip if already reset today
+    if (lastReset === today) {
+      hasChecked.current = true
+      return
+    }
+
+    // Mark as checked before async operation to prevent double execution
+    hasChecked.current = true
+
+    const resetDaily = async () => {
       try {
-        // Get session for access token (required for RLS)
         const supabase = createClient()
         const { data: { session } } = await supabase.auth.getSession()
 
@@ -92,28 +111,22 @@ export function useDailyLimit() {
         })
 
         if (freshProfile) {
-          setProfile(freshProfile)
+          setProfileRef.current(freshProfile)
         }
       } catch {
-        // Silent fail
+        // Silent fail - will retry on next page load
       }
     }
-  }, [profile, setProfile])
 
-  // Run check when profile is available
-  useEffect(() => {
-    if (profile && !hasChecked.current) {
-      hasChecked.current = true
-      checkAndResetDaily()
-    }
-  }, [profile, checkAndResetDaily])
+    resetDaily()
+  }, [profile?.id, profile?.last_reset_date]) // Only depend on specific fields
 
-  // Reset the check flag when profile changes (e.g., different user)
+  // Reset the check flag when user changes
   useEffect(() => {
     return () => {
       hasChecked.current = false
     }
-  }, [])
+  }, [user?.id])
 
   const canShareStar = useCallback(() => {
     // Admins have unlimited stars
@@ -132,9 +145,9 @@ export function useDailyLimit() {
   }, [profile, isAdmin])
 
   const incrementStarCount = useCallback(async () => {
-    // Admins don't need to track star count
-    if (isAdmin) {
-      return profile
+    // Admins don't need to track star count (use ref for latest value)
+    if (isAdminRef.current) {
+      return profileRef.current
     }
 
     try {
@@ -180,7 +193,7 @@ export function useDailyLimit() {
       }
 
       if (data) {
-        setProfile(data)
+        setProfileRef.current(data)
       }
       return data
     } catch (err) {
@@ -190,11 +203,12 @@ export function useDailyLimit() {
     } finally {
       setLoading(false)
     }
-  }, [setProfile, isAdmin, profile])
+  }, []) // No dependencies - uses refs for latest values
 
   // Increment view count (for statistics only, no limit)
   const incrementViewCount = useCallback(async () => {
-    if (!profile) return
+    const currentProfile = profileRef.current
+    if (!currentProfile) return
 
     try {
       const supabase = createClient()
@@ -202,7 +216,7 @@ export function useDailyLimit() {
 
       if (!session?.user) return
 
-      const currentViews = profile.daily_views_used ?? 0
+      const currentViews = currentProfile.daily_views_used ?? 0
 
       const { data } = await supabaseUpdate<Profile>(
         'profiles',
@@ -212,12 +226,12 @@ export function useDailyLimit() {
       )
 
       if (data) {
-        setProfile(data)
+        setProfileRef.current(data)
       }
     } catch {
       // Silent fail - stats are not critical
     }
-  }, [profile, setProfile])
+  }, []) // No dependencies - uses refs for latest values
 
   return {
     loading,

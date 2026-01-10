@@ -23,6 +23,10 @@ interface MusicContextType {
 
 const MusicContext = createContext<MusicContextType | null>(null)
 
+// Global audio instance to persist across page navigations
+let globalAudio: HTMLAudioElement | null = null
+let globalAudioInitialized = false
+
 export function MusicProvider({ children }: { children: ReactNode }) {
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const [isPlaying, setIsPlaying] = useState(false)
@@ -51,34 +55,41 @@ export function MusicProvider({ children }: { children: ReactNode }) {
   // Initialize audio element once globally
   useEffect(() => {
     if (typeof window === 'undefined') return
-    if (audioRef.current) return // Already initialized
+
+    // Use global audio to persist across navigations
+    if (globalAudioInitialized && globalAudio) {
+      audioRef.current = globalAudio
+      setIsLoaded(true)
+      setIsPlaying(!globalAudio.paused)
+      return
+    }
 
     const audio = new Audio(MUSIC_PATH)
     audio.loop = true
     audio.volume = DEFAULT_VOLUME
     audio.preload = 'auto'
 
-    audio.addEventListener('canplaythrough', () => {
-      setIsLoaded(true)
-    })
+    // Named handlers for proper cleanup
+    const handleCanPlayThrough = () => setIsLoaded(true)
+    const handlePlay = () => setIsPlaying(true)
+    const handlePause = () => setIsPlaying(false)
+    const handleError = (e: Event) => console.warn('Background music failed to load:', e)
 
-    audio.addEventListener('play', () => {
-      setIsPlaying(true)
-    })
-
-    audio.addEventListener('pause', () => {
-      setIsPlaying(false)
-    })
-
-    audio.addEventListener('error', (e) => {
-      console.warn('Background music failed to load:', e)
-    })
+    audio.addEventListener('canplaythrough', handleCanPlayThrough)
+    audio.addEventListener('play', handlePlay)
+    audio.addEventListener('pause', handlePause)
+    audio.addEventListener('error', handleError)
 
     audioRef.current = audio
+    globalAudio = audio
+    globalAudioInitialized = true
 
-    // Cleanup only on full unmount (app close)
+    // Cleanup event listeners on unmount (but keep audio for navigation persistence)
     return () => {
-      // Don't cleanup - we want to persist across page navigations
+      audio.removeEventListener('canplaythrough', handleCanPlayThrough)
+      audio.removeEventListener('play', handlePlay)
+      audio.removeEventListener('pause', handlePause)
+      audio.removeEventListener('error', handleError)
     }
   }, [])
 

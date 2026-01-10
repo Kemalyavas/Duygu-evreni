@@ -12,7 +12,7 @@ type SoundType = keyof typeof SOUNDS
 
 const VOLUME = {
   planetClick: 0.55,
-  starClick: 0.4,
+  starClick: 0.3,
   addStar: 0.4,
 } as const
 

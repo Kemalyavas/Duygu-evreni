@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import { supabaseFetch, supabaseInsert } from '@/lib/supabase/fetch'
 import { createClient } from '@/lib/supabase/client'
 import type { Star, StarCreateInput } from '@/types'
@@ -9,6 +9,7 @@ import type { Star, StarCreateInput } from '@/types'
 export function useStarCounts() {
   const [starCounts, setStarCounts] = useState<Record<string, number>>({})
   const [loading, setLoading] = useState(false)
+  const isMountedRef = useRef(true)
 
   const fetchStarCounts = useCallback(async () => {
     try {
@@ -25,6 +26,9 @@ export function useStarCounts() {
         return {}
       }
 
+      // Check if still mounted before proceeding
+      if (!isMountedRef.current) return {}
+
       // Get count for each planet using exact count
       const counts: Record<string, number> = {}
 
@@ -35,23 +39,33 @@ export function useStarCounts() {
             .select('*', { count: 'exact', head: true })
             .eq('planet_id', planet.id)
 
-          if (!error && count !== null) {
+          if (!error && count !== null && isMountedRef.current) {
             counts[planet.id] = count
           }
         })
       )
 
-      setStarCounts(counts)
+      // Only update state if still mounted
+      if (isMountedRef.current) {
+        setStarCounts(counts)
+      }
       return counts
     } finally {
-      setLoading(false)
+      if (isMountedRef.current) {
+        setLoading(false)
+      }
     }
   }, [])
 
   // Fetch counts on mount
   useEffect(() => {
+    isMountedRef.current = true
     fetchStarCounts()
-  }, [fetchStarCounts])
+
+    return () => {
+      isMountedRef.current = false
+    }
+  }, []) // Empty dependency - only run on mount
 
   return {
     starCounts,
@@ -77,6 +91,15 @@ export function useStars() {
   const [stars, setStars] = useState<Star[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const isMountedRef = useRef(true)
+
+  // Track mounted state
+  useEffect(() => {
+    isMountedRef.current = true
+    return () => {
+      isMountedRef.current = false
+    }
+  }, [])
 
   const fetchStarsByPlanet = useCallback(async (planetId: string, limit = 15000) => {
     try {
@@ -90,6 +113,9 @@ export function useStars() {
       let hasMore = true
 
       while (hasMore && allStars.length < limit) {
+        // Check if still mounted before each request
+        if (!isMountedRef.current) return allStars
+
         const { data, error: fetchError } = await supabaseFetch<Star[]>('stars', {
           filter: `planet_id=eq.${planetId}`,
           order: 'created_at.desc',
@@ -98,7 +124,9 @@ export function useStars() {
         })
 
         if (fetchError) {
-          setError(fetchError)
+          if (isMountedRef.current) {
+            setError(fetchError)
+          }
           return allStars
         }
 
@@ -111,10 +139,14 @@ export function useStars() {
         }
       }
 
-      setStars(allStars)
+      if (isMountedRef.current) {
+        setStars(allStars)
+      }
       return allStars
     } finally {
-      setLoading(false)
+      if (isMountedRef.current) {
+        setLoading(false)
+      }
     }
   }, [])
 
@@ -129,14 +161,20 @@ export function useStars() {
       })
 
       if (fetchError) {
-        setError(fetchError)
+        if (isMountedRef.current) {
+          setError(fetchError)
+        }
         return []
       }
 
-      setStars(data || [])
+      if (isMountedRef.current) {
+        setStars(data || [])
+      }
       return data || []
     } finally {
-      setLoading(false)
+      if (isMountedRef.current) {
+        setLoading(false)
+      }
     }
   }, [])
 
@@ -170,17 +208,21 @@ export function useStars() {
         throw new Error(insertError)
       }
 
-      if (data) {
+      if (data && isMountedRef.current) {
         setStars((prev) => [data, ...prev])
       }
 
       return data
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Yıldız oluşturulamadı'
-      setError(message)
+      if (isMountedRef.current) {
+        setError(message)
+      }
       throw new Error(message)
     } finally {
-      setLoading(false)
+      if (isMountedRef.current) {
+        setLoading(false)
+      }
     }
   }, [])
 
