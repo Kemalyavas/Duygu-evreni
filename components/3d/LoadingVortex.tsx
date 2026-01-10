@@ -44,6 +44,10 @@ export function LoadingVortex({
 
   const baseColor = useMemo(() => new THREE.Color(color), [color])
 
+  // Timer refs for cleanup
+  const gatheringTimerRef = useRef<NodeJS.Timeout | null>(null)
+  const hideTimerRef = useRef<NodeJS.Timeout | null>(null)
+
   // Brighter version of planet color
   const brightColor = useMemo(() => {
     const c = baseColor.clone()
@@ -105,12 +109,12 @@ export function LoadingVortex({
       const elapsedTime = dataLoadedTime.current - loadingStartTime.current
       const remainingTime = Math.max(0, VORTEX.MIN_GATHERING_TIME - elapsedTime)
 
-      setTimeout(() => {
+      gatheringTimerRef.current = setTimeout(() => {
         setPhase('exploding')
         explosionStartTime.current = performance.now()
         onExplosionStart?.()
 
-        setTimeout(() => {
+        hideTimerRef.current = setTimeout(() => {
           setIsVisible(false)
           setPhase('idle')
         }, VORTEX.HIDE_DELAY)
@@ -118,6 +122,18 @@ export function LoadingVortex({
     }
     wasLoading.current = isLoading
   }, [isLoading, onExplosionStart])
+
+  // Cleanup timers on unmount
+  useEffect(() => {
+    return () => {
+      if (gatheringTimerRef.current) {
+        clearTimeout(gatheringTimerRef.current)
+      }
+      if (hideTimerRef.current) {
+        clearTimeout(hideTimerRef.current)
+      }
+    }
+  }, [])
 
   useFrame(({ clock }) => {
     if (!isVisible) return
