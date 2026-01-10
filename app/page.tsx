@@ -10,7 +10,7 @@ import { Button, ErrorBoundary, MusicToggle } from '@/components/ui'
 import { Onboarding } from '@/components/Onboarding'
 import { StarCreationModal } from '@/components/StarCreationModal'
 import { StarViewPanel } from '@/components/StarViewPanel'
-import { useAuth, usePlanets, useStars, useStarCounts, useDailyLimit, useReadStars, useMobile } from '@/lib/hooks'
+import { useAuth, usePlanets, useStars, useStarCounts, useDailyLimit, useReadStars, useMobile, useSoundEffects } from '@/lib/hooks'
 import type { Planet, Star } from '@/types'
 
 // Dynamic import for 3D component (client-side only)
@@ -39,6 +39,7 @@ function HomePageContent() {
   const { remainingStars, isAdmin } = useDailyLimit()
   const { readStarIds, markAsRead } = useReadStars()
   const isMobile = useMobile()
+  const { playPlanetClick, playStarClick } = useSoundEffects()
 
   const [focusedPlanetId, setFocusedPlanetId] = useState<string | null>(planetIdFromUrl)
   const [selectedStar, setSelectedStar] = useState<Star | null>(null)
@@ -150,10 +151,11 @@ function HomePageContent() {
 
   // Planet click - update URL with shallow routing
   const handlePlanetClick = useCallback((planet: Planet) => {
+    playPlanetClick()
     setFocusedPlanetId(planet.id)
     // Shallow routing - doesn't trigger page reload
     window.history.pushState(null, '', `?planet=${planet.id}`)
-  }, [])
+  }, [playPlanetClick])
 
   // Back to universe - clear focused planet
   const handleBackToUniverse = useCallback(() => {
@@ -164,6 +166,7 @@ function HomePageContent() {
 
   // Star click
   const handleStarClick = useCallback((star: Star) => {
+    playStarClick()
     setSelectedStar(star)
     markAsRead(star.id)
     // Mark that user has clicked a star (hides the hint prompt)
@@ -171,7 +174,7 @@ function HomePageContent() {
       setHasClickedStar(true)
       localStorage.setItem('duygu-evreni-star-clicked', 'true')
     }
-  }, [markAsRead, hasClickedStar])
+  }, [markAsRead, hasClickedStar, playStarClick])
 
   const handleClosePanel = useCallback(() => {
     setSelectedStar(null)

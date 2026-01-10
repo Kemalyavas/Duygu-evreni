@@ -2,10 +2,10 @@
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { useBackgroundMusic } from '@/lib/hooks'
+import { useMusic } from '@/components/MusicProvider'
 
 export function MusicToggle() {
-  const { musicEnabled, toggleMusic, isLoaded } = useBackgroundMusic()
+  const { musicEnabled, toggleMusic, isLoaded } = useMusic()
   const [mounted, setMounted] = useState(false)
 
   // Prevent hydration mismatch
@@ -30,7 +30,7 @@ export function MusicToggle() {
       className={`
         p-2.5 rounded-full backdrop-blur-md border transition-all duration-300
         ${musicEnabled
-          ? 'bg-purple-500/20 border-purple-400/50 text-purple-300'
+          ? 'bg-cyan-500/20 border-cyan-400/50 text-cyan-300'
           : 'bg-white/5 border-white/10 text-white/50 hover:text-white/80'
         }
         ${!isLoaded ? 'opacity-50 cursor-wait' : 'hover:scale-110'}

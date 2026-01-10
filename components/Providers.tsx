@@ -1,6 +1,7 @@
 'use client'
 
 import { AuthHandler } from './AuthHandler'
+import { MusicProvider } from './MusicProvider'
 
 interface ProvidersProps {
   children: React.ReactNode
@@ -12,9 +13,9 @@ interface ProvidersProps {
  */
 export function Providers({ children }: ProvidersProps) {
   return (
-    <>
+    <MusicProvider>
       <AuthHandler />
       {children}
-    </>
+    </MusicProvider>
   )
 }

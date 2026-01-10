@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { format } from 'date-fns'
 import { tr } from 'date-fns/locale'
-import { Navbar, Card, Button } from '@/components/ui'
+import { Navbar, Card, Button, MusicToggle } from '@/components/ui'
 import { DonutChart, StarListItem } from '@/components/profile'
 import { useAuth, usePlanets, useDailyLimit } from '@/lib/hooks'
 import { createClient } from '@/lib/supabase/client'
@@ -152,6 +152,11 @@ export default function ProfilPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#0A0E27] to-black">
       <Navbar />
+
+      {/* Music Toggle - fixed bottom right */}
+      <div className="fixed bottom-6 right-6 z-50">
+        <MusicToggle />
+      </div>
 
       <div className="pt-24 pb-12 px-4 max-w-2xl mx-auto">
         <motion.div

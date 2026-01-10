@@ -130,7 +130,7 @@ export const STAR_FIELD = {
 // Large Star Count Threshold
 export const LARGE_STAR_COUNT = {
   /** Threshold for enabling vortex animation */
-  VORTEX_THRESHOLD: 300,
+  VORTEX_THRESHOLD: 100,
 } as const
 
 // Material Properties
