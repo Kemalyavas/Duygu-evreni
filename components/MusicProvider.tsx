@@ -4,7 +4,14 @@ import { createContext, useContext, useState, useEffect, useRef, useCallback, Re
 
 const STORAGE_KEY = 'duygu-evreni-music-enabled'
 const MUSIC_PATH = '/sounds/Universe_Background.mp3'
-const DEFAULT_VOLUME = 0.1 // Lowered from 0.15
+const DEFAULT_VOLUME = 0.1
+
+// Check if device is mobile
+const isMobile = () => {
+  if (typeof window === 'undefined') return false
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+    window.innerWidth < 768
+}
 
 interface MusicContextType {
   isPlaying: boolean
@@ -23,15 +30,21 @@ export function MusicProvider({ children }: { children: ReactNode }) {
   const hasTriedAutoplay = useRef(false)
   const [mounted, setMounted] = useState(false)
 
-  // Check if user previously disabled music (default: enabled)
-  const [musicEnabled, setMusicEnabled] = useState(true)
+  // Check if user previously set music preference
+  // Default: OFF on mobile, ON on desktop
+  const [musicEnabled, setMusicEnabled] = useState(false)
 
   // Load preference from localStorage after mount
   useEffect(() => {
     setMounted(true)
     const stored = localStorage.getItem(STORAGE_KEY)
     if (stored !== null) {
+      // User has a saved preference, use it
       setMusicEnabled(stored === 'true')
+    } else {
+      // No saved preference - default OFF on mobile, ON on desktop
+      const defaultEnabled = !isMobile()
+      setMusicEnabled(defaultEnabled)
     }
   }, [])
 
@@ -77,25 +90,53 @@ export function MusicProvider({ children }: { children: ReactNode }) {
 
     const tryPlay = () => {
       if (hasTriedAutoplay.current) return
-      hasTriedAutoplay.current = true
 
       if (audioRef.current && musicEnabled) {
-        audioRef.current.play().catch(() => {
-          // Autoplay blocked, that's ok
-        })
+        // Mark that we tried, but only if play succeeds
+        const playPromise = audioRef.current.play()
+        if (playPromise !== undefined) {
+          playPromise
+            .then(() => {
+              hasTriedAutoplay.current = true
+            })
+            .catch(() => {
+              // Autoplay blocked, will try again on next interaction
+            })
+        }
       }
     }
 
-    window.addEventListener('click', tryPlay, { once: true })
-    window.addEventListener('touchstart', tryPlay, { once: true })
-    window.addEventListener('keydown', tryPlay, { once: true })
+    // Multiple event types for better mobile support
+    const events = ['click', 'touchstart', 'touchend', 'keydown', 'scroll']
+    events.forEach(event => {
+      window.addEventListener(event, tryPlay, { passive: true })
+    })
 
     return () => {
-      window.removeEventListener('click', tryPlay)
-      window.removeEventListener('touchstart', tryPlay)
-      window.removeEventListener('keydown', tryPlay)
+      events.forEach(event => {
+        window.removeEventListener(event, tryPlay)
+      })
     }
   }, [musicEnabled, mounted])
+
+  // Also try when audio becomes loaded (if user already interacted)
+  useEffect(() => {
+    if (!isLoaded || !musicEnabled || isPlaying) return
+    if (hasTriedAutoplay.current) return
+
+    // User may have interacted before audio was ready, try again
+    const timer = setTimeout(() => {
+      if (audioRef.current && !hasTriedAutoplay.current) {
+        audioRef.current.play()
+          .then(() => {
+            hasTriedAutoplay.current = true
+          })
+          .catch(() => {})
+      }
+    }, 100)
+
+    return () => clearTimeout(timer)
+  }, [isLoaded, musicEnabled, isPlaying])
 
   // Handle music enabled state changes
   useEffect(() => {

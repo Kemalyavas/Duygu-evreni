@@ -55,6 +55,9 @@ export function useSceneState({
   const prevFocusedPlanetId = useRef<string | null>(null)
   const prevSelectedStarId = useRef<string | undefined>(undefined)
 
+  // Pending star position (when star is selected during planet transition)
+  const pendingStarPosition = useRef<[number, number, number] | null>(null)
+
   // Group stars by planet
   const starsByPlanet = useMemo(() => {
     const grouped: Record<string, Star[]> = {}
@@ -149,12 +152,40 @@ export function useSceneState({
     const delay = isFocusedOnStar ? CAMERA.STAR_FOCUS_DELAY : CAMERA.PLANET_FOCUS_DELAY
     setTimeout(() => {
       setIsTransitioning(false)
+
+      // Check for pending star animation (from profile navigation)
+      if (pendingStarPosition.current && focusedPlanetId) {
+        const planet = planets.find(p => p.id === focusedPlanetId)
+        if (planet) {
+          const position = pendingStarPosition.current
+          pendingStarPosition.current = null
+
+          const cameraPos = calculateStarCameraPosition(
+            position,
+            [planet.position_x, planet.position_y, planet.position_z],
+            CAMERA.STAR_FOCUS_DISTANCE
+          )
+
+          // Small delay before starting star animation
+          setTimeout(() => {
+            setTargetCameraPosition(cameraPos)
+            setTargetLookAt(position)
+            setAnimationTrigger(prev => prev + 1)
+            setIsTransitioning(true)
+            setIsFocusedOnStar(true)
+          }, 100)
+        }
+      }
     }, delay)
-  }, [isFocusedOnStar])
+  }, [isFocusedOnStar, focusedPlanetId, planets])
 
   // Handle selected star position - animate camera towards it
   const handleSelectedStarPosition = useCallback((position: [number, number, number]) => {
-    if (isTransitioning) return
+    // If transitioning (e.g., planet zoom), store for later
+    if (isTransitioning) {
+      pendingStarPosition.current = position
+      return
+    }
 
     const planet = planets.find(p => p.id === focusedPlanetId)
     if (!planet) return

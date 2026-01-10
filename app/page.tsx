@@ -39,7 +39,7 @@ function HomePageContent() {
   const { remainingStars, isAdmin } = useDailyLimit()
   const { readStarIds, markAsRead } = useReadStars()
   const isMobile = useMobile()
-  const { playPlanetClick, playStarClick } = useSoundEffects()
+  const { playPlanetClick, playStarClick, playAddStar } = useSoundEffects()
 
   const [focusedPlanetId, setFocusedPlanetId] = useState<string | null>(planetIdFromUrl)
   const [selectedStar, setSelectedStar] = useState<Star | null>(null)
@@ -181,6 +181,7 @@ function HomePageContent() {
   }, [])
 
   const handleStarCreated = useCallback((newStar: Star) => {
+    playAddStar()
     if (focusedPlanetId) {
       fetchStarsByPlanet(focusedPlanetId)
     }
@@ -189,7 +190,7 @@ function HomePageContent() {
     // Focus camera on the newly created star
     setSelectedStar(newStar)
     markAsRead(newStar.id)
-  }, [focusedPlanetId, fetchStarsByPlanet, refetchCounts, markAsRead])
+  }, [focusedPlanetId, fetchStarsByPlanet, refetchCounts, markAsRead, playAddStar])
 
   const handleLogout = async () => {
     await signOut()

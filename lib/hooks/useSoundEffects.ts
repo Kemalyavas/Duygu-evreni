@@ -5,6 +5,7 @@ import { useRef, useCallback, useEffect } from 'react'
 const SOUNDS = {
   planetClick: '/sounds/planet_click.mp3',
   starClick: '/sounds/star_click.mp3',
+  addStar: '/sounds/add_star.mp3',
 } as const
 
 type SoundType = keyof typeof SOUNDS
@@ -12,12 +13,14 @@ type SoundType = keyof typeof SOUNDS
 const VOLUME = {
   planetClick: 0.55,
   starClick: 0.4,
+  addStar: 0.4,
 } as const
 
 export function useSoundEffects() {
   const audioRefs = useRef<Record<SoundType, HTMLAudioElement | null>>({
     planetClick: null,
     starClick: null,
+    addStar: null,
   })
 
   // Preload sounds
@@ -60,9 +63,14 @@ export function useSoundEffects() {
     playSound('starClick')
   }, [playSound])
 
+  const playAddStar = useCallback(() => {
+    playSound('addStar')
+  }, [playSound])
+
   return {
     playPlanetClick,
     playStarClick,
+    playAddStar,
     playSound,
   }
 }

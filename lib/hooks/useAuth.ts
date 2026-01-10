@@ -136,9 +136,29 @@ export function useAuth() {
         throw new Error(error.message)
       }
 
+      // Manually update state immediately after successful login
+      if (data.session?.user) {
+        setUser({ id: data.session.user.id, email: data.session.user.email || '' })
+
+        // Fetch and set profile
+        try {
+          const { data: profileData } = await supabaseFetch<Profile>('profiles', {
+            filter: `id=eq.${data.session.user.id}`,
+            single: true,
+            accessToken: data.session.access_token,
+          })
+
+          if (profileData) {
+            setProfile(profileData)
+          }
+        } catch {
+          console.warn('[Auth] Could not fetch profile on sign in')
+        }
+      }
+
       return data
     },
-    []
+    [setUser, setProfile]
   )
 
   const signUp = useCallback(
