@@ -385,7 +385,7 @@ function HomePageContent() {
             >
               <Button
                 variant="primary"
-                size="lg"
+                size={isMobile ? 'md' : 'lg'}
                 onClick={() => setIsModalOpen(true)}
                 className="shadow-lg shadow-purple-500/25"
               >
