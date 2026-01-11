@@ -92,7 +92,7 @@ export default function KullaniciAdiPage() {
       const supabase = createClient()
       const { error: updateError } = await supabase
         .from('profiles')
-        .update({ username })
+        .update({ username, show_username_in_chats: true })
         .eq('id', user!.id)
 
       if (updateError) {
@@ -106,7 +106,7 @@ export default function KullaniciAdiPage() {
 
       // Update local profile
       if (profile) {
-        setProfile({ ...profile, username })
+        setProfile({ ...profile, username, show_username_in_chats: true })
       }
 
       // Redirect to main page
@@ -225,11 +225,6 @@ export default function KullaniciAdiPage() {
             {loading ? 'Kaydediliyor...' : 'Devam Et'}
           </Button>
         </form>
-
-        {/* Info */}
-        <p className="text-white/30 text-xs text-center mt-6">
-          Kullanıcı adın sohbetlerde ve paylaşımlarında görünecek
-        </p>
       </motion.div>
     </div>
   )

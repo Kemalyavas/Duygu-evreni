@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useMemo, useCallback } from 'react'
+import { useEffect, useRef, useMemo, useCallback, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useStore } from '@/lib/store/useStore'
@@ -60,13 +60,72 @@ function FloatingStars() {
   )
 }
 
+// Compact chat button component
+function CompactChatButton({
+  username,
+  unreadCount,
+  onClick,
+}: {
+  username: string
+  unreadCount: number
+  onClick: () => void
+}) {
+  return (
+    <motion.div
+      initial={{ scale: 0, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
+      exit={{ scale: 0, opacity: 0 }}
+      className="fixed bottom-6 right-6 z-40"
+    >
+      <button
+        onClick={onClick}
+        className="flex items-center gap-3 px-4 py-3 bg-[#0d0d1a]/95 backdrop-blur-xl border border-white/10 rounded-2xl hover:bg-[#0d0d1a] hover:border-white/20 transition-all shadow-lg shadow-black/20 group"
+      >
+        {/* Avatar */}
+        <div className="relative">
+          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500/30 to-purple-500/30 flex items-center justify-center">
+            <span className="text-white/80 text-sm font-medium">
+              {username[0]?.toUpperCase() || '?'}
+            </span>
+          </div>
+          {/* Unread badge */}
+          {unreadCount > 0 && (
+            <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-cyan-500 flex items-center justify-center text-white text-xs font-medium">
+              {unreadCount > 9 ? '9+' : unreadCount}
+            </span>
+          )}
+        </div>
+
+        {/* Text */}
+        <div className="text-left">
+          <p className="text-white font-medium text-sm">{username}</p>
+          <p className="text-white/40 text-xs">Sohbete dön</p>
+        </div>
+
+        {/* Expand icon */}
+        <svg className="w-5 h-5 text-white/40 group-hover:text-white/60 transition-colors ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+        </svg>
+      </button>
+    </motion.div>
+  )
+}
+
 export function ChatPanel() {
   const router = useRouter()
   const { user } = useAuth()
   const isMobile = useMobile()
-  const { activeConversation, isMessagingPanelOpen, setMessagingPanelOpen, setActiveConversation } = useStore()
+  const {
+    activeConversation,
+    isMessagingPanelOpen,
+    setMessagingPanelOpen,
+    setActiveConversation,
+    isChatCompact,
+    setChatCompact,
+  } = useStore()
   const { messages, sendMessage, loading, markAsRead } = useMessages(activeConversation?.id || null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const [unreadInCompact, setUnreadInCompact] = useState(0)
 
   // Auto-scroll to bottom
   useEffect(() => {
@@ -75,14 +134,35 @@ export function ChatPanel() {
 
   // Mark as read when opened
   useEffect(() => {
-    if (isMessagingPanelOpen && activeConversation) {
+    if (isMessagingPanelOpen && activeConversation && !isChatCompact) {
       markAsRead()
+      setUnreadInCompact(0)
     }
-  }, [isMessagingPanelOpen, activeConversation, markAsRead])
+  }, [isMessagingPanelOpen, activeConversation, isChatCompact, markAsRead])
+
+  // Track unread messages while compact
+  useEffect(() => {
+    if (isChatCompact && messages.length > 0) {
+      const lastMessage = messages[messages.length - 1]
+      if (lastMessage.sender_id !== user?.id && !lastMessage.is_read) {
+        setUnreadInCompact(prev => prev + 1)
+      }
+    }
+  }, [messages, isChatCompact, user?.id])
 
   const handleClose = () => {
     setMessagingPanelOpen(false)
     setActiveConversation(null)
+    setChatCompact(false)
+  }
+
+  const handleMinimize = () => {
+    setChatCompact(true)
+  }
+
+  const handleExpand = () => {
+    setChatCompact(false)
+    setUnreadInCompact(0)
   }
 
   // Navigate to the star that started this conversation
@@ -92,14 +172,17 @@ export function ChatPanel() {
     const star = activeConversation.star
     const url = `/?planet=${star.planet_id}&star=${star.id}`
 
-    // On mobile, close the chat first (full screen)
+    // On mobile, close the chat (full screen)
+    // On desktop, minimize to compact mode
     if (isMobile) {
       setMessagingPanelOpen(false)
       setActiveConversation(null)
+    } else {
+      setChatCompact(true)
     }
 
     router.push(url)
-  }, [activeConversation, isMobile, router, setMessagingPanelOpen, setActiveConversation])
+  }, [activeConversation, isMobile, router, setMessagingPanelOpen, setActiveConversation, setChatCompact])
 
   if (!isMessagingPanelOpen || !activeConversation) return null
 
@@ -111,6 +194,19 @@ export function ChatPanel() {
   const otherUsername = (otherUser?.show_username_in_chats !== false && otherUser?.username)
     ? otherUser.username
     : 'Anonim'
+
+  // Show compact button when minimized (desktop only)
+  if (isChatCompact && !isMobile) {
+    return (
+      <AnimatePresence>
+        <CompactChatButton
+          username={otherUsername}
+          unreadCount={unreadInCompact}
+          onClick={handleExpand}
+        />
+      </AnimatePresence>
+    )
+  }
 
   // Desktop panel
   const desktopPanel = (
@@ -138,14 +234,28 @@ export function ChatPanel() {
               <p className="text-white/40 text-xs">Sohbet</p>
             </div>
           </div>
-          <button
-            onClick={handleClose}
-            className="p-2 rounded-full hover:bg-white/10 text-white/60 hover:text-white transition-colors"
-          >
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
+          <div className="flex items-center gap-1">
+            {/* Minimize button */}
+            <button
+              onClick={handleMinimize}
+              className="p-2 rounded-full hover:bg-white/10 text-white/60 hover:text-white transition-colors"
+              title="Küçült"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+              </svg>
+            </button>
+            {/* Close button */}
+            <button
+              onClick={handleClose}
+              className="p-2 rounded-full hover:bg-white/10 text-white/60 hover:text-white transition-colors"
+              title="Kapat"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
         </div>
         {/* Yıldız bilgisi - tıklanabilir */}
         {activeConversation?.star && (

@@ -7,6 +7,7 @@ import { usePathname } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { clsx } from 'clsx'
 import { Button } from './Button'
+import { MusicToggle } from './MusicToggle'
 import { useAuth } from '@/lib/hooks'
 
 export function Navbar() {
@@ -27,19 +28,22 @@ export function Navbar() {
     <nav className="fixed top-0 left-0 right-0 z-40 glass">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-0 group">
-            <Image
-              src="/logo.png"
-              alt="Duygu Evreni"
-              width={75}
-              height={75}
-              className="w-[75px] h-[75px]"
-            />
-            <span className="font-bold text-[17px] -ml-1 bg-gradient-to-r from-purple-400 via-pink-400 to-purple-300 bg-clip-text text-transparent group-hover:opacity-80 transition-opacity">
-              Duygu Evreni
-            </span>
-          </Link>
+          {/* Logo and Music Toggle */}
+          <div className="flex items-center gap-3">
+            <Link href="/" className="flex items-center gap-0 group">
+              <Image
+                src="/logo.png"
+                alt="Duygu Evreni"
+                width={75}
+                height={75}
+                className="w-[75px] h-[75px]"
+              />
+              <span className="font-bold text-[17px] -ml-1 bg-gradient-to-r from-purple-400 via-pink-400 to-purple-300 bg-clip-text text-transparent group-hover:opacity-80 transition-opacity">
+                Duygu Evreni
+              </span>
+            </Link>
+            <MusicToggle />
+          </div>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-6">

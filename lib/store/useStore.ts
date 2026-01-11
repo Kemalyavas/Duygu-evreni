@@ -27,6 +27,8 @@ interface AppState {
   setActiveConversation: (conversation: ConversationWithDetails | null) => void
   isMessagingPanelOpen: boolean
   setMessagingPanelOpen: (open: boolean) => void
+  isChatCompact: boolean
+  setChatCompact: (compact: boolean) => void
   isMessageRequestModalOpen: boolean
   setMessageRequestModalOpen: (open: boolean) => void
   pendingRequestsCount: number
@@ -61,6 +63,8 @@ export const useStore = create<AppState>((set) => ({
   setActiveConversation: (conversation) => set({ activeConversation: conversation }),
   isMessagingPanelOpen: false,
   setMessagingPanelOpen: (open) => set({ isMessagingPanelOpen: open }),
+  isChatCompact: false,
+  setChatCompact: (compact) => set({ isChatCompact: compact }),
   isMessageRequestModalOpen: false,
   setMessageRequestModalOpen: (open) => set({ isMessageRequestModalOpen: open }),
   pendingRequestsCount: 0,
