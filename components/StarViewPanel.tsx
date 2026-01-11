@@ -3,6 +3,7 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import { formatDistanceToNow } from 'date-fns'
 import { tr } from 'date-fns/locale'
+import { MessageRequestButton } from '@/components/messaging'
 import type { Star } from '@/types'
 
 interface StarViewPanelProps {
@@ -72,6 +73,9 @@ export function StarViewPanel({ star, onClose, planetColor = '#ffffff' }: StarVi
                 <p className="text-white text-lg leading-relaxed">{star.content}</p>
               </div>
 
+              {/* Message Button */}
+              <MessageRequestButton star={star} />
+
               {/* Footer */}
               <div className="pt-4 border-t border-white/10">
                 <span className="text-white/40 text-sm">
@@ -130,10 +134,15 @@ export function StarViewPanel({ star, onClose, planetColor = '#ffffff' }: StarVi
                 {star.content}
               </p>
 
+              {/* Message Button */}
+              <MessageRequestButton star={star} />
+
               {/* Footer */}
-              <span className="text-white/40 text-sm">
-                {formatDate(star.created_at)}
-              </span>
+              <div className="pt-4 border-t border-white/10 mt-4">
+                <span className="text-white/40 text-sm">
+                  {formatDate(star.created_at)}
+                </span>
+              </div>
             </div>
           </motion.div>
         </>

@@ -191,6 +191,10 @@ export function useAuth() {
           .eq('id', data.user.id)
 
         if (profileError) {
+          // Check for unique constraint violation
+          if (profileError.message.includes('unique') || profileError.code === '23505') {
+            throw new Error('Bu kullanıcı adı zaten alınmış')
+          }
           console.warn('[Auth] Could not save username:', profileError.message)
         }
       }

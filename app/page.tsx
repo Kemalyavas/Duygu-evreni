@@ -10,6 +10,7 @@ import { Button, ErrorBoundary, MusicToggle } from '@/components/ui'
 import { Onboarding } from '@/components/Onboarding'
 import { StarCreationModal } from '@/components/StarCreationModal'
 import { StarViewPanel } from '@/components/StarViewPanel'
+import { MessageRequestModal, ChatPanel } from '@/components/messaging'
 import { useAuth, usePlanets, useStars, useStarCounts, useDailyLimit, useReadStars, useMobile, useSoundEffects } from '@/lib/hooks'
 import type { Planet, Star } from '@/types'
 
@@ -493,6 +494,12 @@ function HomePageContent() {
           onSuccess={handleStarCreated}
         />
       )}
+
+      {/* Message Request Modal */}
+      <MessageRequestModal />
+
+      {/* Chat Panel */}
+      <ChatPanel />
     </div>
   )
 }

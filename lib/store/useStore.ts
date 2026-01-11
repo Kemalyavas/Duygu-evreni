@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import type { Planet, Star, Profile } from '@/types'
+import type { Planet, Star, Profile, ConversationWithDetails } from '@/types'
 
 interface AppState {
   // User state
@@ -21,6 +21,18 @@ interface AppState {
   // View state
   isViewingStars: boolean
   setViewingStars: (viewing: boolean) => void
+
+  // Messaging state
+  activeConversation: ConversationWithDetails | null
+  setActiveConversation: (conversation: ConversationWithDetails | null) => void
+  isMessagingPanelOpen: boolean
+  setMessagingPanelOpen: (open: boolean) => void
+  isMessageRequestModalOpen: boolean
+  setMessageRequestModalOpen: (open: boolean) => void
+  pendingRequestsCount: number
+  setPendingRequestsCount: (count: number) => void
+  unreadMessagesCount: number
+  setUnreadMessagesCount: (count: number) => void
 }
 
 export const useStore = create<AppState>((set) => ({
@@ -43,4 +55,16 @@ export const useStore = create<AppState>((set) => ({
   // View state
   isViewingStars: false,
   setViewingStars: (viewing) => set({ isViewingStars: viewing }),
+
+  // Messaging state
+  activeConversation: null,
+  setActiveConversation: (conversation) => set({ activeConversation: conversation }),
+  isMessagingPanelOpen: false,
+  setMessagingPanelOpen: (open) => set({ isMessagingPanelOpen: open }),
+  isMessageRequestModalOpen: false,
+  setMessageRequestModalOpen: (open) => set({ isMessageRequestModalOpen: open }),
+  pendingRequestsCount: 0,
+  setPendingRequestsCount: (count) => set({ pendingRequestsCount: count }),
+  unreadMessagesCount: 0,
+  setUnreadMessagesCount: (count) => set({ unreadMessagesCount: count }),
 }))

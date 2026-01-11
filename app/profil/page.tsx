@@ -8,7 +8,8 @@ import { tr } from 'date-fns/locale'
 import { Navbar, Card, Button, MusicToggle } from '@/components/ui'
 import { BlackHoleContact } from '@/components/BlackHoleContact'
 import { DonutChart, StarListItem } from '@/components/profile'
-import { useAuth, usePlanets, useDailyLimit } from '@/lib/hooks'
+import { PendingRequestsList, ConversationList, ChatPanel } from '@/components/messaging'
+import { useAuth, usePlanets, useDailyLimit, useConversations } from '@/lib/hooks'
 import { createClient } from '@/lib/supabase/client'
 
 interface PlanetStats {
@@ -34,6 +35,13 @@ export default function ProfilPage() {
   const { user, profile, signOut } = useAuth()
   const { planets } = usePlanets()
   const { remainingStars, maxStars } = useDailyLimit()
+  const {
+    pendingRequests,
+    conversations,
+    pendingCount,
+    fetchPendingRequests,
+    fetchConversations,
+  } = useConversations()
 
   const [stats, setStats] = useState<PlanetStats[]>([])
   const [totalStars, setTotalStars] = useState(0)
@@ -122,6 +130,14 @@ export default function ProfilPage() {
       fetchStats()
     }
   }, [user, planets])
+
+  // Fetch messaging data
+  useEffect(() => {
+    if (user) {
+      fetchPendingRequests()
+      fetchConversations()
+    }
+  }, [user, fetchPendingRequests, fetchConversations])
 
   const handleLogout = async () => {
     await signOut()
@@ -272,6 +288,44 @@ export default function ProfilPage() {
             </div>
           </Card>
 
+          {/* Pending Message Requests */}
+          {pendingCount > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <Card>
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-lg font-semibold text-white">
+                    Mesaj İstekleri
+                  </h2>
+                  <span className="bg-cyan-500/20 text-cyan-400 text-xs px-2.5 py-1 rounded-full font-medium">
+                    {pendingCount}
+                  </span>
+                </div>
+                <PendingRequestsList
+                  requests={pendingRequests}
+                  onRespond={fetchPendingRequests}
+                />
+              </Card>
+            </motion.div>
+          )}
+
+          {/* Active Conversations */}
+          {conversations.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <Card>
+                <h2 className="text-lg font-semibold text-white mb-4">
+                  Sohbetlerim
+                </h2>
+                <ConversationList conversations={conversations} />
+              </Card>
+            </motion.div>
+          )}
+
           {/* First Star Date - NEW */}
           {!loading && firstStarDate && (
             <motion.p
@@ -365,6 +419,9 @@ export default function ProfilPage() {
           </div>
         </motion.div>
       </div>
+
+      {/* Chat Panel - Global */}
+      <ChatPanel />
     </div>
   )
 }

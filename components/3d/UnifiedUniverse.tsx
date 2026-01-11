@@ -28,6 +28,38 @@ import {
 // Types
 import type { Planet as PlanetType, Star } from '@/types'
 
+// Loading overlay component - shows while 3D assets are loading
+function LoadingOverlay() {
+  const { progress, active } = useProgress()
+
+  // Hide when loading is complete
+  if (!active && progress >= 100) return null
+
+  return (
+    <Html fullscreen zIndexRange={[100, 0]}>
+      <div className="fixed inset-0 bg-gradient-to-b from-[#0A0E27] to-black flex items-center justify-center z-50">
+        <div className="text-center">
+          <div className="relative w-24 h-24 mx-auto mb-6">
+            {/* Spinning ring */}
+            <div className="absolute inset-0 rounded-full border-2 border-white/10" />
+            <div
+              className="absolute inset-0 rounded-full border-2 border-transparent border-t-cyan-500 animate-spin"
+              style={{ animationDuration: '1s' }}
+            />
+            {/* Progress text */}
+            <div className="absolute inset-0 flex items-center justify-center">
+              <span className="text-white/80 text-lg font-medium">
+                {Math.round(progress)}%
+              </span>
+            </div>
+          </div>
+          <p className="text-white/60 text-lg animate-pulse">Evren yükleniyor...</p>
+        </div>
+      </div>
+    </Html>
+  )
+}
+
 // ============================================
 // Types
 // ============================================
@@ -172,6 +204,9 @@ function Scene({
 
   return (
     <>
+      {/* Loading overlay - shows progress while assets load */}
+      <LoadingOverlay />
+
       <PerspectiveCamera
         makeDefault
         position={DEFAULT_CAMERA.POSITION}
