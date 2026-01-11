@@ -208,7 +208,7 @@ function HomePageContent() {
     // Release lock after animation completes
     setTimeout(() => {
       setIsNavigatingToStar(false)
-    }, 1200)
+    }, 1400)
   }, [stars, focusedPlanetId, handleStarClick, selectedStar, isNavigatingToStar])
 
   const handleClosePanel = useCallback(() => {

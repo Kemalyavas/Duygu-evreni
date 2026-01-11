@@ -207,12 +207,26 @@ export function useAuth() {
     authChecked = false
   }, [setUser, setProfile])
 
+  const signInWithGoogle = useCallback(async () => {
+    const { error } = await supabaseRef.current.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/`,
+      },
+    })
+
+    if (error) {
+      throw new Error(error.message)
+    }
+  }, [])
+
   return {
     user,
     profile,
     signIn,
     signUp,
     signOut,
+    signInWithGoogle,
     isAuthenticated: !!user,
     isLoading,
   }

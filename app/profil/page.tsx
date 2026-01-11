@@ -353,6 +353,16 @@ export default function ProfilPage() {
 
           {/* Black Hole Contact - Easter egg */}
           <BlackHoleContact />
+
+          {/* Privacy link */}
+          <div className="text-center pt-4 pb-2">
+            <a
+              href="/gizlilik"
+              className="text-white/50 hover:text-white hover:underline text-xs transition-all"
+            >
+              Gizlilik Politikası
+            </a>
+          </div>
         </motion.div>
       </div>
     </div>
