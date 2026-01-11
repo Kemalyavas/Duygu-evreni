@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback, Suspense } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams, useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -29,11 +29,19 @@ const UnifiedUniverse = dynamic(
 
 // Wrapper component to handle useSearchParams with Suspense
 function HomePageContent() {
+  const router = useRouter()
   const searchParams = useSearchParams()
   const planetIdFromUrl = searchParams.get('planet')
   const starIdFromUrl = searchParams.get('star')
 
-  const { user, isLoading: authLoading, signOut } = useAuth()
+  const { user, profile, isLoading: authLoading, signOut } = useAuth()
+
+  // Redirect to username setup if logged in but no username
+  useEffect(() => {
+    if (!authLoading && user && profile && !profile.username) {
+      router.replace('/kullanici-adi')
+    }
+  }, [authLoading, user, profile, router])
   const { planets, loading: planetsLoading, error: planetsError } = usePlanets()
   const { stars, loading: starsLoading, fetchAllStars, fetchStarsByPlanet } = useStars()
   const { starCounts, refetchCounts } = useStarCounts()

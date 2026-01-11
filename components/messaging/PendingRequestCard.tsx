@@ -18,6 +18,11 @@ export function PendingRequestCard({ request, onRespond }: PendingRequestCardPro
   const [error, setError] = useState<string | null>(null)
   const { respondToRequest } = useConversations()
 
+  // Respect privacy setting for initiator
+  const initiatorUsername = (request.initiator?.show_username_in_chats !== false && request.initiator?.username)
+    ? request.initiator.username
+    : 'Anonim'
+
   const handleRespond = async (accept: boolean) => {
     try {
       setResponding(true)
@@ -54,7 +59,7 @@ export function PendingRequestCard({ request, onRespond }: PendingRequestCardPro
       <div className="flex items-start gap-3 mb-3">
         <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500/30 to-purple-500/30 flex items-center justify-center flex-shrink-0">
           <span className="text-white/80 text-sm font-medium">
-            {request.initiator?.username?.[0]?.toUpperCase() || '?'}
+            {initiatorUsername[0]?.toUpperCase() || '?'}
           </span>
         </div>
         <div className="flex-1 min-w-0">

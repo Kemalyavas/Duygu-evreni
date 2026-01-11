@@ -107,7 +107,10 @@ export function ChatPanel() {
   const otherUser = activeConversation.initiator_id === user?.id
     ? activeConversation.star_owner
     : activeConversation.initiator
-  const otherUsername = otherUser?.username || 'Anonim'
+  // Respect privacy setting: show username only if show_username_in_chats is true
+  const otherUsername = (otherUser?.show_username_in_chats !== false && otherUser?.username)
+    ? otherUser.username
+    : 'Anonim'
 
   // Desktop panel
   const desktopPanel = (

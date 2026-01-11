@@ -40,7 +40,10 @@ export function ConversationList({ conversations, onSelect }: ConversationListPr
       {conversations.map((conv) => {
         const isActive = activeConversation?.id === conv.id
         const otherUser = conv.initiator_id === user?.id ? conv.star_owner : conv.initiator
-        const otherUsername = otherUser?.username || 'Anonim'
+        // Respect privacy setting
+        const otherUsername = (otherUser?.show_username_in_chats !== false && otherUser?.username)
+          ? otherUser.username
+          : 'Anonim'
 
         return (
           <button

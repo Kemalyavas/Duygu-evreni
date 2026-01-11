@@ -9,13 +9,26 @@ export async function GET(request: Request) {
 
   if (code) {
     const supabase = await createClient()
-    const { error } = await supabase.auth.exchangeCodeForSession(code)
+    const { error, data } = await supabase.auth.exchangeCodeForSession(code)
 
-    if (!error) {
+    if (!error && data.session) {
       // If this is a password recovery, redirect to password reset page
       if (type === 'recovery') {
         return NextResponse.redirect(`${origin}/sifre-sifirla`)
       }
+
+      // Check if user has username set
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('username')
+        .eq('id', data.session.user.id)
+        .single()
+
+      // If no username, redirect to username setup page
+      if (!profile?.username) {
+        return NextResponse.redirect(`${origin}/kullanici-adi`)
+      }
+
       return NextResponse.redirect(`${origin}${next}`)
     }
   }

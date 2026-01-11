@@ -227,6 +227,7 @@ export function useAuth() {
   return {
     user,
     profile,
+    setProfile,
     signIn,
     signUp,
     signOut,

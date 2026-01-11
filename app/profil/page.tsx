@@ -32,7 +32,7 @@ const STARS_PER_PAGE = 10
 
 export default function ProfilPage() {
   const router = useRouter()
-  const { user, profile, signOut } = useAuth()
+  const { user, profile, setProfile, signOut } = useAuth()
   const { planets } = usePlanets()
   const { remainingStars, maxStars } = useDailyLimit()
   const {
@@ -54,6 +54,7 @@ export default function ProfilPage() {
   const [firstStarDate, setFirstStarDate] = useState<string | null>(null)
   const [dominantEmotion, setDominantEmotion] = useState<PlanetStats | null>(null)
   const [hasMore, setHasMore] = useState(false)
+  const [privacyLoading, setPrivacyLoading] = useState(false)
 
   // Fetch user's star statistics and full star data
   useEffect(() => {
@@ -157,6 +158,30 @@ export default function ProfilPage() {
     setTimeout(() => {
       router.push(`/?planet=${star.planet_id}&star=${star.id}`)
     }, 300)
+  }
+
+  const handlePrivacyToggle = async () => {
+    if (!user || !profile || privacyLoading) return
+
+    try {
+      setPrivacyLoading(true)
+      const newValue = !profile.show_username_in_chats
+      const supabase = createClient()
+
+      const { error } = await supabase
+        .from('profiles')
+        .update({ show_username_in_chats: newValue })
+        .eq('id', user.id)
+
+      if (error) throw error
+
+      // Update local state
+      setProfile({ ...profile, show_username_in_chats: newValue })
+    } catch (err) {
+      console.error('Failed to update privacy setting:', err)
+    } finally {
+      setPrivacyLoading(false)
+    }
   }
 
   // Prepare chart data
@@ -285,6 +310,38 @@ export default function ProfilPage() {
                   className="h-full bg-gradient-to-r from-cyan-500 to-teal-400 rounded-full"
                 />
               </div>
+            </div>
+          </Card>
+
+          {/* Privacy Settings */}
+          <Card>
+            <h2 className="text-lg font-semibold text-white mb-4">
+              Gizlilik Ayarları
+            </h2>
+            <div className="flex items-center justify-between">
+              <div className="flex-1">
+                <p className="text-white/80 text-sm">Sohbetlerde kullanıcı adım gözüksün</p>
+                <p className="text-white/40 text-xs mt-1">
+                  Kapalıysa sohbetlerde &ldquo;Anonim&rdquo; olarak görünürsün
+                </p>
+              </div>
+              <button
+                onClick={handlePrivacyToggle}
+                disabled={privacyLoading}
+                className={`relative w-12 h-7 rounded-full transition-colors ${
+                  profile?.show_username_in_chats !== false
+                    ? 'bg-cyan-500'
+                    : 'bg-white/20'
+                } ${privacyLoading ? 'opacity-50' : ''}`}
+              >
+                <span
+                  className={`absolute top-1 w-5 h-5 rounded-full bg-white shadow transition-transform ${
+                    profile?.show_username_in_chats !== false
+                      ? 'left-6'
+                      : 'left-1'
+                  }`}
+                />
+              </button>
             </div>
           </Card>
 

@@ -29,6 +29,7 @@ export interface Profile {
   daily_stars_added: number
   daily_views_used: number
   last_reset_date: string
+  show_username_in_chats: boolean
   created_at: string
 }
 
