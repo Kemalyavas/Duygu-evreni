@@ -10,6 +10,11 @@ import { PLANET_MODELS } from '@/lib/planetModels'
 import { ORBIT, UI_ANIMATION } from '@/lib/constants/animation'
 import { useMobile } from '@/lib/hooks/useMobile'
 
+// Preload all planet models immediately when this module loads
+Object.values(PLANET_MODELS).forEach((path) => {
+  useGLTF.preload(path)
+})
+
 interface Planet3DProps {
   planet: PlanetType
   starCount: number

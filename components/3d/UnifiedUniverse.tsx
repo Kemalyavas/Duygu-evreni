@@ -2,7 +2,7 @@
 
 import { Suspense, useMemo, useRef, useState, useEffect, useCallback } from 'react'
 import { Canvas } from '@react-three/fiber'
-import { OrbitControls, PerspectiveCamera, Html } from '@react-three/drei'
+import { OrbitControls, PerspectiveCamera, Html, useProgress } from '@react-three/drei'
 import { EffectComposer, Bloom } from '@react-three/postprocessing'
 
 // Components
@@ -106,6 +106,28 @@ function Scene({
 }: SceneProps) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const orbitControlsRef = useRef<any>(null)
+
+  // Track loading progress for 3D assets
+  const { progress, active } = useProgress()
+
+  // Track when planets are ready to show
+  const [planetsReady, setPlanetsReady] = useState(false)
+
+  // Show planets when loading is complete (progress = 100) or after timeout
+  useEffect(() => {
+    // If loading is complete, show planets immediately
+    if (!active && progress === 100) {
+      setPlanetsReady(true)
+      return
+    }
+
+    // Fallback: show planets after 500ms even if still loading
+    const timer = setTimeout(() => {
+      setPlanetsReady(true)
+    }, 500)
+
+    return () => clearTimeout(timer)
+  }, [progress, active])
 
   // Track which planets have completed vortex animation
   const [starsReadyToShow, setStarsReadyToShow] = useState<Record<string, boolean>>({})
@@ -228,8 +250,8 @@ function Scene({
         />
       )}
 
-      {/* Planets */}
-      {planets.map((planet) => {
+      {/* Planets - only render when ready to prevent one-by-one loading appearance */}
+      {planetsReady && planets.map((planet) => {
         const isHope = planet.name === 'Hope'
         const isDepression = planet.name === 'Depression'
         const isFocused = planet.id === focusedPlanetId
