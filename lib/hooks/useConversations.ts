@@ -23,7 +23,7 @@ export function useConversations() {
       if (!session?.user) return []
 
       const { data, error: fetchError } = await supabaseFetch<ConversationWithDetails[]>('conversations', {
-        select: '*, star:stars(*), initiator:profiles!conversations_initiator_id_fkey(*), star_owner:profiles!conversations_star_owner_id_fkey(*)',
+        select: '*, star:stars(*), initiator:profiles!conversations_initiator_id_fkey(id, username, show_username_in_chats), star_owner:profiles!conversations_star_owner_id_fkey(id, username, show_username_in_chats)',
         filter: `or=(initiator_id.eq.${session.user.id},star_owner_id.eq.${session.user.id})&status=eq.accepted`,
         order: 'updated_at.desc',
         accessToken: session.access_token,
