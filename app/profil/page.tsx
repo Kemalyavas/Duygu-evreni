@@ -6,6 +6,7 @@ import { motion } from 'framer-motion'
 import { format } from 'date-fns'
 import { tr } from 'date-fns/locale'
 import { Navbar, Card, Button, MusicToggle } from '@/components/ui'
+import { BlackHoleContact } from '@/components/BlackHoleContact'
 import { DonutChart, StarListItem } from '@/components/profile'
 import { useAuth, usePlanets, useDailyLimit } from '@/lib/hooks'
 import { createClient } from '@/lib/supabase/client'
@@ -349,6 +350,9 @@ export default function ProfilPage() {
           >
             Çıkış Yap
           </Button>
+
+          {/* Black Hole Contact - Easter egg */}
+          <BlackHoleContact />
         </motion.div>
       </div>
     </div>
