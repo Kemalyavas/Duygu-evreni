@@ -81,13 +81,13 @@ export function StarViewPanel({ star, onClose, planetColor = '#ffffff' }: StarVi
             </div>
           </motion.div>
 
-          {/* Mobile: Bottom sheet */}
+          {/* Mobile: Bottom sheet - positioned above the action buttons */}
           <motion.div
             initial={{ y: '100%' }}
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="md:hidden fixed left-0 right-0 bottom-0 bg-[#0d0d1a]/95 backdrop-blur-xl border-t border-white/10 z-30 rounded-t-3xl max-h-[60vh] shadow-2xl"
+            className="md:hidden fixed left-0 right-0 bottom-20 bg-[#0d0d1a]/95 backdrop-blur-xl border-t border-white/10 z-30 rounded-3xl max-h-[50vh] shadow-2xl mx-3"
           >
             {/* Drag handle */}
             <div className="flex justify-center py-3">
