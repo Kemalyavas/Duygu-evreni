@@ -170,8 +170,8 @@ export default function ProfilPage() {
     <div className="min-h-screen bg-gradient-to-b from-[#0A0E27] to-black">
       <Navbar />
 
-      {/* Music Toggle - fixed bottom right */}
-      <div className="fixed bottom-6 right-6 z-50">
+      {/* Music Toggle - fixed top left (to avoid chat panel overlap) */}
+      <div className="fixed top-20 left-4 z-50">
         <MusicToggle />
       </div>
 

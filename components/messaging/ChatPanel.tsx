@@ -1,11 +1,63 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useStore } from '@/lib/store/useStore'
 import { useMessages, useAuth, useMobile } from '@/lib/hooks'
 import { MessageBubble } from './MessageBubble'
 import { MessageInput } from './MessageInput'
+
+// Floating stars background component
+function FloatingStars() {
+  const stars = useMemo(() => {
+    return Array.from({ length: 15 }, (_, i) => ({
+      id: i,
+      size: Math.random() * 3 + 1,
+      left: Math.random() * 100,
+      top: Math.random() * 100,
+      duration: Math.random() * 20 + 15,
+      delay: Math.random() * 10,
+      opacity: Math.random() * 0.3 + 0.1,
+    }))
+  }, [])
+
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      {stars.map((star) => (
+        <motion.div
+          key={star.id}
+          className="absolute"
+          style={{
+            left: `${star.left}%`,
+            top: `${star.top}%`,
+            width: star.size,
+            height: star.size,
+          }}
+          animate={{
+            y: [0, -30, 0],
+            x: [0, 10, -10, 0],
+            opacity: [star.opacity, star.opacity * 1.5, star.opacity],
+          }}
+          transition={{
+            duration: star.duration,
+            repeat: Infinity,
+            delay: star.delay,
+            ease: 'easeInOut',
+          }}
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            className="text-white"
+            style={{ opacity: star.opacity }}
+          >
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+          </svg>
+        </motion.div>
+      ))}
+    </div>
+  )
+}
 
 export function ChatPanel() {
   const { user } = useAuth()
@@ -48,31 +100,49 @@ export function ChatPanel() {
       transition={{ type: 'spring', damping: 25, stiffness: 200 }}
       className="hidden md:flex fixed right-0 top-0 bottom-0 w-[400px] bg-[#0d0d1a]/95 backdrop-blur-xl border-l border-white/10 z-40 flex-col"
     >
+      {/* Floating stars background */}
+      <FloatingStars />
+
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-white/10">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500/30 to-purple-500/30 flex items-center justify-center">
-            <span className="text-white/80 text-sm font-medium">
-              {otherUsername[0]?.toUpperCase() || '?'}
-            </span>
+      <div className="relative z-10 border-b border-white/10">
+        <div className="flex items-center justify-between p-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500/30 to-purple-500/30 flex items-center justify-center">
+              <span className="text-white/80 text-sm font-medium">
+                {otherUsername[0]?.toUpperCase() || '?'}
+              </span>
+            </div>
+            <div>
+              <h3 className="text-white font-medium">{otherUsername}</h3>
+              <p className="text-white/40 text-xs">Sohbet</p>
+            </div>
           </div>
-          <div>
-            <h3 className="text-white font-medium">{otherUsername}</h3>
-            <p className="text-white/40 text-xs">Sohbet</p>
-          </div>
+          <button
+            onClick={handleClose}
+            className="p-2 rounded-full hover:bg-white/10 text-white/60 hover:text-white transition-colors"
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
         </div>
-        <button
-          onClick={handleClose}
-          className="p-2 rounded-full hover:bg-white/10 text-white/60 hover:text-white transition-colors"
-        >
-          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
+        {/* Yıldız bilgisi */}
+        {activeConversation?.star && (
+          <div className="px-4 pb-3">
+            <div className="flex items-center gap-2 px-3 py-2 bg-white/5 rounded-lg border border-white/5">
+              <svg className="w-3.5 h-3.5 text-yellow-400 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+              </svg>
+              <p className="text-white/40 text-xs truncate italic">
+                &ldquo;{activeConversation.star.content.slice(0, 40)}{activeConversation.star.content.length > 40 ? '...' : ''}&rdquo;
+              </p>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-3">
+      <div className="relative z-10 flex-1 overflow-y-auto p-4 space-y-3">
         {/* İlk mesaj (kabul edilen istek) */}
         <div className="text-center py-4">
           <p className="text-white/30 text-xs">Sohbet başladı</p>
@@ -97,7 +167,9 @@ export function ChatPanel() {
       </div>
 
       {/* Input */}
-      <MessageInput onSend={sendMessage} disabled={loading} />
+      <div className="relative z-10">
+        <MessageInput onSend={sendMessage} disabled={loading} />
+      </div>
     </motion.div>
   )
 
@@ -110,28 +182,46 @@ export function ChatPanel() {
       transition={{ type: 'spring', damping: 25, stiffness: 200 }}
       className="md:hidden fixed inset-0 bg-[#0d0d1a]/98 backdrop-blur-xl z-50 flex flex-col"
     >
+      {/* Floating stars background */}
+      <FloatingStars />
+
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-white/10 safe-top">
-        <div className="flex items-center gap-3">
-          <button
-            onClick={handleClose}
-            className="p-2 -ml-2 rounded-full hover:bg-white/10 text-white/60 hover:text-white transition-colors"
-          >
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-          </button>
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-500/30 to-purple-500/30 flex items-center justify-center">
-            <span className="text-white/80 text-xs font-medium">
-              {otherUsername[0]?.toUpperCase() || '?'}
-            </span>
+      <div className="relative z-10 border-b border-white/10 safe-top">
+        <div className="flex items-center justify-between p-4">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handleClose}
+              className="p-2 -ml-2 rounded-full hover:bg-white/10 text-white/60 hover:text-white transition-colors"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-500/30 to-purple-500/30 flex items-center justify-center">
+              <span className="text-white/80 text-xs font-medium">
+                {otherUsername[0]?.toUpperCase() || '?'}
+              </span>
+            </div>
+            <span className="text-white font-medium">{otherUsername}</span>
           </div>
-          <span className="text-white font-medium">{otherUsername}</span>
         </div>
+        {/* Yıldız bilgisi */}
+        {activeConversation?.star && (
+          <div className="px-4 pb-3">
+            <div className="flex items-center gap-2 px-3 py-2 bg-white/5 rounded-lg border border-white/5">
+              <svg className="w-3.5 h-3.5 text-yellow-400 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+              </svg>
+              <p className="text-white/40 text-xs truncate italic">
+                &ldquo;{activeConversation.star.content.slice(0, 40)}{activeConversation.star.content.length > 40 ? '...' : ''}&rdquo;
+              </p>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-3">
+      <div className="relative z-10 flex-1 overflow-y-auto p-4 space-y-3">
         <div className="text-center py-4">
           <p className="text-white/30 text-xs">Sohbet başladı</p>
         </div>
@@ -154,7 +244,7 @@ export function ChatPanel() {
       </div>
 
       {/* Input */}
-      <div className="safe-bottom">
+      <div className="relative z-10 safe-bottom">
         <MessageInput onSend={sendMessage} disabled={loading} />
       </div>
     </motion.div>
