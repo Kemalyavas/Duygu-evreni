@@ -186,16 +186,6 @@ export function ChatPanel() {
 
   if (!isMessagingPanelOpen || !activeConversation) return null
 
-  // Debug log - bunu sonra kaldırırız
-  console.log('ChatPanel DEBUG:', {
-    'user?.id': user?.id,
-    'initiator_id': activeConversation.initiator_id,
-    'star_owner_id': activeConversation.star_owner_id,
-    'isInitiator': activeConversation.initiator_id === user?.id,
-    'initiator': activeConversation.initiator,
-    'star_owner': activeConversation.star_owner,
-  })
-
   // Karşı tarafın bilgisi
   const otherUser = activeConversation.initiator_id === user?.id
     ? activeConversation.star_owner
