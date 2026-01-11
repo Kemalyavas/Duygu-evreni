@@ -1,7 +1,9 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+
+const BLACK_HOLE_SOUND = '/sounds/black_hole.mp3'
 
 const CONTACT_INFO = {
   name: 'Ali Kemal Yavas',
@@ -13,24 +15,59 @@ const CONTACT_INFO = {
 export function BlackHoleContact() {
   const [isOpen, setIsOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
+  const audioRef = useRef<HTMLAudioElement | null>(null)
+
+  // Preload sound
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const audio = new Audio(BLACK_HOLE_SOUND)
+    audio.preload = 'auto'
+    audio.volume = 0.6
+    audioRef.current = audio
+
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause()
+        audioRef.current.src = ''
+      }
+    }
+  }, [])
 
   const handleToggle = () => {
     const newState = !isOpen
     setIsOpen(newState)
 
-    // Scroll to black hole when opening
-    if (newState) {
-      setTimeout(() => {
-        containerRef.current?.scrollIntoView({
-          behavior: 'smooth',
-          block: 'center'
-        })
-      }, 100)
+    // Play sound only when opening
+    if (newState && audioRef.current) {
+      audioRef.current.currentTime = 0
+      audioRef.current.play().catch(() => {})
+    }
+
+    // Scroll to black hole while it opens
+    if (newState && containerRef.current) {
+      // Use requestAnimationFrame for smooth following
+      let frame: number
+      const startTime = performance.now()
+      const duration = 600
+
+      const animate = () => {
+        const elapsed = performance.now() - startTime
+
+        if (elapsed < duration) {
+          containerRef.current?.scrollIntoView({ block: 'end', behavior: 'instant' })
+          frame = requestAnimationFrame(animate)
+        }
+      }
+
+      frame = requestAnimationFrame(animate)
     }
   }
 
   return (
-    <div ref={containerRef} className="flex flex-col items-center gap-3 mt-8 pb-8">
+    <div
+      ref={containerRef}
+      className="flex flex-col items-center gap-3 mt-8 pb-8"
+    >
       {/* Hint text */}
       <motion.p
         initial={{ opacity: 0 }}

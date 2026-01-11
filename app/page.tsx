@@ -52,6 +52,7 @@ function HomePageContent() {
   const [initialLoadComplete, setInitialLoadComplete] = useState(false) // Track if initial stars load is done
   const [hasStartedLoading, setHasStartedLoading] = useState(false) // Track if loading has started for current planet
   const [starsVisuallyReady, setStarsVisuallyReady] = useState(false) // Track when stars are visible (after vortex)
+  const [isNavigatingToStar, setIsNavigatingToStar] = useState(false) // Track star navigation animation
 
   // Welcome message for first-time visitors to Umut planet
   const UMUT_PLANET_ID = '1ad9ca47-4ead-4a55-aa3a-5d048fd9f6c5'
@@ -151,11 +152,14 @@ function HomePageContent() {
 
   // Planet click - update URL with shallow routing
   const handlePlanetClick = useCallback((planet: Planet) => {
-    playPlanetClick()
+    // Only play sound when entering planet from universe view (not when already in planet)
+    if (!focusedPlanetId) {
+      playPlanetClick()
+    }
     setFocusedPlanetId(planet.id)
     // Shallow routing - doesn't trigger page reload
     window.history.pushState(null, '', `?planet=${planet.id}`)
-  }, [playPlanetClick])
+  }, [playPlanetClick, focusedPlanetId])
 
   // Back to universe - clear focused planet
   const handleBackToUniverse = useCallback(() => {
@@ -176,6 +180,36 @@ function HomePageContent() {
       localStorage.setItem('duygu-evreni-star-clicked', 'true')
     }
   }, [markAsRead, hasClickedStar, playStarClick, incrementViewCount])
+
+  // Random star selection - picks a different star than currently selected
+  const handleRandomStar = useCallback(() => {
+    if (isNavigatingToStar) return // Prevent spam clicking
+
+    const planetStars = stars.filter(s => s.planet_id === focusedPlanetId)
+    if (planetStars.length === 0) return
+
+    // Start navigation lock
+    setIsNavigatingToStar(true)
+
+    // If only one star exists, just select it
+    if (planetStars.length === 1) {
+      handleStarClick(planetStars[0])
+    } else {
+      // Filter out currently selected star to ensure we get a different one
+      const availableStars = selectedStar
+        ? planetStars.filter(s => s.id !== selectedStar.id)
+        : planetStars
+
+      const randomIndex = Math.floor(Math.random() * availableStars.length)
+      const randomStar = availableStars[randomIndex]
+      handleStarClick(randomStar)
+    }
+
+    // Release lock after animation completes
+    setTimeout(() => {
+      setIsNavigatingToStar(false)
+    }, 1200)
+  }, [stars, focusedPlanetId, handleStarClick, selectedStar, isNavigatingToStar])
 
   const handleClosePanel = useCallback(() => {
     setSelectedStar(null)
@@ -376,17 +410,46 @@ function HomePageContent() {
               </div>
             </motion.div>
 
-            {/* Share star button */}
+            {/* Bottom action buttons */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 20 }}
               transition={{ delay: 0.3 }}
-              className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20"
+              className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex gap-3"
             >
+              {/* Random star button - only show if there are stars */}
+              {stars.filter(s => s.planet_id === focusedPlanetId).length > 0 && (
+                <Button
+                  variant="secondary"
+                  size={isMobile ? 'sm' : 'md'}
+                  onClick={handleRandomStar}
+                  disabled={isNavigatingToStar}
+                  className="shadow-lg"
+                >
+                  <span className="flex items-center gap-1.5">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-3.5 w-3.5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
+                      />
+                    </svg>
+                    Keşfet
+                  </span>
+                </Button>
+              )}
+              {/* Share star button */}
               <Button
                 variant="primary"
-                size={isMobile ? 'md' : 'lg'}
+                size={isMobile ? 'sm' : 'md'}
                 onClick={() => setIsModalOpen(true)}
                 className="shadow-lg shadow-purple-500/25"
               >
