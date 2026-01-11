@@ -11,7 +11,7 @@ interface MessageRequestButtonProps {
 
 export function MessageRequestButton({ star }: MessageRequestButtonProps) {
   const { user } = useAuth()
-  const { setMessageRequestModalOpen } = useStore()
+  const { setMessageRequestModalOpen, setSelectedStar } = useStore()
 
   // Giriş yapmamışsa gösterme
   if (!user) return null
@@ -19,11 +19,17 @@ export function MessageRequestButton({ star }: MessageRequestButtonProps) {
   // Kendi yıldızına mesaj gönderemez
   if (user.id === star.user_id) return null
 
+  const handleClick = () => {
+    // Store'a yıldızı kaydet ki modal erişebilsin
+    setSelectedStar(star)
+    setMessageRequestModalOpen(true)
+  }
+
   return (
     <Button
       variant="secondary"
       size="sm"
-      onClick={() => setMessageRequestModalOpen(true)}
+      onClick={handleClick}
       className="w-full mt-4 bg-white/5 hover:bg-white/10 border-white/10"
     >
       <svg
