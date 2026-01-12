@@ -142,17 +142,40 @@ export function useMessages(conversationId: string | null) {
         async (payload: any) => {
           const newMessage = payload.new as Message
 
-          // Eğer bu mesaj zaten varsa ekleme
+          // Skip if message already exists (deduplication)
           setMessages(prev => {
             if (prev.some(m => m.id === newMessage.id)) return prev
 
-            // Sender bilgisini çek (basit tutuyoruz)
+            // Add message with undefined sender first, will be fetched below
             const messageWithSender: MessageWithSender = {
               ...newMessage,
               sender: undefined,
             }
             return [...prev, messageWithSender]
           })
+
+          // Fetch sender info asynchronously and update
+          try {
+            const { data: { session } } = await supabase.auth.getSession()
+            if (!session) return
+
+            const { data: senderData } = await supabaseFetch<MessageWithSender['sender']>('profiles', {
+              filter: `id=eq.${newMessage.sender_id}`,
+              select: 'id, username',
+              single: true,
+              accessToken: session.access_token,
+            })
+
+            if (senderData && isMountedRef.current) {
+              setMessages(prev => prev.map(msg =>
+                msg.id === newMessage.id
+                  ? { ...msg, sender: senderData }
+                  : msg
+              ))
+            }
+          } catch {
+            // Silent fail - sender info is not critical
+          }
         }
       )
       .subscribe()

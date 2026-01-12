@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { formatDistanceToNow } from 'date-fns'
 import { tr } from 'date-fns/locale'
@@ -18,12 +18,19 @@ export function PendingRequestCard({ request, onRespond }: PendingRequestCardPro
   const [error, setError] = useState<string | null>(null)
   const { respondToRequest } = useConversations()
 
+  // Ref to prevent double-click race condition
+  const isProcessingRef = useRef(false)
+
   // Respect privacy setting for initiator
   const initiatorUsername = (request.initiator?.show_username_in_chats !== false && request.initiator?.username)
     ? request.initiator.username
     : 'Anonim'
 
   const handleRespond = async (accept: boolean) => {
+    // Prevent double-click: check ref immediately (before async setState)
+    if (isProcessingRef.current) return
+    isProcessingRef.current = true
+
     try {
       setResponding(true)
       setError(null)
@@ -31,6 +38,8 @@ export function PendingRequestCard({ request, onRespond }: PendingRequestCardPro
       onRespond?.()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'İşlem başarısız')
+      // Reset ref on error so user can retry
+      isProcessingRef.current = false
     } finally {
       setResponding(false)
     }

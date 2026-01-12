@@ -1,7 +1,9 @@
-# Duygu Evreni - Claude Code Kılavuzu
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Proje Özeti
-Duygu Evreni, kullanıcıların duygularını "yıldız" olarak paylaşabildiği 3D interaktif bir sosyal platformdur. Her gezegen bir duyguyu temsil eder (Aşk, Hüzün, Öfke, Korku, Mutluluk, Huzur).
+Duygu Evreni, kullanıcıların duygularını "yıldız" olarak paylaşabildiği 3D interaktif bir sosyal platformdur. Her gezegen bir duyguyu temsil eder (Aşk, Mutluluk, Hüzün, Öfke, Umut, Korku, Huzur, Özlem, Şaşkınlık, Minnettarlık).
 
 ## Tech Stack
 - **Framework:** Next.js 16 (App Router, Turbopack)
@@ -28,10 +30,11 @@ app/                      # Next.js App Router sayfaları
 
 components/
 ├── 3d/                  # Three.js bileşenleri
-│   ├── Universe.tsx     # Ana evren sahne
-│   ├── Planet.tsx       # Gezegen bileşeni
+│   ├── UnifiedUniverse.tsx # Ana 3D sahne (evren + gezegen görünümü)
+│   ├── Planet.tsx       # Gezegen bileşeni (Fresnel glow shader)
 │   ├── OrbitingStar.tsx # Yörüngedeki yıldız
-│   └── PlanetRenderer.tsx # Gezegen render
+│   ├── StarField.tsx    # Arka plan yıldız alanı
+│   └── CameraController.tsx # Kamera animasyonları
 ├── messaging/           # Mesajlaşma sistemi
 │   ├── ChatPanel.tsx    # Sohbet paneli
 │   ├── MessageRequestButton.tsx
@@ -67,7 +70,7 @@ types/
 
 ### Ana Tablolar
 - `profiles` - Kullanıcı profilleri (username, daily limits, privacy settings)
-- `planets` - 6 gezegen (Aşk, Hüzün, Öfke, Korku, Mutluluk, Huzur)
+- `planets` - 10 gezegen (duygu kategorileri)
 - `stars` - Kullanıcı paylaşımları (content, position_x/y/z)
 - `conversations` - Mesaj istekleri ve sohbetler (status: pending/accepted/rejected)
 - `messages` - Sohbet mesajları
@@ -124,9 +127,10 @@ npm run dev
 # Build
 npm run build
 
-# Test
-npm run test
-npm run test:run
+# Test (Vitest)
+npm run test              # Watch mode
+npm run test:run          # Single run
+npm run test:coverage     # Coverage report
 
 # Lint
 npm run lint

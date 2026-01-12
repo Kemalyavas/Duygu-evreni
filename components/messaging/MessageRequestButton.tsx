@@ -13,12 +13,13 @@ interface MessageRequestButtonProps {
 
 export function MessageRequestButton({ star }: MessageRequestButtonProps) {
   const { user } = useAuth()
-  const { setMessageRequestModalOpen, setSelectedStar, setActiveConversation, setMessagingPanelOpen } = useStore()
+  const { setMessageRequestModalOpen, setSelectedStar, setActiveConversation, setMessagingPanelOpen, lastConversationCreatedAt } = useStore()
   const { checkExistingConversation } = useConversations()
   const [existingConversationId, setExistingConversationId] = useState<string | null>(null)
   const [checking, setChecking] = useState(true)
 
   // Kullanıcıyla zaten bir sohbet var mı kontrol et
+  // Also re-check when a new conversation is created (via lastConversationCreatedAt trigger)
   useEffect(() => {
     if (!user || user.id === star.user_id) {
       setChecking(false)
@@ -33,7 +34,7 @@ export function MessageRequestButton({ star }: MessageRequestButtonProps) {
     }
 
     check()
-  }, [user, star.user_id, checkExistingConversation])
+  }, [user, star.user_id, checkExistingConversation, lastConversationCreatedAt])
 
   // Giriş yapmamışsa gösterme
   if (!user) return null

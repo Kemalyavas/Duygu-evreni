@@ -39,6 +39,10 @@ interface AppState {
   // Bildirim state'leri
   unreadNotificationsCount: number
   setUnreadNotificationsCount: (count: number) => void
+
+  // Conversation created trigger (to refresh MessageRequestButton)
+  lastConversationCreatedAt: number
+  triggerConversationCreated: () => void
 }
 
 export const useStore = create<AppState>((set) => ({
@@ -79,4 +83,8 @@ export const useStore = create<AppState>((set) => ({
   // Bildirim state'leri
   unreadNotificationsCount: 0,
   setUnreadNotificationsCount: (count) => set({ unreadNotificationsCount: count }),
+
+  // Conversation created trigger (to refresh MessageRequestButton)
+  lastConversationCreatedAt: 0,
+  triggerConversationCreated: () => set({ lastConversationCreatedAt: Date.now() }),
 }))

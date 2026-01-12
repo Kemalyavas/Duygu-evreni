@@ -8,6 +8,44 @@ import { useMessages, useAuth, useMobile } from '@/lib/hooks'
 import { MessageBubble } from './MessageBubble'
 import { MessageInput } from './MessageInput'
 
+// Hook to handle mobile keyboard height
+function useKeyboardHeight(enabled: boolean) {
+  const [keyboardHeight, setKeyboardHeight] = useState(0)
+
+  useEffect(() => {
+    if (!enabled || typeof window === 'undefined') return
+
+    const viewport = window.visualViewport
+    if (!viewport) return
+
+    const handleResize = () => {
+      // Calculate keyboard height from viewport difference
+      const newKeyboardHeight = window.innerHeight - viewport.height
+      setKeyboardHeight(Math.max(0, newKeyboardHeight))
+
+      // Also set CSS variable for use in styles
+      document.documentElement.style.setProperty(
+        '--keyboard-height',
+        `${Math.max(0, newKeyboardHeight)}px`
+      )
+    }
+
+    // Initial check
+    handleResize()
+
+    viewport.addEventListener('resize', handleResize)
+    viewport.addEventListener('scroll', handleResize)
+
+    return () => {
+      viewport.removeEventListener('resize', handleResize)
+      viewport.removeEventListener('scroll', handleResize)
+      document.documentElement.style.setProperty('--keyboard-height', '0px')
+    }
+  }, [enabled])
+
+  return keyboardHeight
+}
+
 // Floating stars background component
 function FloatingStars() {
   const stars = useMemo(() => {
@@ -115,6 +153,8 @@ export function ChatPanel() {
   const router = useRouter()
   const { user } = useAuth()
   const isMobile = useMobile()
+  const keyboardHeight = useKeyboardHeight(isMobile)
+  const [hasMounted, setHasMounted] = useState(false)
   const {
     activeConversation,
     isMessagingPanelOpen,
@@ -125,12 +165,18 @@ export function ChatPanel() {
   } = useStore()
   const { messages, sendMessage, loading, markAsRead } = useMessages(activeConversation?.id || null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const messagesContainerRef = useRef<HTMLDivElement>(null)
   const [unreadInCompact, setUnreadInCompact] = useState(0)
 
-  // Auto-scroll to bottom
+  // Track mount state to prevent SSR/hydration flash
+  useEffect(() => {
+    setHasMounted(true)
+  }, [])
+
+  // Auto-scroll to bottom (also when keyboard opens)
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages])
+  }, [messages, keyboardHeight])
 
   // Mark as read when opened
   useEffect(() => {
@@ -184,7 +230,9 @@ export function ChatPanel() {
     router.push(url)
   }, [activeConversation, isMobile, router, setMessagingPanelOpen, setActiveConversation, setChatCompact])
 
-  if (!isMessagingPanelOpen || !activeConversation) return null
+  // Don't render until mounted (prevents SSR/hydration mismatch flash)
+  // Also don't render if panel is closed or no conversation
+  if (!hasMounted || !isMessagingPanelOpen || !activeConversation) return null
 
   // Karşı tarafın bilgisi
   const otherUser = activeConversation.initiator_id === user?.id
@@ -331,7 +379,14 @@ export function ChatPanel() {
       animate={{ y: 0 }}
       exit={{ y: '100%' }}
       transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-      className="md:hidden fixed inset-0 bg-[#0d0d1a]/98 backdrop-blur-xl z-50 flex flex-col"
+      className="md:hidden fixed inset-x-0 top-0 bg-[#0d0d1a]/98 backdrop-blur-xl z-50 flex flex-col"
+      style={{
+        height: keyboardHeight > 0
+          ? `calc(100dvh - ${keyboardHeight}px)`
+          : '100dvh',
+        // Prevent iOS bounce/overscroll
+        overscrollBehavior: 'none',
+      }}
     >
       {/* Floating stars background */}
       <FloatingStars />
@@ -383,7 +438,14 @@ export function ChatPanel() {
       </div>
 
       {/* Messages */}
-      <div className="relative z-10 flex-1 overflow-y-auto p-4 space-y-3">
+      <div
+        ref={messagesContainerRef}
+        className="relative z-10 flex-1 overflow-y-auto p-4 space-y-3 overscroll-none"
+        style={{
+          // Add extra padding at bottom for safe area when keyboard is closed
+          paddingBottom: keyboardHeight === 0 ? 'calc(1rem + var(--safe-area-bottom))' : '1rem',
+        }}
+      >
         <div className="text-center py-4">
           <p className="text-white/30 text-xs">Sohbet başladı</p>
         </div>
@@ -414,8 +476,13 @@ export function ChatPanel() {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input */}
-      <div className="relative z-10 safe-bottom">
+      {/* Input - safe-bottom only when keyboard is closed */}
+      <div
+        className="relative z-10"
+        style={{
+          paddingBottom: keyboardHeight === 0 ? 'var(--safe-area-bottom)' : 0,
+        }}
+      >
         <MessageInput onSend={sendMessage} disabled={loading} />
       </div>
     </motion.div>

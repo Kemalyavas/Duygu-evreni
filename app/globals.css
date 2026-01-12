@@ -7,6 +7,9 @@
   --safe-area-bottom: env(safe-area-inset-bottom, 0px);
   --safe-area-left: env(safe-area-inset-left, 0px);
 
+  /* Mobile keyboard height (set via JavaScript) */
+  --keyboard-height: 0px;
+
   /* Soft Nebula Theme Colors */
   --background: #0D1129;
   --background-dark: #050810;

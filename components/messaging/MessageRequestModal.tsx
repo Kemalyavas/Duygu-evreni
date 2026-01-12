@@ -15,7 +15,7 @@ export function MessageRequestModal() {
   const [success, setSuccess] = useState(false)
   const [remainingRequests, setRemainingRequests] = useState(5)
 
-  const { selectedStar, isMessageRequestModalOpen, setMessageRequestModalOpen } = useStore()
+  const { selectedStar, isMessageRequestModalOpen, setMessageRequestModalOpen, triggerConversationCreated } = useStore()
   const { sendMessageRequest, getRemainingRequests, maxDailyRequests } = useConversations()
 
   // Kalan istek sayısını al
@@ -37,6 +37,9 @@ export function MessageRequestModal() {
         selectedStar.user_id,
         message.trim()
       )
+
+      // Trigger refresh for MessageRequestButton
+      triggerConversationCreated()
 
       setSuccess(true)
       setTimeout(() => {
