@@ -148,10 +148,13 @@ const POLITICAL_FIGURES_KEYWORDS = [
   // ==========================================
   'imamoğlu',
   'imamoglu',
+  'imamson',
+  'imam son',
   'ekrem imamoğlu',
   'ekrem imamoglu',
   'ekrem',
   'ibb başkan',
+  'ibb baskani',
   'mansur yavaş',
   'mansur yavas',
   'mansur',
@@ -329,6 +332,13 @@ const SEXUAL_EXPLICIT_KEYWORDS = [
  */
 function normalizeText(text: string): string {
   return text
+    // Normalize Unicode (decomposed → composed)
+    .normalize('NFC')
+    // Handle ALL variations of Turkish İ/I before toLowerCase
+    .replace(/\u0130/g, 'i')  // İ (Turkish capital I with dot)
+    .replace(/\u0049/g, 'i')  // I (regular capital I)
+    .replace(/İ/g, 'i')       // Belt and suspenders
+    .replace(/I/g, 'i')
     .toLowerCase()
     // Normalize Turkish characters
     .replace(/ı/g, 'i')
@@ -355,7 +365,7 @@ function normalizeText(text: string): string {
  * Check if text contains any of the keywords
  * Uses fuzzy matching for Turkish text
  */
-function containsKeywords(text: string, keywords: string[]): string[] {
+function containsKeywords(text: string, keywords: string[], matchWordStart = false): string[] {
   const normalizedText = normalizeText(text)
   const matched: string[] = []
 
@@ -366,6 +376,12 @@ function containsKeywords(text: string, keywords: string[]): string[] {
     if (normalizedKeyword.includes(' ')) {
       // Multi-word phrase - check as substring
       if (normalizedText.includes(normalizedKeyword)) {
+        matched.push(keyword)
+      }
+    } else if (matchWordStart) {
+      // Match words that START with the keyword (for verb stems like gebertir → gebertiririm)
+      const regex = new RegExp(`(^|\\s)${normalizedKeyword}`, 'i')
+      if (regex.test(normalizedText)) {
         matched.push(keyword)
       }
     } else {
@@ -445,7 +461,7 @@ export function runLocalFilter(content: string): LocalFilterResult {
   }
 
   // Also check explicit violence keywords (geber, etc.)
-  const violenceMatches = containsKeywords(content, VIOLENCE_KEYWORDS)
+  const violenceMatches = containsKeywords(content, VIOLENCE_KEYWORDS, true) // matchWordStart for verb conjugations
   if (violenceMatches.length > 0) {
     result.requiresAIReview = true
     if (!result.triggeredCategories.includes('VIOLENCE_THREATS')) {

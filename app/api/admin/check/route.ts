@@ -12,13 +12,27 @@ export async function GET() {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
-    if (!user?.email) {
+    if (!user) {
       return NextResponse.json({ isAdmin: false })
     }
 
-    const isAdmin = ADMIN_EMAILS.includes(user.email.toLowerCase())
+    // Check database is_admin field first
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('is_admin')
+      .eq('id', user.id)
+      .single()
 
-    return NextResponse.json({ isAdmin })
+    if (profile?.is_admin) {
+      return NextResponse.json({ isAdmin: true })
+    }
+
+    // Fallback to email check
+    if (user.email && ADMIN_EMAILS.includes(user.email.toLowerCase())) {
+      return NextResponse.json({ isAdmin: true })
+    }
+
+    return NextResponse.json({ isAdmin: false })
   } catch {
     return NextResponse.json({ isAdmin: false })
   }

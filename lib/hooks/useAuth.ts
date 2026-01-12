@@ -10,6 +10,30 @@ import type { AuthChangeEvent, Session } from '@supabase/supabase-js'
 // Global flag to track if auth has been checked
 let authChecked = false
 
+// Track IP in background (non-blocking)
+async function trackUserIP(accessToken: string) {
+  try {
+    await fetch('/api/ip/track', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+      },
+    })
+  } catch {
+    // Silently fail - IP tracking is not critical
+  }
+}
+
+// Check if IP is banned
+async function checkIPBan(): Promise<{ banned: boolean; reason?: string }> {
+  try {
+    const response = await fetch('/api/ip/check')
+    return await response.json()
+  } catch {
+    return { banned: false }
+  }
+}
+
 export function useAuth() {
   const { user, profile, setUser, setProfile } = useStore()
   const [isLoading, setIsLoading] = useState(!authChecked)
@@ -64,6 +88,9 @@ export function useAuth() {
         if (session?.user && isMounted) {
           setUser({ id: session.user.id, email: session.user.email || '' })
 
+          // Track IP in background
+          trackUserIP(session.access_token)
+
           // Fetch profile using fetch API with access token for RLS
           try {
             const { data: profileData } = await supabaseFetch<Profile>('profiles', {
@@ -104,6 +131,9 @@ export function useAuth() {
           if (event === 'SIGNED_IN' && session?.user) {
             setUser({ id: session.user.id, email: session.user.email || '' })
 
+            // Track IP in background
+            trackUserIP(session.access_token)
+
             // Fetch profile using fetch API with access token for RLS
             try {
               const { data: profileData } = await supabaseFetch<Profile>('profiles', {
@@ -138,6 +168,12 @@ export function useAuth() {
 
   const signIn = useCallback(
     async (email: string, password: string) => {
+      // Check if IP is banned before allowing login
+      const ipCheck = await checkIPBan()
+      if (ipCheck.banned) {
+        throw new Error(ipCheck.reason || 'Bu IP adresi engellenmiş')
+      }
+
       const { data, error } = await supabaseRef.current.auth.signInWithPassword({
         email,
         password,
@@ -150,6 +186,9 @@ export function useAuth() {
       // Manually update state immediately after successful login
       if (data.session?.user) {
         setUser({ id: data.session.user.id, email: data.session.user.email || '' })
+
+        // Track IP in background
+        trackUserIP(data.session.access_token)
 
         // Fetch and set profile
         try {
@@ -174,6 +213,12 @@ export function useAuth() {
 
   const signUp = useCallback(
     async (email: string, password: string, username?: string) => {
+      // Check if IP is banned before allowing signup
+      const ipCheck = await checkIPBan()
+      if (ipCheck.banned) {
+        throw new Error(ipCheck.reason || 'Bu IP adresi engellenmiş')
+      }
+
       const { data, error } = await supabaseRef.current.auth.signUp({
         email,
         password,
@@ -232,6 +277,7 @@ export function useAuth() {
     signUp,
     signOut,
     signInWithGoogle,
+    checkIPBan,
     isAuthenticated: !!user,
     isLoading,
   }
