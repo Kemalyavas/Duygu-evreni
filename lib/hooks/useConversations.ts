@@ -111,27 +111,32 @@ export function useConversations() {
       if (!session?.user) throw new Error('Giriş yapmanız gerekiyor')
       if (session.user.id === starOwnerId) throw new Error('Kendi yıldızınıza mesaj gönderemezsiniz')
 
-      // Günlük limit kontrolü
-      const { data: profile } = await supabaseFetch<{ daily_message_requests_sent: number }>('profiles', {
+      // Profil bilgilerini al (admin kontrolü + günlük limit)
+      const { data: profile } = await supabaseFetch<{ daily_message_requests_sent: number; is_admin: boolean }>('profiles', {
         filter: `id=eq.${session.user.id}`,
-        select: 'daily_message_requests_sent',
+        select: 'daily_message_requests_sent, is_admin',
         single: true,
         accessToken: session.access_token,
       })
 
+      const isAdmin = profile?.is_admin || false
       const currentRequests = profile?.daily_message_requests_sent || 0
-      if (currentRequests >= MAX_DAILY_REQUESTS) {
+
+      // Admin için limit kontrolü yok
+      if (!isAdmin && currentRequests >= MAX_DAILY_REQUESTS) {
         throw new Error('Günlük mesaj isteği limitinize ulaştınız (5/5)')
       }
 
-      // Engel kontrolü
-      const { data: blocked } = await supabaseFetch<{ id: string }[]>('blocked_users', {
-        filter: `blocker_id=eq.${starOwnerId}&blocked_id=eq.${session.user.id}`,
-        accessToken: session.access_token,
-      })
+      // Admin için engel kontrolü yok (engellenemez)
+      if (!isAdmin) {
+        const { data: blocked } = await supabaseFetch<{ id: string }[]>('blocked_users', {
+          filter: `blocker_id=eq.${starOwnerId}&blocked_id=eq.${session.user.id}`,
+          accessToken: session.access_token,
+        })
 
-      if (blocked && blocked.length > 0) {
-        throw new Error('Bu kullanıcıya mesaj gönderemezsiniz')
+        if (blocked && blocked.length > 0) {
+          throw new Error('Bu kullanıcıya mesaj gönderemezsiniz')
+        }
       }
 
       // Bu kullanıcıyla zaten bir sohbet var mı kontrol et (herhangi bir yıldızdan)
@@ -151,40 +156,59 @@ export function useConversations() {
         // Rejected conversation varsa, onu güncelle (tekrar istek gönderme)
         const rejectedConversation = existingConversations.find(c => c.status === 'rejected')
         if (rejectedConversation) {
+          // Admin için direkt accepted, normal kullanıcılar için pending
+          const newStatus = isAdmin ? 'accepted' : 'pending'
+          const updateData: Record<string, unknown> = {
+            star_id: starId,
+            first_message: firstMessage,
+            status: newStatus,
+            created_at: new Date().toISOString(),
+          }
+
+          if (isAdmin) {
+            updateData.accepted_at = new Date().toISOString()
+          } else {
+            updateData.accepted_at = null
+          }
+
           const { error: updateError } = await supabaseUpdate<Conversation>(
             'conversations',
             `id=eq.${rejectedConversation.id}`,
-            {
-              star_id: starId,
-              first_message: firstMessage,
-              status: 'pending',
-              created_at: new Date().toISOString(),
-              accepted_at: null,
-            },
+            updateData,
             session.access_token
           )
 
           if (updateError) throw new Error(updateError)
 
-          // Günlük sayacı artır
-          await supabaseUpdate('profiles',
-            `id=eq.${session.user.id}`,
-            { daily_message_requests_sent: currentRequests + 1 },
-            session.access_token
-          )
+          // Admin için günlük sayaç artırmaya gerek yok
+          if (!isAdmin) {
+            await supabaseUpdate('profiles',
+              `id=eq.${session.user.id}`,
+              { daily_message_requests_sent: currentRequests + 1 },
+              session.access_token
+            )
+          }
 
           return { id: rejectedConversation.id } as Conversation
         }
       }
 
-      // Yeni conversation oluştur
-      const { data, error: insertError } = await supabaseInsert<Conversation>('conversations', {
+      // Admin için direkt accepted, normal kullanıcılar için pending
+      const conversationStatus = isAdmin ? 'accepted' : 'pending'
+      const conversationData: Record<string, unknown> = {
         star_id: starId,
         initiator_id: session.user.id,
         star_owner_id: starOwnerId,
         first_message: firstMessage,
-        status: 'pending',
-      }, session.access_token)
+        status: conversationStatus,
+      }
+
+      if (isAdmin) {
+        conversationData.accepted_at = new Date().toISOString()
+      }
+
+      // Yeni conversation oluştur
+      const { data, error: insertError } = await supabaseInsert<Conversation>('conversations', conversationData, session.access_token)
 
       if (insertError) {
         if (insertError.includes('duplicate') || insertError.includes('unique')) {
@@ -193,12 +217,14 @@ export function useConversations() {
         throw new Error(insertError)
       }
 
-      // Günlük sayacı artır
-      await supabaseUpdate('profiles',
-        `id=eq.${session.user.id}`,
-        { daily_message_requests_sent: currentRequests + 1 },
-        session.access_token
-      )
+      // Admin için günlük sayaç artırmaya gerek yok
+      if (!isAdmin) {
+        await supabaseUpdate('profiles',
+          `id=eq.${session.user.id}`,
+          { daily_message_requests_sent: currentRequests + 1 },
+          session.access_token
+        )
+      }
 
       return data
     } catch (err) {
@@ -275,20 +301,23 @@ export function useConversations() {
     }
   }, [])
 
-  // Günlük kalan istek sayısını getir
-  const getRemainingRequests = useCallback(async () => {
+  // Günlük kalan istek sayısını getir (admin için sınırsız: -1)
+  const getRemainingRequests = useCallback(async (): Promise<number> => {
     try {
       const supabase = createClient()
       const { data: { session } } = await supabase.auth.getSession()
 
       if (!session?.user) return MAX_DAILY_REQUESTS
 
-      const { data: profile } = await supabaseFetch<{ daily_message_requests_sent: number }>('profiles', {
+      const { data: profile } = await supabaseFetch<{ daily_message_requests_sent: number; is_admin: boolean }>('profiles', {
         filter: `id=eq.${session.user.id}`,
-        select: 'daily_message_requests_sent',
+        select: 'daily_message_requests_sent, is_admin',
         single: true,
         accessToken: session.access_token,
       })
+
+      // Admin için sınırsız (-1)
+      if (profile?.is_admin) return -1
 
       return MAX_DAILY_REQUESTS - (profile?.daily_message_requests_sent || 0)
     } catch {
