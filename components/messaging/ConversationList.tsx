@@ -73,9 +73,11 @@ export function ConversationList({ conversations, onSelect }: ConversationListPr
                     {formatDistanceToNow(new Date(conv.updated_at), { addSuffix: false, locale: tr })}
                   </span>
                 </div>
-                <p className="text-white/50 text-xs truncate mt-0.5">
-                  {conv.last_message?.content || conv.first_message}
-                </p>
+                {conv.last_message?.content && (
+                  <p className="text-white/50 text-xs truncate mt-0.5">
+                    {conv.last_message.content}
+                  </p>
+                )}
               </div>
 
               {/* Unread indicator */}

@@ -134,6 +134,20 @@ export function useConversations() {
         throw new Error('Bu kullanıcıya mesaj gönderemezsiniz')
       }
 
+      // Bu kullanıcıyla zaten bir sohbet var mı kontrol et (herhangi bir yıldızdan)
+      const { data: existingConversations } = await supabaseFetch<{ id: string; status: string }[]>('conversations', {
+        select: 'id, status',
+        filter: `or=(and(initiator_id.eq.${session.user.id},star_owner_id.eq.${starOwnerId}),and(initiator_id.eq.${starOwnerId},star_owner_id.eq.${session.user.id}))`,
+        accessToken: session.access_token,
+      })
+
+      if (existingConversations && existingConversations.length > 0) {
+        const hasActiveConversation = existingConversations.some(c => c.status === 'pending' || c.status === 'accepted')
+        if (hasActiveConversation) {
+          throw new Error('Bu kullanıcıyla zaten bir sohbetiniz var')
+        }
+      }
+
       // Conversation oluştur
       const { data, error: insertError } = await supabaseInsert<Conversation>('conversations', {
         star_id: starId,
@@ -204,6 +218,34 @@ export function useConversations() {
     }
   }, [fetchPendingRequests])
 
+  // Bu kullanıcıyla zaten bir sohbet var mı kontrol et
+  const checkExistingConversation = useCallback(async (targetUserId: string): Promise<{ exists: boolean; conversationId?: string }> => {
+    try {
+      const supabase = createClient()
+      const { data: { session } } = await supabase.auth.getSession()
+
+      if (!session?.user) return { exists: false }
+      if (session.user.id === targetUserId) return { exists: false }
+
+      const { data: existingConversations } = await supabaseFetch<{ id: string; status: string }[]>('conversations', {
+        select: 'id, status',
+        filter: `or=(and(initiator_id.eq.${session.user.id},star_owner_id.eq.${targetUserId}),and(initiator_id.eq.${targetUserId},star_owner_id.eq.${session.user.id}))`,
+        accessToken: session.access_token,
+      })
+
+      if (existingConversations && existingConversations.length > 0) {
+        const activeConversation = existingConversations.find(c => c.status === 'pending' || c.status === 'accepted')
+        if (activeConversation) {
+          return { exists: true, conversationId: activeConversation.id }
+        }
+      }
+
+      return { exists: false }
+    } catch {
+      return { exists: false }
+    }
+  }, [])
+
   // Günlük kalan istek sayısını getir
   const getRemainingRequests = useCallback(async () => {
     try {
@@ -236,6 +278,7 @@ export function useConversations() {
     sendMessageRequest,
     respondToRequest,
     getRemainingRequests,
+    checkExistingConversation,
     pendingCount: pendingRequests.length,
     maxDailyRequests: MAX_DAILY_REQUESTS,
   }

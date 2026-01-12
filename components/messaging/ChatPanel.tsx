@@ -286,19 +286,27 @@ export function ChatPanel() {
 
       {/* Messages */}
       <div className="relative z-10 flex-1 overflow-y-auto p-4 space-y-3">
-        {/* İlk mesaj (kabul edilen istek) */}
+        {/* Sohbet başladı */}
         <div className="text-center py-4">
           <p className="text-white/30 text-xs">Sohbet başladı</p>
         </div>
 
-        {/* Mesajlar */}
-        {messages.length === 0 && !loading && (
-          <div className="text-center py-8">
-            <p className="text-white/40 text-sm">Henüz mesaj yok</p>
-            <p className="text-white/30 text-xs mt-1">İlk mesajı sen gönder!</p>
-          </div>
+        {/* İlk mesaj (mesaj isteğindeki yazı) */}
+        {activeConversation.first_message && (
+          <MessageBubble
+            message={{
+              id: 'first-message',
+              conversation_id: activeConversation.id,
+              sender_id: activeConversation.initiator_id,
+              content: activeConversation.first_message,
+              is_read: true,
+              created_at: activeConversation.created_at,
+            }}
+            isOwn={activeConversation.initiator_id === user?.id}
+          />
         )}
 
+        {/* Mesajlar */}
         {messages.map((msg) => (
           <MessageBubble
             key={msg.id}
@@ -380,13 +388,22 @@ export function ChatPanel() {
           <p className="text-white/30 text-xs">Sohbet başladı</p>
         </div>
 
-        {messages.length === 0 && !loading && (
-          <div className="text-center py-8">
-            <p className="text-white/40 text-sm">Henüz mesaj yok</p>
-            <p className="text-white/30 text-xs mt-1">İlk mesajı sen gönder!</p>
-          </div>
+        {/* İlk mesaj (mesaj isteğindeki yazı) */}
+        {activeConversation.first_message && (
+          <MessageBubble
+            message={{
+              id: 'first-message',
+              conversation_id: activeConversation.id,
+              sender_id: activeConversation.initiator_id,
+              content: activeConversation.first_message,
+              is_read: true,
+              created_at: activeConversation.created_at,
+            }}
+            isOwn={activeConversation.initiator_id === user?.id}
+          />
         )}
 
+        {/* Mesajlar */}
         {messages.map((msg) => (
           <MessageBubble
             key={msg.id}
