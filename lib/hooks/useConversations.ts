@@ -142,13 +142,42 @@ export function useConversations() {
       })
 
       if (existingConversations && existingConversations.length > 0) {
+        // Aktif (pending veya accepted) sohbet varsa engelle
         const hasActiveConversation = existingConversations.some(c => c.status === 'pending' || c.status === 'accepted')
         if (hasActiveConversation) {
           throw new Error('Bu kullanıcıyla zaten bir sohbetiniz var')
         }
+
+        // Rejected conversation varsa, onu güncelle (tekrar istek gönderme)
+        const rejectedConversation = existingConversations.find(c => c.status === 'rejected')
+        if (rejectedConversation) {
+          const { error: updateError } = await supabaseUpdate<Conversation>(
+            'conversations',
+            `id=eq.${rejectedConversation.id}`,
+            {
+              star_id: starId,
+              first_message: firstMessage,
+              status: 'pending',
+              created_at: new Date().toISOString(),
+              accepted_at: null,
+            },
+            session.access_token
+          )
+
+          if (updateError) throw new Error(updateError)
+
+          // Günlük sayacı artır
+          await supabaseUpdate('profiles',
+            `id=eq.${session.user.id}`,
+            { daily_message_requests_sent: currentRequests + 1 },
+            session.access_token
+          )
+
+          return { id: rejectedConversation.id } as Conversation
+        }
       }
 
-      // Conversation oluştur
+      // Yeni conversation oluştur
       const { data, error: insertError } = await supabaseInsert<Conversation>('conversations', {
         star_id: starId,
         initiator_id: session.user.id,
