@@ -1,11 +1,19 @@
 'use client'
 
-import { useState } from 'react'
-import { motion } from 'framer-motion'
+import { useState, useRef } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { Modal, Button } from '@/components/ui'
 import { useDailyLimit, useStars, generateOrbitPosition } from '@/lib/hooks'
 import { moderateContent } from '@/lib/moderation'
 import type { Planet, Star } from '@/types'
+
+// Popüler emojiler
+const EMOJI_LIST = [
+  '😊', '😢', '😡', '😱', '🥰', '😔', '😌', '🤗',
+  '💔', '❤️', '💕', '✨', '🌟', '💫', '🔥', '💪',
+  '🙏', '🤔', '😴', '🥺', '😭', '🤯', '😤', '🫠',
+  '🌈', '🌙', '☀️', '🌸', '🍀', '🦋', '🕊️', '💭',
+]
 
 interface StarCreationModalProps {
   isOpen: boolean
@@ -26,9 +34,29 @@ export function StarCreationModal({
   const [error, setError] = useState('')
   const [helpResources, setHelpResources] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false)
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
 
-  const { canShareStar, remainingStars, incrementStarCount, isAdmin } = useDailyLimit()
+  const { canShareStar, remainingStars, checkRealLimit, incrementStarCount, isAdmin } = useDailyLimit()
   const { createStar } = useStars()
+
+  const insertEmoji = (emoji: string) => {
+    const textarea = textareaRef.current
+    if (textarea) {
+      const start = textarea.selectionStart
+      const end = textarea.selectionEnd
+      const newContent = content.slice(0, start) + emoji + content.slice(end)
+      setContent(newContent)
+      // Cursor'ı emoji'den sonraya taşı
+      setTimeout(() => {
+        textarea.selectionStart = textarea.selectionEnd = start + emoji.length
+        textarea.focus()
+      }, 0)
+    } else {
+      setContent(content + emoji)
+    }
+    setShowEmojiPicker(false)
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -37,8 +65,15 @@ export function StarCreationModal({
     setLoading(true)
 
     try {
-      // Check daily limit
+      // Check daily limit from local state first
       if (!canShareStar) {
+        setError('Günlük limitine ulaştın. Yarın tekrar dene!')
+        return
+      }
+
+      // Double-check with database to avoid race conditions
+      const hasRealLimit = await checkRealLimit()
+      if (!hasRealLimit) {
         setError('Günlük limitine ulaştın. Yarın tekrar dene!')
         return
       }
@@ -70,7 +105,12 @@ export function StarCreationModal({
 
       // Only increment daily limit if star was created successfully
       if (newStar) {
-        await incrementStarCount()
+        // Try to increment but don't fail if it errors (star is already created)
+        try {
+          await incrementStarCount()
+        } catch {
+          // Silently ignore - star was created successfully, count will sync on next load
+        }
         setContent('')
         onSuccess?.(newStar)
         onClose()
@@ -107,15 +147,56 @@ export function StarCreationModal({
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Textarea */}
-          <div>
+          <div className="relative">
             <textarea
+              ref={textareaRef}
               value={content}
               onChange={(e) => setContent(e.target.value)}
               placeholder="Duygunu buraya yaz..."
-              className="w-full h-32 px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-purple-500/50 resize-none"
+              className="w-full h-32 px-4 py-3 pr-12 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-purple-500/50 resize-none"
               maxLength={MAX_CHARS + 10}
               disabled={!canShareStar}
             />
+
+            {/* Emoji button */}
+            <button
+              type="button"
+              onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+              className="absolute top-3 right-3 p-1.5 rounded-lg hover:bg-white/10 transition-colors text-white/50 hover:text-white/80"
+              title="Emoji ekle"
+            >
+              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="12" cy="12" r="10" />
+                <path d="M8 14s1.5 2 4 2 4-2 4-2" />
+                <line x1="9" y1="9" x2="9.01" y2="9" strokeWidth="3" strokeLinecap="round" />
+                <line x1="15" y1="9" x2="15.01" y2="9" strokeWidth="3" strokeLinecap="round" />
+              </svg>
+            </button>
+
+            {/* Emoji picker */}
+            <AnimatePresence>
+              {showEmojiPicker && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                  className="absolute top-12 right-0 z-10 p-3 bg-[#1a1a2e] border border-white/10 rounded-xl shadow-xl"
+                >
+                  <div className="grid grid-cols-8 gap-1">
+                    {EMOJI_LIST.map((emoji) => (
+                      <button
+                        key={emoji}
+                        type="button"
+                        onClick={() => insertEmoji(emoji)}
+                        className="w-8 h-8 flex items-center justify-center text-lg hover:bg-white/10 rounded-lg transition-colors"
+                      >
+                        {emoji}
+                      </button>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             {/* Character counter */}
             <div className="flex justify-between items-center mt-2">

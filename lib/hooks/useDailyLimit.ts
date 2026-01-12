@@ -144,6 +144,32 @@ export function useDailyLimit() {
     return Math.max(0, MAX_DAILY_STARS - added)
   }, [profile, isAdmin])
 
+  // Check real limit from database before creating star
+  const checkRealLimit = useCallback(async (): Promise<boolean> => {
+    // Admins have unlimited stars
+    if (isAdminRef.current) return true
+
+    try {
+      const supabase = createClient()
+      const { data: { session } } = await supabase.auth.getSession()
+
+      if (!session?.user) return false
+
+      const { data: currentProfile } = await supabaseFetch<Profile>('profiles', {
+        filter: `id=eq.${session.user.id}`,
+        single: true,
+        accessToken: session.access_token,
+      })
+
+      if (!currentProfile) return false
+
+      const currentCount = currentProfile.daily_stars_added ?? 0
+      return currentCount < MAX_DAILY_STARS
+    } catch {
+      return false
+    }
+  }, [])
+
   const incrementStarCount = useCallback(async () => {
     // Admins don't need to track star count (use ref for latest value)
     if (isAdminRef.current) {
@@ -241,6 +267,7 @@ export function useDailyLimit() {
     canShareStar: canShareStar(),
     remainingStars: getRemainingStars(),
     maxStars: MAX_DAILY_STARS,
+    checkRealLimit,
     incrementStarCount,
     incrementViewCount,
   }
