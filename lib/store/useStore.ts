@@ -35,6 +35,10 @@ interface AppState {
   setPendingRequestsCount: (count: number) => void
   unreadMessagesCount: number
   setUnreadMessagesCount: (count: number) => void
+
+  // Bildirim state'leri
+  unreadNotificationsCount: number
+  setUnreadNotificationsCount: (count: number) => void
 }
 
 export const useStore = create<AppState>((set) => ({
@@ -71,4 +75,8 @@ export const useStore = create<AppState>((set) => ({
   setPendingRequestsCount: (count) => set({ pendingRequestsCount: count }),
   unreadMessagesCount: 0,
   setUnreadMessagesCount: (count) => set({ unreadMessagesCount: count }),
+
+  // Bildirim state'leri
+  unreadNotificationsCount: 0,
+  setUnreadNotificationsCount: (count) => set({ unreadNotificationsCount: count }),
 }))

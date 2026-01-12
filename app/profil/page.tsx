@@ -5,11 +5,11 @@ import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { format } from 'date-fns'
 import { tr } from 'date-fns/locale'
-import { Navbar, Card, Button } from '@/components/ui'
+import { Navbar, Card, Button, NotificationList } from '@/components/ui'
 import { BlackHoleContact } from '@/components/BlackHoleContact'
 import { DonutChart, StarListItem } from '@/components/profile'
 import { PendingRequestsList, ConversationList, ChatPanel } from '@/components/messaging'
-import { useAuth, usePlanets, useDailyLimit, useConversations } from '@/lib/hooks'
+import { useAuth, usePlanets, useDailyLimit, useConversations, useNotifications } from '@/lib/hooks'
 import { createClient } from '@/lib/supabase/client'
 
 interface PlanetStats {
@@ -42,6 +42,7 @@ export default function ProfilPage() {
     fetchPendingRequests,
     fetchConversations,
   } = useConversations()
+  const { notifications, unreadCount } = useNotifications()
 
   const [stats, setStats] = useState<PlanetStats[]>([])
   const [totalStars, setTotalStars] = useState(0)
@@ -339,6 +340,30 @@ export default function ProfilPage() {
               </button>
             </div>
           </Card>
+
+          {/* Bildirimler */}
+          {notifications.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <Card>
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-lg font-semibold text-white">
+                    Bildirimler
+                  </h2>
+                  {unreadCount > 0 && (
+                    <span className="bg-cyan-500/20 text-cyan-400 text-xs px-2.5 py-1 rounded-full font-medium">
+                      {unreadCount} yeni
+                    </span>
+                  )}
+                </div>
+                <div className="max-h-80 overflow-y-auto">
+                  <NotificationList showHeader={false} />
+                </div>
+              </Card>
+            </motion.div>
+          )}
 
           {/* Pending Message Requests */}
           {pendingCount > 0 && (

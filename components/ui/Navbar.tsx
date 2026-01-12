@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { clsx } from 'clsx'
 import { Button } from './Button'
 import { MusicToggle } from './MusicToggle'
+import { NotificationBell } from './NotificationBell'
 import { useAuth } from '@/lib/hooks'
 
 export function Navbar() {
@@ -47,6 +48,9 @@ export function Navbar() {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-6">
+            {!isLoading && user && (
+              <NotificationBell />
+            )}
             {!isLoading && user && navLinks.map((link) => (
               <Link
                 key={link.href}
@@ -77,11 +81,13 @@ export function Navbar() {
             )}
           </div>
 
-          {/* Mobile menu button */}
-          <button
-            className="md:hidden p-2 text-white/60 hover:text-white"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          >
+          {/* Mobile: Notification bell + Menu button */}
+          <div className="md:hidden flex items-center gap-2">
+            {!isLoading && user && <NotificationBell />}
+            <button
+              className="p-2 text-white/60 hover:text-white"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            >
             <svg
               className="h-6 w-6"
               fill="none"
@@ -104,7 +110,8 @@ export function Navbar() {
                 />
               )}
             </svg>
-          </button>
+            </button>
+          </div>
         </div>
       </div>
 
