@@ -79,64 +79,193 @@ const SUICIDE_SELF_HARM_KEYWORDS = [
  * These trigger AI review to distinguish criticism from hate speech
  */
 const POLITICAL_FIGURES_KEYWORDS = [
-  // Ataturk (protected by law)
+  // ==========================================
+  // ATATÜRK (protected by law - 5816 sayılı kanun)
+  // ==========================================
   'atatürk',
   'ataturk',
+  'ata türk',
   'mustafa kemal',
-  'm. kemal',
+  'm kemal',
+  'mkemal',
+  'mk atatürk',
   'gazi mustafa',
   'gazi paşa',
+  'gazi pasa',
+  'atam',
 
-  // Current President
+  // ==========================================
+  // CUMHURBAŞKANI - ERDOĞAN
+  // ==========================================
   'cumhurbaşkan',
+  'cumhurbaskani',
   'erdoğan',
   'erdogan',
   'tayyip',
+  'tayip',
+  'tayib',
+  'tayyib',
   'rte',
   'reis',
   'recep tayyip',
+  'r t e',
+  'reisicumhur',
+  'cb erdogan',
+  'uzun adam',
 
-  // Major Political Leaders
+  // ==========================================
+  // ANA MUHALEFET - CHP
+  // ==========================================
   'kılıçdaroğlu',
   'kilicdaroglu',
+  'kılıçdar',
+  'kilicdar',
   'kemal kılıçdaroğlu',
+  'kk',
+  'özgür özel',
+  'ozgur ozel',
+  'özel',
+
+  // ==========================================
+  // MHP
+  // ==========================================
   'bahçeli',
   'bahceli',
   'devlet bahçeli',
+  'devlet bahceli',
+  'db',
+
+  // ==========================================
+  // İYİ PARTİ
+  // ==========================================
   'akşener',
   'aksener',
   'meral akşener',
+  'meral aksener',
+
+  // ==========================================
+  // İSTANBUL - ANKARA BELEDİYE
+  // ==========================================
   'imamoğlu',
   'imamoglu',
   'ekrem imamoğlu',
+  'ekrem imamoglu',
+  'ekrem',
+  'ibb başkan',
   'mansur yavaş',
   'mansur yavas',
+  'mansur',
+  'abb başkan',
 
-  // Political Parties
+  // ==========================================
+  // DİĞER SİYASİLER
+  // ==========================================
+  'süleyman soylu',
+  'suleyman soylu',
+  'soylu',
+  'binali yıldırım',
+  'binali yildirim',
+  'ali babacan',
+  'babacan',
+  'ahmet davutoğlu',
+  'davutoglu',
+  'davutoğlu',
+  'temel karamollaoğlu',
+  'karamollaoğlu',
+  'fatih erbakan',
+  'erbakan',
+  'necmettin erbakan',
+  'ümit özdağ',
+  'umit ozdag',
+  'özdağ',
+  'ozdag',
+  'sinan oğan',
+  'sinan ogan',
+  'muharrem ince',
+  'muharrem ınce',
+  'ince',
+  'selahattin demirtaş',
+  'demirtas',
+  'demirtaş',
+  'selo',
+  'pervin buldan',
+  'buldan',
+  'meral danış beştaş',
+  'tansu çiller',
+  'tansu ciller',
+  'çiller',
+  'mesut yılmaz',
+  'bülent ecevit',
+  'ecevit',
+  'demirel',
+  'süleyman demirel',
+  'turgut özal',
+  'özal',
+
+  // ==========================================
+  // PARTİLER
+  // ==========================================
   'akp',
   'ak parti',
+  'akparti',
+  'a k p',
   'chp',
+  'c h p',
   'mhp',
+  'm h p',
   'iyi parti',
   'iyip',
+  'iyi p',
   'hdp',
+  'h d p',
   'dem parti',
+  'demparti',
+  'saadet partisi',
   'saadet',
+  'sp',
   'yeniden refah',
+  'refah partisi',
   'zafer partisi',
+  'zp',
+  'deva partisi',
+  'deva',
+  'gelecek partisi',
+  'memleket partisi',
+  'tdp',
+  'tip',
+  'türkiye işçi partisi',
+  'vatan partisi',
+  'doğu perinçek',
+  'perincek',
 
-  // State Institutions (when combined with negative content)
+  // ==========================================
+  // KURUMLAR
+  // ==========================================
   'tbmm',
+  't b m m',
   'meclis',
   'anayasa mahkemesi',
+  'aym',
   'yargıtay',
+  'yargitay',
   'danıştay',
+  'danistay',
+  'sayıştay',
+  'hsyk',
+  'hakimler savcılar',
 
-  // Government terms
+  // ==========================================
+  // GENEL TERİMLER
+  // ==========================================
+  'cumhurbaşkanlığı',
+  'başbakan',
+  'basbakan',
+  'milletvekil',
+  'mv',
   'bakan',
   'bakanlık',
-  'başbakan',
-  'milletvekil',
+  'vali',
+  'kaymakam',
 ]
 
 /**
@@ -215,6 +344,8 @@ function normalizeText(text: string): string {
     .replace(/4/g, 'a')
     .replace(/5/g, 's')
     .replace(/@/g, 'a')
+    // Remove obfuscation characters (*, -, _, ., etc.)
+    .replace(/[*\-_.,!?#$%^&()+=~`'"]/g, '')
     // Remove extra spaces
     .replace(/\s+/g, ' ')
     .trim()
