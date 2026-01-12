@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
-// Service role client for bypassing RLS
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+// Lazy-load supabase admin client
+function getSupabaseAdmin() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+}
 
 function getClientIP(request: NextRequest): string {
   // Try various headers that might contain the real IP
@@ -37,7 +39,7 @@ export async function POST(request: NextRequest) {
     }
 
     const token = authHeader.split(' ')[1]
-    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token)
+    const { data: { user }, error: authError } = await getSupabaseAdmin().auth.getUser(token)
 
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -47,7 +49,7 @@ export async function POST(request: NextRequest) {
     const now = new Date().toISOString()
 
     // Update last_ip in profiles
-    await supabaseAdmin
+    await getSupabaseAdmin()
       .from('profiles')
       .update({
         last_ip: ip,
@@ -56,7 +58,7 @@ export async function POST(request: NextRequest) {
       .eq('id', user.id)
 
     // Add to IP history (upsert)
-    await supabaseAdmin
+    await getSupabaseAdmin()
       .from('user_ip_history')
       .upsert({
         user_id: user.id,

@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
-// Service role client for bypassing RLS
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+// Lazy-load supabase admin client
+function getSupabaseAdmin() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+}
 
 // POST: Ban an IP
 export async function POST(request: NextRequest) {
@@ -17,14 +19,14 @@ export async function POST(request: NextRequest) {
     }
 
     const token = authHeader.split(' ')[1]
-    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token)
+    const { data: { user }, error: authError } = await getSupabaseAdmin().auth.getUser(token)
 
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     // Check if admin
-    const { data: profile } = await supabaseAdmin
+    const { data: profile } = await getSupabaseAdmin()
       .from('profiles')
       .select('is_admin')
       .eq('id', user.id)
@@ -39,7 +41,7 @@ export async function POST(request: NextRequest) {
 
     // If user_id provided, get all their IPs and ban them
     if (user_id) {
-      const { data: ipHistory } = await supabaseAdmin
+      const { data: ipHistory } = await getSupabaseAdmin()
         .from('user_ip_history')
         .select('ip_address')
         .eq('user_id', user_id)
@@ -51,21 +53,22 @@ export async function POST(request: NextRequest) {
           banned_by: user.id,
         }))
 
-        await supabaseAdmin
+        await getSupabaseAdmin()
           .from('banned_ips')
           .upsert(bans, { onConflict: 'ip_address' })
 
         // Also ban the user
-        await supabaseAdmin.auth.admin.updateUserById(user_id, {
+        await getSupabaseAdmin().auth.admin.updateUserById(user_id, {
           ban_duration: 'none', // Permanent
           user_metadata: { banned: true }
         })
 
         // Set banned_until to infinity
-        await supabaseAdmin.rpc('ban_user_permanently', { target_user_id: user_id })
-          .catch(() => {
-            // Fallback: direct SQL might not work, use auth admin
-          })
+        try {
+          await getSupabaseAdmin().rpc('ban_user_permanently', { target_user_id: user_id })
+        } catch {
+          // RPC might not exist, ignore
+        }
 
         return NextResponse.json({
           success: true,
@@ -76,7 +79,7 @@ export async function POST(request: NextRequest) {
 
     // Single IP ban
     if (ip_address) {
-      await supabaseAdmin
+      await getSupabaseAdmin()
         .from('banned_ips')
         .upsert({
           ip_address,
@@ -104,14 +107,14 @@ export async function DELETE(request: NextRequest) {
     }
 
     const token = authHeader.split(' ')[1]
-    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token)
+    const { data: { user }, error: authError } = await getSupabaseAdmin().auth.getUser(token)
 
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     // Check if admin
-    const { data: profile } = await supabaseAdmin
+    const { data: profile } = await getSupabaseAdmin()
       .from('profiles')
       .select('is_admin')
       .eq('id', user.id)
@@ -128,7 +131,7 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'ip required' }, { status: 400 })
     }
 
-    await supabaseAdmin
+    await getSupabaseAdmin()
       .from('banned_ips')
       .delete()
       .eq('ip_address', ip_address)
@@ -150,14 +153,14 @@ export async function GET(request: NextRequest) {
     }
 
     const token = authHeader.split(' ')[1]
-    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token)
+    const { data: { user }, error: authError } = await getSupabaseAdmin().auth.getUser(token)
 
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     // Check if admin
-    const { data: profile } = await supabaseAdmin
+    const { data: profile } = await getSupabaseAdmin()
       .from('profiles')
       .select('is_admin')
       .eq('id', user.id)
@@ -167,7 +170,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
-    const { data: bannedIPs } = await supabaseAdmin
+    const { data: bannedIPs } = await getSupabaseAdmin()
       .from('banned_ips')
       .select('*')
       .order('created_at', { ascending: false })

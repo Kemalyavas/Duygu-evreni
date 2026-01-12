@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
-// Service role client for bypassing RLS
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+// Lazy-load supabase admin client
+function getSupabaseAdmin() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+}
 
 function getClientIP(request: NextRequest): string {
   const forwardedFor = request.headers.get('x-forwarded-for')
@@ -31,7 +33,7 @@ export async function GET(request: NextRequest) {
     const ip = getClientIP(request)
 
     // Check if IP is banned
-    const { data: bannedIP } = await supabaseAdmin
+    const { data: bannedIP } = await getSupabaseAdmin()
       .from('banned_ips')
       .select('id, reason')
       .eq('ip_address', ip)
