@@ -145,6 +145,7 @@ export function useDailyLimit() {
   }, [profile, isAdmin])
 
   // Check real limit from database before creating star
+  // Also updates local state to stay in sync
   const checkRealLimit = useCallback(async (): Promise<boolean> => {
     // Admins have unlimited stars
     if (isAdminRef.current) return true
@@ -162,6 +163,9 @@ export function useDailyLimit() {
       })
 
       if (!currentProfile) return false
+
+      // Update local state with fresh data from database
+      setProfileRef.current(currentProfile)
 
       const currentCount = currentProfile.daily_stars_added ?? 0
       return currentCount < MAX_DAILY_STARS
