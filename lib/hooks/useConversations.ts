@@ -13,7 +13,7 @@ export function useConversations() {
   const [error, setError] = useState<string | null>(null)
   const isMountedRef = useRef(true)
 
-  // Kullanıcının tüm sohbetlerini getir (kabul edilmiş olanlar)
+  // Kullanıcının tüm sohbetlerini getir (kabul edilmiş olanlar, gizlenmemiş)
   const fetchConversations = useCallback(async () => {
     try {
       setLoading(true)
@@ -22,8 +22,8 @@ export function useConversations() {
 
       if (!session?.user) return []
 
-      const { data, error: fetchError } = await supabaseFetch<ConversationWithDetails[]>('conversations', {
-        select: '*, star:stars(*), initiator:profiles!conversations_initiator_id_fkey(id, username, show_username_in_chats), star_owner:profiles!conversations_star_owner_id_fkey(id, username, show_username_in_chats)',
+      const { data, error: fetchError } = await supabaseFetch<(ConversationWithDetails & { hidden_by_initiator: boolean; hidden_by_owner: boolean })[]>('conversations', {
+        select: '*, star:stars(*), initiator:profiles!conversations_initiator_id_fkey(id, username, show_username_in_chats), star_owner:profiles!conversations_star_owner_id_fkey(id, username, show_username_in_chats), hidden_by_initiator, hidden_by_owner',
         filter: `or=(initiator_id.eq.${session.user.id},star_owner_id.eq.${session.user.id})&status=eq.accepted`,
         order: 'updated_at.desc',
         accessToken: session.access_token,
@@ -31,10 +31,20 @@ export function useConversations() {
 
       if (fetchError) throw new Error(fetchError)
 
+      // Filter out hidden conversations for current user
+      const visibleConversations = (data || []).filter(conv => {
+        const isInitiator = conv.initiator_id === session.user.id
+        if (isInitiator) {
+          return !conv.hidden_by_initiator
+        } else {
+          return !conv.hidden_by_owner
+        }
+      })
+
       if (isMountedRef.current) {
-        setConversations(data || [])
+        setConversations(visibleConversations)
       }
-      return data || []
+      return visibleConversations
     } catch (err) {
       if (isMountedRef.current) {
         setError(err instanceof Error ? err.message : 'Sohbetler yüklenemedi')
@@ -325,6 +335,49 @@ export function useConversations() {
     }
   }, [])
 
+  // Sohbeti gizle (sil)
+  const hideConversation = useCallback(async (conversationId: string) => {
+    try {
+      const supabase = createClient()
+      const { data: { session } } = await supabase.auth.getSession()
+
+      if (!session?.user) throw new Error('Giriş yapmanız gerekiyor')
+
+      // Get conversation to determine user role
+      const { data: conv } = await supabaseFetch<{ initiator_id: string; star_owner_id: string }>('conversations', {
+        filter: `id=eq.${conversationId}`,
+        select: 'initiator_id, star_owner_id',
+        single: true,
+        accessToken: session.access_token,
+      })
+
+      if (!conv) throw new Error('Sohbet bulunamadı')
+
+      const isInitiator = conv.initiator_id === session.user.id
+      const updateField = isInitiator ? 'hidden_by_initiator' : 'hidden_by_owner'
+
+      const { error: updateError } = await supabaseUpdate(
+        'conversations',
+        `id=eq.${conversationId}`,
+        { [updateField]: true },
+        session.access_token
+      )
+
+      if (updateError) throw new Error(updateError)
+
+      // Update local state
+      if (isMountedRef.current) {
+        setConversations(prev => prev.filter(c => c.id !== conversationId))
+      }
+
+      return { success: true }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Sohbet silinemedi'
+      if (isMountedRef.current) setError(message)
+      throw new Error(message)
+    }
+  }, [])
+
   return {
     conversations,
     pendingRequests,
@@ -337,6 +390,7 @@ export function useConversations() {
     respondToRequest,
     getRemainingRequests,
     checkExistingConversation,
+    hideConversation,
     pendingCount: pendingRequests.length,
     maxDailyRequests: MAX_DAILY_REQUESTS,
   }

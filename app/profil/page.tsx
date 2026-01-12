@@ -41,6 +41,7 @@ export default function ProfilPage() {
     pendingCount,
     fetchPendingRequests,
     fetchConversations,
+    hideConversation,
   } = useConversations()
   const { notifications, unreadCount } = useNotifications()
 
@@ -398,7 +399,7 @@ export default function ProfilPage() {
                 <h2 className="text-lg font-semibold text-white mb-4">
                   Sohbetlerim
                 </h2>
-                <ConversationList conversations={conversations} />
+                <ConversationList conversations={conversations} onDelete={hideConversation} />
               </Card>
             </motion.div>
           )}

@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { formatDistanceToNow } from 'date-fns'
 import { tr } from 'date-fns/locale'
 import { useStore } from '@/lib/store/useStore'
@@ -9,16 +10,34 @@ import type { ConversationWithDetails } from '@/types'
 interface ConversationListProps {
   conversations: ConversationWithDetails[]
   onSelect?: (conversation: ConversationWithDetails) => void
+  onDelete?: (conversationId: string) => Promise<unknown>
 }
 
-export function ConversationList({ conversations, onSelect }: ConversationListProps) {
+export function ConversationList({ conversations, onSelect, onDelete }: ConversationListProps) {
   const { user } = useAuth()
   const { activeConversation, setActiveConversation, setMessagingPanelOpen } = useStore()
+  const [deletingId, setDeletingId] = useState<string | null>(null)
 
   const handleSelect = (conv: ConversationWithDetails) => {
     setActiveConversation(conv)
     setMessagingPanelOpen(true)
     onSelect?.(conv)
+  }
+
+  const handleDelete = async (e: React.MouseEvent, convId: string) => {
+    e.stopPropagation() // Prevent selecting the conversation
+    if (!onDelete || deletingId) return
+
+    setDeletingId(convId)
+    try {
+      await onDelete(convId)
+      // If deleted conversation was active, clear it
+      if (activeConversation?.id === convId) {
+        setActiveConversation(null)
+      }
+    } finally {
+      setDeletingId(null)
+    }
   }
 
   if (conversations.length === 0) {
@@ -49,7 +68,7 @@ export function ConversationList({ conversations, onSelect }: ConversationListPr
           <button
             key={conv.id}
             onClick={() => handleSelect(conv)}
-            className={`w-full text-left p-3 rounded-xl transition-colors ${
+            className={`w-full text-left p-3 rounded-xl transition-colors group ${
               isActive
                 ? 'bg-cyan-500/20 border border-cyan-500/30'
                 : 'bg-white/5 hover:bg-white/10 border border-transparent'
@@ -85,6 +104,27 @@ export function ConversationList({ conversations, onSelect }: ConversationListPr
                 <div className="w-5 h-5 rounded-full bg-cyan-500 flex items-center justify-center flex-shrink-0">
                   <span className="text-white text-xs font-medium">{conv.unread_count}</span>
                 </div>
+              )}
+
+              {/* Delete button */}
+              {onDelete && (
+                <button
+                  onClick={(e) => handleDelete(e, conv.id)}
+                  disabled={deletingId === conv.id}
+                  className="p-1.5 rounded-lg text-white/30 hover:text-red-400 hover:bg-red-500/10 transition-colors opacity-0 group-hover:opacity-100 flex-shrink-0"
+                  title="Sohbeti sil"
+                >
+                  {deletingId === conv.id ? (
+                    <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                    </svg>
+                  ) : (
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  )}
+                </button>
               )}
             </div>
           </button>
