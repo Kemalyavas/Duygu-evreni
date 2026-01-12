@@ -145,7 +145,7 @@ export function useDailyLimit() {
   }, [profile, isAdmin])
 
   // Check real limit from database before creating star
-  // Also updates local state to stay in sync
+  // Also updates local state to stay in sync AND handles day change
   const checkRealLimit = useCallback(async (): Promise<boolean> => {
     // Admins have unlimited stars
     if (isAdminRef.current) return true
@@ -163,6 +163,30 @@ export function useDailyLimit() {
       })
 
       if (!currentProfile) return false
+
+      const today = getLocalDateString()
+      const lastReset = currentProfile.last_reset_date
+        ? currentProfile.last_reset_date.split('T')[0]
+        : null
+
+      // Check if it's a new day - if so, reset the counters
+      if (lastReset !== today) {
+        const { data: resetProfile } = await supabaseUpdate<Profile>(
+          'profiles',
+          `id=eq.${session.user.id}`,
+          {
+            daily_stars_added: 0,
+            daily_views_used: 0,
+            last_reset_date: today,
+          },
+          session.access_token
+        )
+
+        if (resetProfile) {
+          setProfileRef.current(resetProfile)
+          return true // After reset, user has full limit
+        }
+      }
 
       // Update local state with fresh data from database
       setProfileRef.current(currentProfile)
@@ -203,7 +227,18 @@ export function useDailyLimit() {
         throw new Error('Profil bulunamadı')
       }
 
-      const currentCount = currentProfile.daily_stars_added ?? 0
+      // Check if it's a new day - if so, reset first
+      const today = getLocalDateString()
+      const lastReset = currentProfile.last_reset_date
+        ? currentProfile.last_reset_date.split('T')[0]
+        : null
+
+      let currentCount = currentProfile.daily_stars_added ?? 0
+
+      if (lastReset !== today) {
+        // New day - reset and start fresh
+        currentCount = 0
+      }
 
       if (currentCount >= MAX_DAILY_STARS) {
         throw new Error('Günlük limitinize ulaştınız')
@@ -214,6 +249,7 @@ export function useDailyLimit() {
         `id=eq.${session.user.id}`,
         {
           daily_stars_added: currentCount + 1,
+          last_reset_date: today, // Always update to today
         },
         session.access_token
       )
