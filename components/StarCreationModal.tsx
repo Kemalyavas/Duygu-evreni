@@ -162,7 +162,12 @@ export function StarCreationModal({
             <button
               type="button"
               onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-              className="absolute top-3 right-3 p-1.5 rounded-lg hover:bg-white/10 transition-colors text-white/50 hover:text-white/80"
+              disabled={!canShareStar}
+              className={`absolute top-3 right-3 p-1.5 rounded-lg transition-colors ${
+                canShareStar
+                  ? 'hover:bg-white/10 text-white/50 hover:text-white/80'
+                  : 'text-white/20 cursor-not-allowed'
+              }`}
               title="Emoji ekle"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

@@ -106,7 +106,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<Moderatio
       // If local filter triggered categories that need review, be cautious
       if (localResult.requiresAIReview && localResult.triggeredCategories.length > 0) {
         // Block high-risk categories when AI is unavailable
-        const highRiskCategories = ['SUICIDE_SELF_HARM', 'VIOLENCE_THREATS', 'SEXUAL_EXPLICIT']
+        const highRiskCategories = ['SUICIDE_SELF_HARM', 'VIOLENCE_THREATS', 'CHILD_ABUSE']
         const hasHighRisk = localResult.triggeredCategories.some(cat => highRiskCategories.includes(cat))
 
         if (hasHighRisk) {
