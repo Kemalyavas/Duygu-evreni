@@ -88,9 +88,14 @@ export function MessageRequestModal() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
               </div>
-              <h3 className="text-white text-lg font-medium">İstek Gönderildi!</h3>
+              <h3 className="text-white text-lg font-medium">
+                {remainingRequests === -1 ? 'Mesaj Gönderildi!' : 'İstek Gönderildi!'}
+              </h3>
               <p className="text-white/60 text-sm mt-2">
-                Yıldız sahibi isteğini kabul ederse sohbet başlayacak.
+                {remainingRequests === -1
+                  ? 'Sohbet başladı, artık mesajlaşabilirsiniz.'
+                  : 'Yıldız sahibi isteğini kabul ederse sohbet başlayacak.'
+                }
               </p>
             </motion.div>
           ) : (
@@ -144,7 +149,7 @@ export function MessageRequestModal() {
               <div className="flex items-center justify-between text-xs text-white/40 mb-4">
                 <span>Günlük kalan istek hakkın</span>
                 <span className={remainingRequests === 0 ? 'text-red-400' : 'text-cyan-400'}>
-                  {remainingRequests}/{maxDailyRequests}
+                  {remainingRequests === -1 ? '∞' : `${remainingRequests}/${maxDailyRequests}`}
                 </span>
               </div>
 
@@ -160,7 +165,7 @@ export function MessageRequestModal() {
                 <Button
                   variant="primary"
                   onClick={handleSend}
-                  disabled={!message.trim() || sending || remainingRequests <= 0}
+                  disabled={!message.trim() || sending || (remainingRequests !== -1 && remainingRequests <= 0)}
                   className="flex-1"
                 >
                   {sending ? (
