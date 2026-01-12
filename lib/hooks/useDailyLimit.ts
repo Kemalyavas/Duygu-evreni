@@ -7,6 +7,18 @@ import type { Profile } from '@/types'
 
 const MAX_DAILY_STARS = 3
 
+// Global cache for admin status to prevent duplicate API calls
+let globalAdminChecked = false
+let globalIsAdmin = false
+let globalAdminUserId: string | null = null
+
+// Export reset function for use on sign out
+export function resetDailyLimitCache() {
+  globalAdminChecked = false
+  globalIsAdmin = false
+  globalAdminUserId = null
+}
+
 // Get local date in YYYY-MM-DD format
 function getLocalDateString(): string {
   const now = new Date()
@@ -39,16 +51,36 @@ export function useDailyLimit() {
   // Profile loaded state
   const profileLoaded = !!profile
 
-  // Check admin status from server-side API (secure)
+  // Check admin status from server-side API (secure) - uses global cache
   useEffect(() => {
-    if (!user || adminChecked) return
+    if (!user) return
+
+    // If same user already checked globally, use cached result
+    if (globalAdminChecked && globalAdminUserId === user.id) {
+      setIsAdmin(globalIsAdmin)
+      setAdminChecked(true)
+      return
+    }
+
+    // If user changed, reset global cache
+    if (globalAdminUserId !== user.id) {
+      globalAdminChecked = false
+      globalIsAdmin = false
+      globalAdminUserId = user.id
+    }
+
+    if (adminChecked) return
 
     const checkAdminStatus = async () => {
       try {
         const response = await fetch('/api/admin/check')
         if (response.ok) {
           const data = await response.json()
-          setIsAdmin(data.isAdmin === true)
+          const isAdminResult = data.isAdmin === true
+          setIsAdmin(isAdminResult)
+          // Cache globally
+          globalIsAdmin = isAdminResult
+          globalAdminChecked = true
         }
       } catch {
         // Silent fail - default to non-admin
@@ -60,12 +92,6 @@ export function useDailyLimit() {
 
     checkAdminStatus()
   }, [user, adminChecked])
-
-  // Reset admin check when user changes
-  useEffect(() => {
-    setAdminChecked(false)
-    setIsAdmin(false)
-  }, [user?.id])
 
   // Check and reset if new day - only runs once per profile load
   useEffect(() => {

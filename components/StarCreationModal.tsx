@@ -3,7 +3,7 @@
 import { useState, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Modal, Button } from '@/components/ui'
-import { useDailyLimit, useStars, generateOrbitPosition } from '@/lib/hooks'
+import { useDailyLimit, useStars, useAuth, generateOrbitPosition } from '@/lib/hooks'
 import { moderateContent } from '@/lib/moderation'
 import type { Planet, Star } from '@/types'
 
@@ -37,8 +37,11 @@ export function StarCreationModal({
   const [showEmojiPicker, setShowEmojiPicker] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
+  const { user } = useAuth()
   const { canShareStar, remainingStars, checkRealLimit, incrementStarCount, isAdmin } = useDailyLimit()
   const { createStar } = useStars()
+
+  const isLoggedIn = !!user
 
   const insertEmoji = (emoji: string) => {
     const textarea = textareaRef.current
@@ -65,6 +68,12 @@ export function StarCreationModal({
     setLoading(true)
 
     try {
+      // Check if user is logged in
+      if (!isLoggedIn) {
+        setError('Yıldız paylaşmak için giriş yapmalısın')
+        return
+      }
+
       // Check daily limit from local state first
       if (!canShareStar) {
         setError('Günlük limitine ulaştın. Yarın tekrar dene!')
@@ -155,16 +164,16 @@ export function StarCreationModal({
               placeholder="Duygunu buraya yaz..."
               className="w-full h-32 px-4 py-3 pr-12 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-purple-500/50 resize-none"
               maxLength={MAX_CHARS + 10}
-              disabled={!canShareStar}
+              disabled={!isLoggedIn || !canShareStar}
             />
 
             {/* Emoji button */}
             <button
               type="button"
               onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-              disabled={!canShareStar}
+              disabled={!isLoggedIn || !canShareStar}
               className={`absolute top-3 right-3 p-1.5 rounded-lg transition-colors ${
-                canShareStar
+                isLoggedIn && canShareStar
                   ? 'hover:bg-white/10 text-white/50 hover:text-white/80'
                   : 'text-white/20 cursor-not-allowed'
               }`}
@@ -206,7 +215,9 @@ export function StarCreationModal({
             {/* Character counter */}
             <div className="flex justify-between items-center mt-2">
               <span className="text-xs text-white/40">
-                {isAdmin
+                {!isLoggedIn
+                  ? 'Yıldız paylaşmak için giriş yap'
+                  : isAdmin
                   ? '👑 Admin - Sınırsız yıldız'
                   : remainingStars > 0
                   ? `Bugün ${remainingStars} yıldız paylaşabilirsin`
@@ -257,9 +268,9 @@ export function StarCreationModal({
             size="lg"
             className="w-full"
             isLoading={loading}
-            disabled={!canShareStar || isOverLimit || content.trim().length === 0}
+            disabled={!isLoggedIn || !canShareStar || isOverLimit || content.trim().length === 0}
           >
-            {canShareStar ? 'Yıldızı Gönder' : 'Limit Doldu'}
+            {!isLoggedIn ? 'Giriş Yap' : canShareStar ? 'Yıldızı Gönder' : 'Limit Doldu'}
           </Button>
         </form>
       </div>

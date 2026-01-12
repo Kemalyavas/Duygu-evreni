@@ -4,14 +4,20 @@ import { useEffect, useCallback, useState, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { supabaseFetch } from '@/lib/supabase/fetch'
 import { useStore } from '@/lib/store/useStore'
+import { resetDailyLimitCache } from './useDailyLimit'
 import type { Profile } from '@/types'
 import type { AuthChangeEvent, Session } from '@supabase/supabase-js'
 
 // Global flag to track if auth has been checked
 let authChecked = false
+// Global flag to prevent duplicate IP tracking
+let ipTracked = false
 
-// Track IP in background (non-blocking)
+// Track IP in background (non-blocking) - only once per session
 async function trackUserIP(accessToken: string) {
+  if (ipTracked) return // Already tracked this session
+  ipTracked = true
+
   try {
     await fetch('/api/ip/track', {
       method: 'POST',
@@ -21,6 +27,7 @@ async function trackUserIP(accessToken: string) {
     })
   } catch {
     // Silently fail - IP tracking is not critical
+    ipTracked = false // Reset on error so it can retry
   }
 }
 
@@ -254,6 +261,8 @@ export function useAuth() {
     setUser(null)
     setProfile(null)
     authChecked = false
+    ipTracked = false // Reset IP tracking on sign out
+    resetDailyLimitCache() // Reset admin cache on sign out
   }, [setUser, setProfile])
 
   const signInWithGoogle = useCallback(async () => {
