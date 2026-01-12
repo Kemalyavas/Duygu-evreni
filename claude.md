@@ -3,9 +3,11 @@
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Proje Özeti
-Duygu Evreni, kullanıcıların duygularını "yıldız" olarak paylaşabildiği 3D interaktif bir sosyal platformdur. Her gezegen bir duyguyu temsil eder (Aşk, Mutluluk, Hüzün, Öfke, Umut, Korku, Huzur, Özlem, Şaşkınlık, Minnettarlık).
+
+Duygu Evreni, kullanıcıların duygularını "yıldız" olarak paylaşabildiği 3D interaktif bir sosyal platformdur. Her gezegen bir duyguyu temsil eder (Aşk, Mutluluk, Hüzün, Öfke, Umut, Korku, Huzur, Özlem, Şaşkınlık, Depresyon).
 
 ## Tech Stack
+
 - **Framework:** Next.js 16 (App Router, Turbopack)
 - **React:** 19
 - **3D:** Three.js + React Three Fiber + Drei
@@ -69,6 +71,7 @@ types/
 ## Veritabanı Şeması
 
 ### Ana Tablolar
+
 - `profiles` - Kullanıcı profilleri (username, daily limits, privacy settings)
 - `planets` - 10 gezegen (duygu kategorileri)
 - `stars` - Kullanıcı paylaşımları (content, position_x/y/z)
@@ -79,11 +82,13 @@ types/
 - `user_ip_history` - Kullanıcı IP geçmişi
 
 ### Önemli RLS Kuralları
+
 - Kullanıcılar sadece kendi verilerini görebilir/değiştirebilir
 - `notifications` INSERT için `WITH CHECK (TRUE)` - triggerlar ekler
 - `user_ip_history` sadece kendi kayıtlarını ekleyebilir
 
 ### Aktif Triggerlar
+
 - `check_daily_star_limit` - Günlük 3 yıldız limiti (Europe/Istanbul timezone)
 - `notify_on_message_request` - Mesaj isteği gelince bildirim
 - `notify_on_request_accepted` - İstek kabul edilince bildirim
@@ -92,28 +97,33 @@ types/
 ## Geliştirme Kuralları
 
 ### TypeScript
+
 - Strict mode aktif, `any` kullanma
 - Tüm props için interface tanımla
 - Supabase realtime payload'ları için `as unknown as Type` kullan
 
 ### Supabase
+
 - Client-side: `createClient()` from `@/lib/supabase/client`
 - Server-side: `createClient()` from `@/lib/supabase/server`
 - API routes için lazy-loaded `getSupabaseAdmin()` (service role)
 - RLS her zaman aktif, access token ile işlem yap
 
 ### React Patterns
+
 - Custom hooks `lib/hooks/` altında
 - Global state için Zustand (`useStore`)
 - Realtime subscription'lar `useEffect` içinde, cleanup ile
 - `isMountedRef` pattern ile memory leak önleme
 
 ### 3D (Three.js)
+
 - Material/Geometry disposal önemli (memory leak)
 - `useFrame` içinde state güncellemesi yapma
 - Mobile için performans optimizasyonu gerekli
 
 ### Content Moderation
+
 - İki katmanlı: Local filter + Gemini AI
 - Türkçe karakter normalizasyonu (İ → i için `\u0130` replace)
 - Fail-safe: AI unavailable ise local filter kullan
@@ -149,16 +159,19 @@ ADMIN_EMAILS=                    # Admin email listesi (virgülle ayrılmış)
 ## Önemli Notlar
 
 1. **Günlük Limitler:**
+
    - 3 yıldız/gün (admin hariç)
    - 5 mesaj isteği/gün
    - Reset: Gece 00:00 Türkiye saati
 
 2. **Bildirim Sistemi:**
+
    - Realtime subscription ile anlık
    - Navbar'da badge + Profil'de liste
    - Okundu/okunmadı takibi
 
 3. **IP Ban Sistemi:**
+
    - `/api/ip/track` ile IP kaydı
    - `/api/ip/check` ile ban kontrolü
    - `banned_ips` tablosunda `banned_until = infinity` kalıcı ban

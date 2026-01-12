@@ -6,6 +6,26 @@ import { createClient } from '@/lib/supabase/client'
 import { useStore } from '@/lib/store/useStore'
 import type { Notification, NotificationWithSender } from '@/types'
 
+// Notification sound player
+let notificationAudio: HTMLAudioElement | null = null
+
+function playNotificationSound() {
+  try {
+    // Create audio element lazily
+    if (!notificationAudio) {
+      notificationAudio = new Audio('/sounds/notification.mp3')
+      notificationAudio.volume = 0.5
+    }
+    // Reset and play
+    notificationAudio.currentTime = 0
+    notificationAudio.play().catch(() => {
+      // Autoplay might be blocked - ignore silently
+    })
+  } catch {
+    // Audio not supported - ignore
+  }
+}
+
 export function useNotifications() {
   const [notifications, setNotifications] = useState<NotificationWithSender[]>([])
   const [loading, setLoading] = useState(false)
@@ -187,6 +207,10 @@ export function useNotifications() {
               setNotifications(prev => {
                 // Duplicate kontrolü
                 if (prev.some(n => n.id === newNotification.id)) return prev
+
+                // Play notification sound for new notifications
+                playNotificationSound()
+
                 const updated = [newNotification as NotificationWithSender, ...prev]
                 // Yeni unread count hesapla
                 const newUnreadCount = updated.filter(n => !n.is_read).length

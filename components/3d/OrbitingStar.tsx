@@ -524,6 +524,7 @@ export function OrbitingStars({
       {/* Normal (unread) stars - bright and prominent */}
       {normalIndices.length > 0 && (
         <instancedMesh
+          key={`normal-${normalIndices.length}`}
           ref={normalMeshRef}
           args={[starGeometry, undefined, normalIndices.length]}
           frustumCulled={false}
@@ -544,6 +545,7 @@ export function OrbitingStars({
       {/* Read stars - dimmer appearance */}
       {readIndices.length > 0 && (
         <instancedMesh
+          key={`read-${readIndices.length}`}
           ref={readMeshRef}
           args={[starGeometry, undefined, readIndices.length]}
           frustumCulled={false}
