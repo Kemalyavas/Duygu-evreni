@@ -112,14 +112,8 @@ export function StarCreationModal({
         position_z,
       })
 
-      // Only increment daily limit if star was created successfully
+      // Star created successfully - counter is already incremented by database trigger
       if (newStar) {
-        // Try to increment but don't fail if it errors (star is already created)
-        try {
-          await incrementStarCount()
-        } catch {
-          // Silently ignore - star was created successfully, count will sync on next load
-        }
         setContent('')
         onSuccess?.(newStar)
         onClose()
