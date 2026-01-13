@@ -119,7 +119,7 @@ export interface Report {
 // Bildirim Sistemi Types
 // ==========================================
 
-export type NotificationType = 'message_request' | 'request_accepted' | 'new_message'
+export type NotificationType = 'message_request' | 'request_accepted' | 'new_message' | 'new_conversation'
 
 export interface Notification {
   id: string
