@@ -77,12 +77,41 @@ export function useMessages(conversationId: string | null) {
         setMessages(prev => [...prev, newMessage])
       }
 
-      // Conversation'ın updated_at'ini güncelle
-      await supabaseUpdate('conversations',
-        `id=eq.${conversationId}`,
-        { updated_at: new Date().toISOString() },
-        session.access_token
-      )
+      // Conversation bilgilerini al ve güncelle
+      const { data: convData } = await supabaseFetch<{ initiator_id: string; star_owner_id: string }>('conversations', {
+        filter: `id=eq.${conversationId}`,
+        select: 'initiator_id, star_owner_id',
+        single: true,
+        accessToken: session.access_token,
+      })
+
+      if (convData) {
+        // Karşı tarafın hidden flag'ini sıfırla (mesaj alınca sohbet tekrar görünsün)
+        const isInitiator = convData.initiator_id === session.user.id
+        const updateData: Record<string, unknown> = {
+          updated_at: new Date().toISOString(),
+        }
+
+        // Karşı tarafın hidden flag'ini sıfırla
+        if (isInitiator) {
+          updateData.hidden_by_owner = false
+        } else {
+          updateData.hidden_by_initiator = false
+        }
+
+        await supabaseUpdate('conversations',
+          `id=eq.${conversationId}`,
+          updateData,
+          session.access_token
+        )
+      } else {
+        // Fallback: sadece updated_at güncelle
+        await supabaseUpdate('conversations',
+          `id=eq.${conversationId}`,
+          { updated_at: new Date().toISOString() },
+          session.access_token
+        )
+      }
 
       return data
     } catch (err) {

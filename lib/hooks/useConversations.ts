@@ -173,6 +173,9 @@ export function useConversations() {
             first_message: firstMessage,
             status: newStatus,
             created_at: new Date().toISOString(),
+            // Hidden flag'leri sıfırla - sohbet tekrar her iki taraf için görünür olsun
+            hidden_by_initiator: false,
+            hidden_by_owner: false,
           }
 
           if (isAdmin) {
