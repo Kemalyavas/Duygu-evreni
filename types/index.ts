@@ -134,5 +134,9 @@ export interface Notification {
 }
 
 export interface NotificationWithSender extends Notification {
-  sender?: Profile
+  sender?: {
+    id: string
+    username: string
+    show_username_in_chats: boolean
+  }
 }

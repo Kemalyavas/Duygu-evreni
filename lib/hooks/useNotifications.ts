@@ -53,10 +53,11 @@ export function useNotifications() {
         return []
       }
 
-      const { data, error: fetchError } = await supabaseFetch<NotificationWithSender[]>(
+      // Önce bildirimleri al (sender bilgisi olmadan)
+      const { data: rawNotifications, error: fetchError } = await supabaseFetch<Notification[]>(
         'notifications',
         {
-          select: '*, sender:profiles!notifications_sender_id_fkey(id, username, show_username_in_chats)',
+          select: '*',
           filter: `user_id=eq.${session.user.id}`,
           order: 'created_at.desc',
           limit: 50,
@@ -64,20 +65,44 @@ export function useNotifications() {
         }
       )
 
-      console.log('[Notifications] Fetch result:', { data: data?.length || 0, error: fetchError })
+      console.log('[Notifications] Fetch result:', { data: rawNotifications?.length || 0, error: fetchError })
 
       if (fetchError) {
         throw new Error(fetchError)
       }
 
-      if (isMountedRef.current) {
-        setNotifications(data || [])
-        const unreadCount = (data || []).filter(n => !n.is_read).length
-        setUnreadNotificationsCount(unreadCount)
-        console.log('[Notifications] Set notifications:', data?.length || 0, 'unread:', unreadCount)
+      // Sender ID'lerini topla ve profilleri al
+      const senderIds = [...new Set((rawNotifications || []).filter(n => n.sender_id).map(n => n.sender_id as string))]
+      let senderProfiles: Record<string, { id: string; username: string; show_username_in_chats: boolean }> = {}
+
+      if (senderIds.length > 0) {
+        const { data: profiles } = await supabaseFetch<{ id: string; username: string; show_username_in_chats: boolean }[]>(
+          'profiles',
+          {
+            select: 'id,username,show_username_in_chats',
+            filter: `id=in.(${senderIds.join(',')})`,
+            accessToken: session.access_token,
+          }
+        )
+        if (profiles) {
+          senderProfiles = profiles.reduce((acc, p) => ({ ...acc, [p.id]: p }), {})
+        }
       }
 
-      return data || []
+      // Bildirimlere sender bilgisini ekle
+      const data: NotificationWithSender[] = (rawNotifications || []).map(n => ({
+        ...n,
+        sender: n.sender_id ? senderProfiles[n.sender_id] || undefined : undefined,
+      }))
+
+      if (isMountedRef.current) {
+        setNotifications(data)
+        const unreadCount = data.filter(n => !n.is_read).length
+        setUnreadNotificationsCount(unreadCount)
+        console.log('[Notifications] Set notifications:', data.length, 'unread:', unreadCount)
+      }
+
+      return data
     } catch (err) {
       console.error('[Notifications] Error:', err)
       if (isMountedRef.current) {
