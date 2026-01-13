@@ -2,11 +2,12 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useStore } from '@/lib/store/useStore'
+import { useNotifications } from '@/lib/hooks'
 import { NotificationList } from './NotificationList'
 
 export function NotificationPanel() {
-  const { unreadNotificationsCount } = useStore()
+  // useNotifications hook'u çağırarak bildirimleri fetch et ve unread count'u al
+  const { unreadCount } = useNotifications()
   const [isOpen, setIsOpen] = useState(false)
   const panelRef = useRef<HTMLDivElement>(null)
   const buttonRef = useRef<HTMLButtonElement>(null)
@@ -56,7 +57,7 @@ export function NotificationPanel() {
 
         {/* Badge */}
         <AnimatePresence>
-          {unreadNotificationsCount > 0 && (
+          {unreadCount > 0 && (
             <motion.span
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
@@ -64,14 +65,14 @@ export function NotificationPanel() {
               className="absolute top-0.5 right-0.5 min-w-[16px] h-[16px] px-1 rounded-full bg-cyan-500 flex items-center justify-center"
             >
               <span className="text-white text-[9px] font-bold">
-                {unreadNotificationsCount > 9 ? '9+' : unreadNotificationsCount}
+                {unreadCount > 9 ? '9+' : unreadCount}
               </span>
             </motion.span>
           )}
         </AnimatePresence>
 
         {/* Pulse animation for unread */}
-        {unreadNotificationsCount > 0 && (
+        {unreadCount > 0 && (
           <span className="absolute top-0.5 right-0.5 min-w-[16px] h-[16px] rounded-full bg-cyan-500 animate-ping opacity-75" />
         )}
       </button>
