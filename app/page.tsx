@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback, Suspense } from 'react'
+import { useState, useEffect, useCallback, Suspense, useRef } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
@@ -62,6 +62,9 @@ function HomePageContent() {
   const [hasStartedLoading, setHasStartedLoading] = useState(false) // Track if loading has started for current planet
   const [starsVisuallyReady, setStarsVisuallyReady] = useState(false) // Track when stars are visible (after vortex)
   const [isNavigatingToStar, setIsNavigatingToStar] = useState(false) // Track star navigation animation
+
+  // Keşfet için son ziyaret edilen yıldızları tutan ref (tekrar gitmeyi önlemek için)
+  const recentlyExploredStarsRef = useRef<string[]>([])
 
   // Welcome message for first-time visitors to Umut planet
   const UMUT_PLANET_ID = '1ad9ca47-4ead-4a55-aa3a-5d048fd9f6c5'
@@ -166,6 +169,8 @@ function HomePageContent() {
       playPlanetClick()
     }
     setFocusedPlanetId(planet.id)
+    // Gezegen değiştiğinde keşfet history'sini sıfırla
+    recentlyExploredStarsRef.current = []
     // Shallow routing - doesn't trigger page reload
     window.history.pushState(null, '', `?planet=${planet.id}`)
   }, [playPlanetClick, focusedPlanetId])
@@ -174,6 +179,8 @@ function HomePageContent() {
   const handleBackToUniverse = useCallback(() => {
     setFocusedPlanetId(null)
     setSelectedStar(null)
+    // Keşfet history'sini sıfırla
+    recentlyExploredStarsRef.current = []
     window.history.pushState(null, '', '/')
   }, [])
 
@@ -190,7 +197,7 @@ function HomePageContent() {
     }
   }, [markAsRead, hasClickedStar, playStarClick, incrementViewCount])
 
-  // Random star selection - picks a different star than currently selected
+  // Akıllı keşfet - önce okunmamış yıldızlara git, aynı yıldızlara tekrar gitme
   const handleRandomStar = useCallback(() => {
     if (isNavigatingToStar) return // Prevent spam clicking
 
@@ -203,22 +210,59 @@ function HomePageContent() {
     // If only one star exists, just select it
     if (planetStars.length === 1) {
       handleStarClick(planetStars[0])
-    } else {
-      // Filter out currently selected star to ensure we get a different one
-      const availableStars = selectedStar
-        ? planetStars.filter(s => s.id !== selectedStar.id)
-        : planetStars
-
-      const randomIndex = Math.floor(Math.random() * availableStars.length)
-      const randomStar = availableStars[randomIndex]
-      handleStarClick(randomStar)
+      setTimeout(() => setIsNavigatingToStar(false), 1400)
+      return
     }
+
+    // Okunmamış yıldızları bul (parlak olanlar)
+    const unreadStars = planetStars.filter(s => !readStarIds.has(s.id))
+
+    // Son ziyaret edilen yıldızlar (bu oturumda keşfetle gidilenler)
+    const recentlyExplored = recentlyExploredStarsRef.current
+
+    let candidateStars: Star[]
+
+    if (unreadStars.length > 0) {
+      // Okunmamış yıldız varsa, öncelik onlara
+      // Son ziyaret edilenleri çıkar
+      candidateStars = unreadStars.filter(s => !recentlyExplored.includes(s.id))
+
+      // Tüm okunmamışlar son ziyaretlilerdeyse, listeyi sıfırla ve tekrar dene
+      if (candidateStars.length === 0) {
+        recentlyExploredStarsRef.current = []
+        candidateStars = unreadStars
+      }
+    } else {
+      // Okunmamış yıldız yoksa, tüm yıldızlardan seç
+      // Son ziyaret edilenleri çıkar
+      candidateStars = planetStars.filter(s => !recentlyExplored.includes(s.id))
+
+      // Tüm yıldızlar son ziyaretlilerdeyse, listeyi sıfırla ve tekrar dene
+      if (candidateStars.length === 0) {
+        recentlyExploredStarsRef.current = []
+        candidateStars = planetStars
+      }
+    }
+
+    // Rastgele bir yıldız seç
+    const randomIndex = Math.floor(Math.random() * candidateStars.length)
+    const randomStar = candidateStars[randomIndex]
+
+    // Seçilen yıldızı son ziyaret edilenlere ekle
+    recentlyExploredStarsRef.current = [...recentlyExploredStarsRef.current, randomStar.id]
+
+    // Maksimum 10 yıldız tut (çok büyümesini önle)
+    if (recentlyExploredStarsRef.current.length > 10) {
+      recentlyExploredStarsRef.current = recentlyExploredStarsRef.current.slice(-10)
+    }
+
+    handleStarClick(randomStar)
 
     // Release lock after animation completes
     setTimeout(() => {
       setIsNavigatingToStar(false)
     }, 1400)
-  }, [stars, focusedPlanetId, handleStarClick, selectedStar, isNavigatingToStar])
+  }, [stars, focusedPlanetId, handleStarClick, readStarIds, isNavigatingToStar])
 
   const handleClosePanel = useCallback(() => {
     setSelectedStar(null)
