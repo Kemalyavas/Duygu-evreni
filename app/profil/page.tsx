@@ -1,15 +1,16 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useEffect, useState, Suspense } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { format } from 'date-fns'
 import { tr } from 'date-fns/locale'
-import { Navbar, Card, Button, NotificationList } from '@/components/ui'
+import { Navbar, Card, Button } from '@/components/ui'
 import { BlackHoleContact } from '@/components/BlackHoleContact'
 import { DonutChart, StarListItem } from '@/components/profile'
 import { PendingRequestsList, ConversationList, ChatPanel } from '@/components/messaging'
 import { useAuth, usePlanets, useDailyLimit, useConversations, useNotifications } from '@/lib/hooks'
+import { useStore } from '@/lib/store/useStore'
 import { createClient } from '@/lib/supabase/client'
 
 interface PlanetStats {
@@ -30,8 +31,9 @@ interface UserStar {
 
 const STARS_PER_PAGE = 10
 
-export default function ProfilPage() {
+function ProfilPageContent() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { user, profile, setProfile, signOut } = useAuth()
   const { planets } = usePlanets()
   const { remainingStars, maxStars } = useDailyLimit()
@@ -43,7 +45,8 @@ export default function ProfilPage() {
     fetchConversations,
     hideConversation,
   } = useConversations()
-  const { notifications, unreadCount } = useNotifications()
+  useNotifications() // Hook'u çağır ama değerleri kullanma (header'daki panel için gerekli)
+  const { setActiveConversation } = useStore()
 
   const [stats, setStats] = useState<PlanetStats[]>([])
   const [totalStars, setTotalStars] = useState(0)
@@ -57,6 +60,19 @@ export default function ProfilPage() {
   const [dominantEmotion, setDominantEmotion] = useState<PlanetStats | null>(null)
   const [hasMore, setHasMore] = useState(false)
   const [privacyLoading, setPrivacyLoading] = useState(false)
+
+  // URL'den conversation parametresini oku ve sohbeti aç
+  useEffect(() => {
+    const conversationId = searchParams.get('conversation')
+    if (conversationId && conversations.length > 0) {
+      const conversation = conversations.find(c => c.id === conversationId)
+      if (conversation) {
+        setActiveConversation(conversation)
+        // URL'i temizle (opsiyonel)
+        router.replace('/profil', { scroll: false })
+      }
+    }
+  }, [searchParams, conversations, setActiveConversation, router])
 
   // Fetch user's star statistics and full star data
   useEffect(() => {
@@ -342,30 +358,6 @@ export default function ProfilPage() {
             </div>
           </Card>
 
-          {/* Bildirimler */}
-          {notifications.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-            >
-              <Card>
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-semibold text-white">
-                    Bildirimler
-                  </h2>
-                  {unreadCount > 0 && (
-                    <span className="bg-cyan-500/20 text-cyan-400 text-xs px-2.5 py-1 rounded-full font-medium">
-                      {unreadCount} yeni
-                    </span>
-                  )}
-                </div>
-                <div className="max-h-80 overflow-y-auto">
-                  <NotificationList showHeader={false} />
-                </div>
-              </Card>
-            </motion.div>
-          )}
-
           {/* Pending Message Requests */}
           {pendingCount > 0 && (
             <motion.div
@@ -501,5 +493,17 @@ export default function ProfilPage() {
       {/* Chat Panel - Global */}
       <ChatPanel />
     </div>
+  )
+}
+
+export default function ProfilPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-b from-slate-900 via-purple-900/20 to-slate-900 flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-white/20 border-t-cyan-400 rounded-full animate-spin" />
+      </div>
+    }>
+      <ProfilPageContent />
+    </Suspense>
   )
 }

@@ -136,17 +136,12 @@ export function NotificationList({ onClose, showHeader = true }: NotificationLis
 
   const handleNotificationClick = (notification: NotificationWithSender) => {
     // Bildirim tipine göre yönlendirme
-    switch (notification.type) {
-      case 'message_request':
-        // Profil sayfasına git (mesaj istekleri bölümüne)
-        router.push('/profil')
-        break
-
-      case 'request_accepted':
-      case 'new_message':
-        // Profil sayfasına git (sohbetler bölümüne)
-        router.push('/profil')
-        break
+    if (notification.conversation_id) {
+      // Sohbet varsa, o sohbeti aç
+      router.push(`/profil?conversation=${notification.conversation_id}`)
+    } else {
+      // Conversation yoksa sadece profil sayfasına git
+      router.push('/profil')
     }
 
     onClose?.()
