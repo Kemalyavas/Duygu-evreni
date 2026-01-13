@@ -4,7 +4,8 @@ import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { formatDistanceToNow } from 'date-fns'
 import { tr } from 'date-fns/locale'
-import { useNotifications } from '@/lib/hooks'
+import { useNotifications, useConversations } from '@/lib/hooks'
+import { useStore } from '@/lib/store/useStore'
 import type { NotificationWithSender, NotificationType } from '@/types'
 
 interface NotificationListProps {
@@ -133,14 +134,21 @@ export function NotificationList({ onClose, showHeader = true }: NotificationLis
     markAllAsRead,
     deleteNotification,
   } = useNotifications()
+  const { conversations } = useConversations()
+  const { setActiveConversation } = useStore()
 
   const handleNotificationClick = (notification: NotificationWithSender) => {
-    // Bildirim tipine göre yönlendirme
+    // Sohbet varsa, direkt sohbeti aç (sayfa fark etmez)
     if (notification.conversation_id) {
-      // Sohbet varsa, o sohbeti aç
-      router.push(`/profil?conversation=${notification.conversation_id}`)
-    } else {
-      // Conversation yoksa sadece profil sayfasına git
+      const conversation = conversations.find(c => c.id === notification.conversation_id)
+      if (conversation) {
+        setActiveConversation(conversation)
+      } else {
+        // Conversation listede yoksa profil sayfasına git (orada yüklenecek)
+        router.push(`/profil?conversation=${notification.conversation_id}`)
+      }
+    } else if (notification.type === 'message_request') {
+      // Mesaj isteği bildirimi ise profil sayfasına git (istekler orada)
       router.push('/profil')
     }
 
