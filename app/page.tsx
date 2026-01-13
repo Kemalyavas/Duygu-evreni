@@ -214,6 +214,9 @@ function HomePageContent() {
       return
     }
 
+    // Şu an seçili yıldızın ID'si (aynı yıldıza gitmeyi önlemek için)
+    const currentStarId = selectedStar?.id
+
     // Okunmamış yıldızları bul (parlak olanlar)
     const unreadStars = planetStars.filter(s => !readStarIds.has(s.id))
 
@@ -224,23 +227,25 @@ function HomePageContent() {
 
     if (unreadStars.length > 0) {
       // Okunmamış yıldız varsa, öncelik onlara
-      // Son ziyaret edilenleri çıkar
-      candidateStars = unreadStars.filter(s => !recentlyExplored.includes(s.id))
+      // Son ziyaret edilenleri ve şu anki yıldızı çıkar
+      candidateStars = unreadStars.filter(s => !recentlyExplored.includes(s.id) && s.id !== currentStarId)
 
       // Tüm okunmamışlar son ziyaretlilerdeyse, listeyi sıfırla ve tekrar dene
       if (candidateStars.length === 0) {
         recentlyExploredStarsRef.current = []
-        candidateStars = unreadStars
+        // Sadece şu anki yıldızı hariç tut
+        candidateStars = unreadStars.filter(s => s.id !== currentStarId)
       }
     } else {
       // Okunmamış yıldız yoksa, tüm yıldızlardan seç
-      // Son ziyaret edilenleri çıkar
-      candidateStars = planetStars.filter(s => !recentlyExplored.includes(s.id))
+      // Son ziyaret edilenleri ve şu anki yıldızı çıkar
+      candidateStars = planetStars.filter(s => !recentlyExplored.includes(s.id) && s.id !== currentStarId)
 
       // Tüm yıldızlar son ziyaretlilerdeyse, listeyi sıfırla ve tekrar dene
       if (candidateStars.length === 0) {
         recentlyExploredStarsRef.current = []
-        candidateStars = planetStars
+        // Sadece şu anki yıldızı hariç tut
+        candidateStars = planetStars.filter(s => s.id !== currentStarId)
       }
     }
 
@@ -262,7 +267,7 @@ function HomePageContent() {
     setTimeout(() => {
       setIsNavigatingToStar(false)
     }, 1400)
-  }, [stars, focusedPlanetId, handleStarClick, readStarIds, isNavigatingToStar])
+  }, [stars, focusedPlanetId, handleStarClick, readStarIds, isNavigatingToStar, selectedStar])
 
   const handleClosePanel = useCallback(() => {
     setSelectedStar(null)
