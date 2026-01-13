@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { supabaseFetch, supabaseUpdate } from '@/lib/supabase/fetch'
 import { createClient } from '@/lib/supabase/client'
+import type { AuthChangeEvent } from '@supabase/supabase-js'
 import { useStore } from '@/lib/store/useStore'
 import type { Notification, NotificationWithSender } from '@/types'
 
@@ -32,7 +33,6 @@ export function useNotifications() {
   const [error, setError] = useState<string | null>(null)
   const isMountedRef = useRef(true)
   const channelRef = useRef<ReturnType<ReturnType<typeof createClient>['channel']> | null>(null)
-  const initialFetchDone = useRef(false)
 
   const { setUnreadNotificationsCount } = useStore()
 
@@ -266,13 +266,30 @@ export function useNotifications() {
     }
   }, [setUnreadNotificationsCount])
 
-  // Initial fetch
+  // Auth state change listener - session değiştiğinde bildirimleri yeniden fetch et
   useEffect(() => {
-    if (!initialFetchDone.current) {
-      initialFetchDone.current = true
-      fetchNotifications()
+    const supabase = createClient()
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event: AuthChangeEvent) => {
+      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+        // Session değiştiğinde bildirimleri yeniden fetch et
+        fetchNotifications()
+      } else if (event === 'SIGNED_OUT') {
+        // Çıkış yapıldığında bildirimleri temizle
+        if (isMountedRef.current) {
+          setNotifications([])
+          setUnreadNotificationsCount(0)
+        }
+      }
+    })
+
+    // İlk yüklemede de fetch yap
+    fetchNotifications()
+
+    return () => {
+      subscription.unsubscribe()
     }
-  }, [fetchNotifications])
+  }, [fetchNotifications, setUnreadNotificationsCount])
 
   // Cleanup
   useEffect(() => {
