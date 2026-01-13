@@ -271,7 +271,8 @@ export function useNotifications() {
     const supabase = createClient()
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event: AuthChangeEvent) => {
-      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+      // INITIAL_SESSION: sayfa yenilendiğinde, SIGNED_IN: giriş yapıldığında, TOKEN_REFRESHED: token yenilendiğinde
+      if (event === 'INITIAL_SESSION' || event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
         // Session değiştiğinde bildirimleri yeniden fetch et
         fetchNotifications()
       } else if (event === 'SIGNED_OUT') {
