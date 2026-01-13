@@ -68,7 +68,13 @@ export const useStore = create<AppState>((set) => ({
 
   // Messaging state
   activeConversation: null,
-  setActiveConversation: (conversation) => set({ activeConversation: conversation }),
+  setActiveConversation: (conversation) => set({
+    activeConversation: conversation,
+    // Conversation set edildiğinde panel'i de aç (null ise kapat)
+    isMessagingPanelOpen: conversation !== null,
+    // Compact modunu kapat
+    isChatCompact: false,
+  }),
   isMessagingPanelOpen: false,
   setMessagingPanelOpen: (open) => set({ isMessagingPanelOpen: open }),
   isChatCompact: false,
