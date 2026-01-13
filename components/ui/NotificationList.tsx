@@ -4,9 +4,10 @@ import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { formatDistanceToNow } from 'date-fns'
 import { tr } from 'date-fns/locale'
-import { useNotifications, useConversations } from '@/lib/hooks'
+import { useNotifications, useConversations, useAuth } from '@/lib/hooks'
 import { useStore } from '@/lib/store/useStore'
-import type { NotificationWithSender, NotificationType } from '@/types'
+import { supabaseFetch, createClient } from '@/lib/supabase/fetch'
+import type { NotificationWithSender, NotificationType, ConversationWithDetails } from '@/types'
 
 interface NotificationListProps {
   onClose?: () => void
@@ -126,6 +127,7 @@ function NotificationItem({
 
 export function NotificationList({ onClose, showHeader = true }: NotificationListProps) {
   const router = useRouter()
+  const { user } = useAuth()
   const {
     notifications,
     unreadCount,
@@ -137,14 +139,46 @@ export function NotificationList({ onClose, showHeader = true }: NotificationLis
   const { conversations } = useConversations()
   const { setActiveConversation } = useStore()
 
-  const handleNotificationClick = (notification: NotificationWithSender) => {
+  const handleNotificationClick = async (notification: NotificationWithSender) => {
     // Sohbet varsa, direkt sohbeti aç (sayfa fark etmez)
     if (notification.conversation_id) {
-      const conversation = conversations.find(c => c.id === notification.conversation_id)
+      // Önce local listeden bak
+      let conversation = conversations.find(c => c.id === notification.conversation_id)
+
+      // Yoksa fetch et
+      if (!conversation && user) {
+        try {
+          const supabase = createClient()
+          const { data: { session } } = await supabase.auth.getSession()
+
+          if (session?.access_token) {
+            const { data } = await supabaseFetch<ConversationWithDetails[]>(
+              'conversations',
+              {
+                select: `
+                  *,
+                  star:stars(id, content, planet_id),
+                  initiator:profiles!conversations_initiator_id_fkey(id, username, show_username_in_chats),
+                  owner:profiles!conversations_star_owner_id_fkey(id, username, show_username_in_chats)
+                `,
+                filter: `id=eq.${notification.conversation_id}`,
+                single: true,
+                accessToken: session.access_token,
+              }
+            )
+            if (data) {
+              conversation = Array.isArray(data) ? data[0] : data
+            }
+          }
+        } catch (err) {
+          console.error('Failed to fetch conversation:', err)
+        }
+      }
+
       if (conversation) {
         setActiveConversation(conversation)
       } else {
-        // Conversation listede yoksa profil sayfasına git (orada yüklenecek)
+        // Hala bulunamadıysa profil sayfasına git
         router.push(`/profil?conversation=${notification.conversation_id}`)
       }
     } else if (notification.type === 'message_request') {

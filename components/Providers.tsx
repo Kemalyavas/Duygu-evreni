@@ -2,6 +2,7 @@
 
 import { AuthHandler } from './AuthHandler'
 import { MusicProvider } from './MusicProvider'
+import { ChatPanel } from './messaging/ChatPanel'
 
 interface ProvidersProps {
   children: React.ReactNode
@@ -16,6 +17,8 @@ export function Providers({ children }: ProvidersProps) {
     <MusicProvider>
       <AuthHandler />
       {children}
+      {/* Global Chat Panel - tüm sayfalarda görünür */}
+      <ChatPanel />
     </MusicProvider>
   )
 }

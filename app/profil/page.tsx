@@ -8,7 +8,7 @@ import { tr } from 'date-fns/locale'
 import { Navbar, Card, Button } from '@/components/ui'
 import { BlackHoleContact } from '@/components/BlackHoleContact'
 import { DonutChart, StarListItem } from '@/components/profile'
-import { PendingRequestsList, ConversationList, ChatPanel } from '@/components/messaging'
+import { PendingRequestsList, ConversationList } from '@/components/messaging'
 import { useAuth, usePlanets, useDailyLimit, useConversations, useNotifications } from '@/lib/hooks'
 import { useStore } from '@/lib/store/useStore'
 import { createClient } from '@/lib/supabase/client'
@@ -489,9 +489,6 @@ function ProfilPageContent() {
           </div>
         </motion.div>
       </div>
-
-      {/* Chat Panel - Global */}
-      <ChatPanel />
     </div>
   )
 }
