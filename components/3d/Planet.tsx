@@ -7,6 +7,7 @@ import { Html, useGLTF } from '@react-three/drei'
 import * as THREE from 'three'
 import type { Planet as PlanetType } from '@/types'
 import { PLANET_MODELS } from '@/lib/planetModels'
+import { useTranslation } from '@/lib/i18n'
 
 interface PlanetProps {
   planet: PlanetType
@@ -255,12 +256,14 @@ export function Planet({ planet, starCount = 0, onClick, isSelected = false }: P
   const [hovered, setHovered] = useState(false)
   const [showMobileTooltip, setShowMobileTooltip] = useState(false)
   const mobileTooltipTimeout = useRef<NodeJS.Timeout | null>(null)
+  const { t, language } = useTranslation()
 
   const baseColor = useMemo(() => new THREE.Color(planet.color), [planet.color])
   const modelPath = PLANET_MODELS[planet.name]
   const hasCustomModel = !!modelPath
   const isHope = planet.name === 'Hope'
   const isDepression = planet.name === 'Depression'
+  const planetName = language === 'tr' ? planet.name_tr : (planet.name_en || planet.name_tr)
 
   // Detect mobile device
   const isMobile = useMemo(() => {
@@ -389,10 +392,10 @@ export function Planet({ planet, starCount = 0, onClick, isSelected = false }: P
           }}
         >
           <div className="glass-tooltip">
-            <p className="text-white font-bold text-xl">{planet.name_tr}</p>
-            <p className="text-white/70 text-base">{starCount} yıldız</p>
+            <p className="text-white font-bold text-xl">{planetName}</p>
+            <p className="text-white/70 text-base">{starCount} {language === 'tr' ? 'yıldız' : 'stars'}</p>
             {showMobileTooltip && (
-              <p className="text-cyan-400/80 text-xs mt-1">Girmek için tekrar dokun</p>
+              <p className="text-cyan-400/80 text-xs mt-1">{t('universe.tapToEnter')}</p>
             )}
           </div>
         </Html>

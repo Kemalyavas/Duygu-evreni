@@ -88,7 +88,8 @@
     "beFirstStar": "İlk yıldızı sen paylaş!",
     "starShared": "Yıldızın paylaşıldı!",
     "dailyLimitReached": "Bugünkü yıldız limitine ulaştın",
-    "loginToShare": "Yıldız paylaşmak için giriş yap"
+    "loginToShare": "Yıldız paylaşmak için giriş yap",
+    "tapToEnter": "Girmek için tekrar dokun"
   },
   "planets": {
     "joy": "Mutluluk",

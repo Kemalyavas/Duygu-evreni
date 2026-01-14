@@ -9,6 +9,7 @@ import type { Planet as PlanetType } from '@/types'
 import { PLANET_MODELS } from '@/lib/planetModels'
 import { ORBIT, UI_ANIMATION } from '@/lib/constants/animation'
 import { useMobile } from '@/lib/hooks/useMobile'
+import { useTranslation } from '@/lib/i18n'
 
 // Preload all planet models immediately when this module loads
 Object.values(PLANET_MODELS).forEach((path) => {
@@ -44,9 +45,11 @@ export function Planet3D({
   const [hovered, setHovered] = useState(false)
   const mobileTooltipTimeout = useRef<NodeJS.Timeout | null>(null)
   const isMobile = useMobile()
+  const { t, language } = useTranslation()
 
   const modelPath = PLANET_MODELS[planet.name]
   const hasCustomModel = !!modelPath
+  const planetName = language === 'tr' ? planet.name_tr : (planet.name_en || planet.name_tr)
 
   const baseColor = useMemo(() => new THREE.Color(planet.color), [planet.color])
 
@@ -197,10 +200,10 @@ export function Planet3D({
           }}
         >
           <div className="glass-tooltip">
-            <p className="text-white font-bold text-xl">{planet.name_tr}</p>
-            <p className="text-white/70 text-base">{starCount} yıldız</p>
+            <p className="text-white font-bold text-xl">{planetName}</p>
+            <p className="text-white/70 text-base">{starCount} {language === 'tr' ? 'yıldız' : 'stars'}</p>
             {showMobileTooltip && (
-              <p className="text-cyan-400/80 text-xs mt-1">Girmek için tekrar dokun</p>
+              <p className="text-cyan-400/80 text-xs mt-1">{t('universe.tapToEnter')}</p>
             )}
           </div>
         </Html>

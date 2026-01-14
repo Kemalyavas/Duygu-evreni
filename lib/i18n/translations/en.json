@@ -88,7 +88,8 @@
     "beFirstStar": "Be the first to share a star!",
     "starShared": "Your star has been shared!",
     "dailyLimitReached": "You've reached today's star limit",
-    "loginToShare": "Login to share a star"
+    "loginToShare": "Login to share a star",
+    "tapToEnter": "Tap again to enter"
   },
   "planets": {
     "joy": "Joy",
