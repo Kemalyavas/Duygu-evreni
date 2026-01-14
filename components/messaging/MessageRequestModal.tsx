@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from '@/components/ui'
 import { useStore } from '@/lib/store/useStore'
 import { useConversations } from '@/lib/hooks'
+import { useTranslation } from '@/lib/i18n'
 
 const MAX_MESSAGE_LENGTH = 500
 
@@ -14,6 +15,7 @@ export function MessageRequestModal() {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
   const [remainingRequests, setRemainingRequests] = useState(5)
+  const { t } = useTranslation()
 
   const { selectedStar, isMessageRequestModalOpen, setMessageRequestModalOpen, triggerConversationCreated } = useStore()
   const { sendMessageRequest, getRemainingRequests, maxDailyRequests } = useConversations()
@@ -46,7 +48,7 @@ export function MessageRequestModal() {
         handleClose()
       }, 2000)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Bir hata oluştu')
+      setError(err instanceof Error ? err.message : t('errors.generic'))
     } finally {
       setSending(false)
     }
@@ -89,12 +91,12 @@ export function MessageRequestModal() {
                 </svg>
               </div>
               <h3 className="text-white text-lg font-medium">
-                {remainingRequests === -1 ? 'Mesaj Gönderildi!' : 'İstek Gönderildi!'}
+                {remainingRequests === -1 ? t('messageRequest.messageSentTitle') : t('messages.requestSent')}
               </h3>
               <p className="text-white/60 text-sm mt-2">
                 {remainingRequests === -1
-                  ? 'Sohbet başladı, artık mesajlaşabilirsiniz.'
-                  : 'Yıldız sahibi isteğini kabul ederse sohbet başlayacak.'
+                  ? t('messageRequest.chatStartedDesc')
+                  : t('messageRequest.starOwnerWillDecide')
                 }
               </p>
             </motion.div>
@@ -102,7 +104,7 @@ export function MessageRequestModal() {
             <>
               {/* Header */}
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-white text-lg font-semibold">Mesaj İsteği Gönder</h2>
+                <h2 className="text-white text-lg font-semibold">{t('messageRequest.title')}</h2>
                 <button
                   onClick={handleClose}
                   className="text-white/60 hover:text-white p-1 rounded-lg hover:bg-white/10 transition-colors"
@@ -115,20 +117,19 @@ export function MessageRequestModal() {
 
               {/* Info */}
               <p className="text-white/60 text-sm mb-4">
-                Bu yıldızın sahibine anonim bir mesaj isteği göndereceksin.
-                Kabul edilirse sohbet başlar ve isimler görünür hale gelir.
+                {t('messageRequest.anonymousRequestInfo')}
               </p>
 
               {/* Textarea */}
               <div className="mb-4">
                 <div className="flex justify-between text-xs text-white/40 mb-2">
-                  <span>İlk mesajın</span>
+                  <span>{t('messageRequest.yourFirstMessage')}</span>
                   <span>{message.length}/{MAX_MESSAGE_LENGTH}</span>
                 </div>
                 <textarea
                   value={message}
                   onChange={(e) => setMessage(e.target.value.slice(0, MAX_MESSAGE_LENGTH))}
-                  placeholder="Merhaba, bu yıldızını çok beğendim..."
+                  placeholder={t('messageRequest.placeholder')}
                   className="w-full h-32 bg-white/5 border border-white/10 rounded-xl p-4 text-white placeholder:text-white/30 focus:outline-none focus:border-white/30 resize-none transition-colors"
                   autoFocus
                 />
@@ -147,7 +148,7 @@ export function MessageRequestModal() {
 
               {/* Daily limit info */}
               <div className="flex items-center justify-between text-xs text-white/40 mb-4">
-                <span>Günlük kalan istek hakkın</span>
+                <span>{t('messageRequest.dailyRequestsRemaining')}</span>
                 <span className={remainingRequests === 0 ? 'text-red-400' : 'text-cyan-400'}>
                   {remainingRequests === -1 ? '∞' : `${remainingRequests}/${maxDailyRequests}`}
                 </span>
@@ -160,7 +161,7 @@ export function MessageRequestModal() {
                   onClick={handleClose}
                   className="flex-1"
                 >
-                  Vazgeç
+                  {t('messageRequest.giveUp')}
                 </Button>
                 <Button
                   variant="primary"
@@ -174,10 +175,10 @@ export function MessageRequestModal() {
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                       </svg>
-                      Gönderiliyor
+                      {t('messageRequest.sending')}
                     </span>
                   ) : (
-                    'Gönder'
+                    t('common.send')
                   )}
                 </Button>
               </div>

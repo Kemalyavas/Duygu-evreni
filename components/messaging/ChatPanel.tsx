@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useStore } from '@/lib/store/useStore'
 import { useMessages, useAuth, useMobile } from '@/lib/hooks'
+import { useTranslation } from '@/lib/i18n'
 import { MessageBubble } from './MessageBubble'
 import { MessageInput } from './MessageInput'
 
@@ -103,10 +104,12 @@ function CompactChatButton({
   username,
   unreadCount,
   onClick,
+  returnText,
 }: {
   username: string
   unreadCount: number
   onClick: () => void
+  returnText: string
 }) {
   return (
     <motion.div
@@ -137,7 +140,7 @@ function CompactChatButton({
         {/* Text */}
         <div className="text-left">
           <p className="text-white font-medium text-sm">{username}</p>
-          <p className="text-white/40 text-xs">Sohbete dön</p>
+          <p className="text-white/40 text-xs">{returnText}</p>
         </div>
 
         {/* Expand icon */}
@@ -152,6 +155,7 @@ function CompactChatButton({
 export function ChatPanel() {
   const router = useRouter()
   const { user } = useAuth()
+  const { t } = useTranslation()
   const isMobile = useMobile()
   const keyboardHeight = useKeyboardHeight(isMobile)
   const [hasMounted, setHasMounted] = useState(false)
@@ -242,7 +246,7 @@ export function ChatPanel() {
   // Respect privacy setting: show username only if show_username_in_chats is true
   const otherUsername = (otherUser?.show_username_in_chats !== false && otherUser?.username)
     ? otherUser.username
-    : 'Anonim'
+    : t('common.anonymous')
 
   // Show compact button when minimized (desktop only)
   if (isChatCompact && !isMobile) {
@@ -252,6 +256,7 @@ export function ChatPanel() {
           username={otherUsername}
           unreadCount={unreadInCompact}
           onClick={handleExpand}
+          returnText={t('chat.returnToChat')}
         />
       </AnimatePresence>
     )
@@ -280,7 +285,7 @@ export function ChatPanel() {
             </div>
             <div>
               <h3 className="text-white font-medium">{otherUsername}</h3>
-              <p className="text-white/40 text-xs">Sohbet</p>
+              <p className="text-white/40 text-xs">{t('chat.title')}</p>
             </div>
           </div>
           <div className="flex items-center gap-1">
@@ -288,7 +293,7 @@ export function ChatPanel() {
             <button
               onClick={handleMinimize}
               className="p-2 rounded-full hover:bg-white/10 text-white/60 hover:text-white transition-colors"
-              title="Küçült"
+              title={t('chat.minimize')}
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
@@ -298,7 +303,7 @@ export function ChatPanel() {
             <button
               onClick={handleClose}
               className="p-2 rounded-full hover:bg-white/10 text-white/60 hover:text-white transition-colors"
-              title="Kapat"
+              title={t('common.close')}
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -325,7 +330,7 @@ export function ChatPanel() {
                 </svg>
               </div>
               <p className="text-white/30 text-[10px] mt-1 text-center group-hover:text-white/50 transition-colors">
-                Yıldıza gitmek için tıkla
+                {t('chat.clickToGoToStar')}
               </p>
             </button>
           </div>
@@ -334,9 +339,9 @@ export function ChatPanel() {
 
       {/* Messages */}
       <div className="relative z-10 flex-1 overflow-y-auto p-4 space-y-3">
-        {/* Sohbet başladı */}
+        {/* Chat started */}
         <div className="text-center py-4">
-          <p className="text-white/30 text-xs">Sohbet başladı</p>
+          <p className="text-white/30 text-xs">{t('chat.chatStarted')}</p>
         </div>
 
         {/* İlk mesaj (mesaj isteğindeki yazı) */}
@@ -430,7 +435,7 @@ export function ChatPanel() {
                 </svg>
               </div>
               <p className="text-white/30 text-[10px] mt-1 text-center">
-                Yıldıza gitmek için dokun
+                {t('chat.tapToGoToStar')}
               </p>
             </button>
           </div>
@@ -447,7 +452,7 @@ export function ChatPanel() {
         }}
       >
         <div className="text-center py-4">
-          <p className="text-white/30 text-xs">Sohbet başladı</p>
+          <p className="text-white/30 text-xs">{t('chat.chatStarted')}</p>
         </div>
 
         {/* İlk mesaj (mesaj isteğindeki yazı) */}

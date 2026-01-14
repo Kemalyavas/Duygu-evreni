@@ -3,9 +3,10 @@
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { formatDistanceToNow } from 'date-fns'
-import { tr } from 'date-fns/locale'
+import { tr, enUS } from 'date-fns/locale'
 import { useNotifications, useConversations, useAuth } from '@/lib/hooks'
 import { useStore } from '@/lib/store/useStore'
+import { useTranslation } from '@/lib/i18n'
 import { supabaseFetch, createClient } from '@/lib/supabase/fetch'
 import type { NotificationWithSender, NotificationType, ConversationWithDetails } from '@/types'
 
@@ -65,11 +66,15 @@ function NotificationItem({
   onMarkAsRead,
   onDelete,
   onClick,
+  deleteTitle,
+  dateLocale,
 }: {
   notification: NotificationWithSender
   onMarkAsRead: (id: string) => void
   onDelete: (id: string) => void
   onClick: (notification: NotificationWithSender) => void
+  deleteTitle: string
+  dateLocale: typeof tr | typeof enUS
 }) {
   const handleClick = () => {
     if (!notification.is_read) {
@@ -104,7 +109,7 @@ function NotificationItem({
             </p>
           )}
           <p className="text-white/30 text-[10px] mt-1">
-            {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true, locale: tr })}
+            {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true, locale: dateLocale })}
           </p>
         </div>
 
@@ -116,7 +121,7 @@ function NotificationItem({
               onDelete(notification.id)
             }}
             className="p-1 rounded-full hover:bg-white/10 text-white/40 hover:text-white/60"
-            title="Sil"
+            title={deleteTitle}
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -136,6 +141,8 @@ function NotificationItem({
 export function NotificationList({ onClose, showHeader = true }: NotificationListProps) {
   const router = useRouter()
   const { user } = useAuth()
+  const { t, language } = useTranslation()
+  const dateLocale = language === 'tr' ? tr : enUS
   const {
     notifications,
     unreadCount,
@@ -210,13 +217,13 @@ export function NotificationList({ onClose, showHeader = true }: NotificationLis
       {/* Header */}
       {showHeader && (
         <div className="flex items-center justify-between p-4 border-b border-white/10">
-          <h3 className="text-white font-semibold">Bildirimler</h3>
+          <h3 className="text-white font-semibold">{t('notifications.title')}</h3>
           {unreadCount > 0 && (
             <button
               onClick={markAllAsRead}
               className="text-cyan-400 text-xs hover:text-cyan-300 transition-colors"
             >
-              Tümünü okundu işaretle
+              {t('notifications.markAllRead')}
             </button>
           )}
         </div>
@@ -235,7 +242,7 @@ export function NotificationList({ onClose, showHeader = true }: NotificationLis
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
               </svg>
             </div>
-            <p className="text-white/40 text-sm">Henüz bildirim yok</p>
+            <p className="text-white/40 text-sm">{t('notifications.empty')}</p>
           </div>
         ) : (
           <AnimatePresence mode="popLayout">
@@ -246,6 +253,8 @@ export function NotificationList({ onClose, showHeader = true }: NotificationLis
                 onMarkAsRead={markAsRead}
                 onDelete={deleteNotification}
                 onClick={handleNotificationClick}
+                deleteTitle={t('common.delete')}
+                dateLocale={dateLocale}
               />
             ))}
           </AnimatePresence>
@@ -262,7 +271,7 @@ export function NotificationList({ onClose, showHeader = true }: NotificationLis
             }}
             className="w-full text-center text-cyan-400 text-xs hover:text-cyan-300 transition-colors"
           >
-            Tüm bildirimleri gör
+            {t('notifications.viewAll')}
           </button>
         </div>
       )}

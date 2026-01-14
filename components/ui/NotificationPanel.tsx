@@ -3,11 +3,13 @@
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNotifications } from '@/lib/hooks'
+import { useTranslation } from '@/lib/i18n'
 import { NotificationList } from './NotificationList'
 
 export function NotificationPanel() {
   // useNotifications hook'u çağırarak bildirimleri fetch et ve unread count'u al
   const { unreadCount } = useNotifications()
+  const { t } = useTranslation()
   const [isOpen, setIsOpen] = useState(false)
   const panelRef = useRef<HTMLDivElement>(null)
   const buttonRef = useRef<HTMLButtonElement>(null)
@@ -38,7 +40,7 @@ export function NotificationPanel() {
         ref={buttonRef}
         onClick={() => setIsOpen(!isOpen)}
         className="relative p-2 rounded-lg hover:bg-white/10 transition-colors"
-        aria-label="Bildirimler"
+        aria-label={t('notifications.title')}
       >
         {/* Bell Icon */}
         <svg

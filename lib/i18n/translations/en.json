@@ -38,7 +38,17 @@
     "passwordsNotMatch": "Passwords do not match",
     "invalidEmail": "Enter a valid email",
     "emailRequired": "Email is required",
-    "passwordRequired": "Password is required"
+    "passwordRequired": "Password is required",
+    "createNewPassword": "Create a new password for your account",
+    "minChars": "At least 6 characters",
+    "reenterPassword": "Re-enter password",
+    "updatePassword": "Update Password",
+    "passwordUpdated": "Password Updated!",
+    "redirecting": "Redirecting...",
+    "invalidResetLink": "Invalid or Expired Link",
+    "invalidResetLinkDesc": "The password reset link is invalid or has expired. Please request a new password reset.",
+    "goToLogin": "Go to Login Page",
+    "passwordUpdateError": "An error occurred while updating the password"
   },
   "username": {
     "title": "Choose Username",
@@ -124,7 +134,28 @@
     "chatDeleted": "Chat deleted",
     "firstMessage": "Write your first message...",
     "dailyLimitReached": "You've reached today's message request limit",
-    "waitForResponse": "Waiting for response..."
+    "waitForResponse": "Waiting for response...",
+    "enterToSend": "Press Enter to send, Shift+Enter for new line"
+  },
+  "chat": {
+    "title": "Chat",
+    "returnToChat": "Return to chat",
+    "minimize": "Minimize",
+    "clickToGoToStar": "Click to go to star",
+    "tapToGoToStar": "Tap to go to star",
+    "chatStarted": "Chat started"
+  },
+  "messageRequest": {
+    "title": "Send Message Request",
+    "messageSentTitle": "Message Sent!",
+    "chatStartedDesc": "Chat started, you can now message each other.",
+    "starOwnerWillDecide": "If the star owner accepts, the chat will begin.",
+    "anonymousRequestInfo": "You will send an anonymous message request to this star's owner. If accepted, the chat begins and names become visible.",
+    "yourFirstMessage": "Your first message",
+    "placeholder": "Hello, I really liked your star...",
+    "dailyRequestsRemaining": "Daily requests remaining",
+    "giveUp": "Give up",
+    "sending": "Sending"
   },
   "notifications": {
     "title": "Notifications",
@@ -134,7 +165,8 @@
     "newMessage": "New message",
     "messageRequest": "Message request",
     "requestAccepted": "Your request was accepted",
-    "newConversation": "New conversation"
+    "newConversation": "New conversation",
+    "viewAll": "View all notifications"
   },
   "profile": {
     "title": "Profile",
@@ -149,7 +181,21 @@
     "showUsernameDesc": "If disabled, you'll appear as 'Anonymous'",
     "deleteAccount": "Delete Account",
     "deleteAccountConfirm": "Are you sure you want to delete your account? This cannot be undone.",
-    "accountDeleted": "Account deleted"
+    "accountDeleted": "Account deleted",
+    "mostSharedEmotion": "Most shared emotion",
+    "starCountWithEmotion": "{{count}} stars, mostly sharing {{emotion}}",
+    "emotionDistribution": "Emotion Distribution",
+    "dailyLimit": "Daily Limit",
+    "todayCanShare": "You can share today",
+    "starsCount": "{{remaining}} / {{max}} stars",
+    "privacySettings": "Privacy Settings",
+    "showUsernameInChats": "Show my username in chats",
+    "anonymousIfOff": "If disabled, you'll appear as \"Anonymous\" in chats",
+    "messageRequests": "Message Requests",
+    "firstStarDate": "You shared your first star on {{date}}",
+    "loadMore": "Load more",
+    "privacyPolicy": "Privacy Policy",
+    "unknown": "Unknown"
   },
   "privacy": {
     "title": "Privacy Policy",

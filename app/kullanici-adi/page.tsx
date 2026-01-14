@@ -3,13 +3,15 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { Button } from '@/components/ui'
+import { Button, LanguageSwitcher } from '@/components/ui'
 import { useAuth } from '@/lib/hooks'
 import { createClient } from '@/lib/supabase/client'
+import { useTranslation } from '@/lib/i18n'
 
 export default function KullaniciAdiPage() {
   const router = useRouter()
   const { user, profile, setProfile } = useAuth()
+  const { t } = useTranslation()
   const [username, setUsername] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
@@ -60,13 +62,13 @@ export default function KullaniciAdiPage() {
 
   const validateUsername = (value: string): string | null => {
     if (value.length < 3) {
-      return 'Kullanıcı adı en az 3 karakter olmalı'
+      return t('username.errorMinLength')
     }
     if (value.length > 20) {
-      return 'Kullanıcı adı en fazla 20 karakter olabilir'
+      return t('username.errorMaxLength')
     }
     if (!/^[a-zA-Z0-9_]+$/.test(value)) {
-      return 'Sadece harf, rakam ve alt çizgi kullanabilirsin'
+      return t('username.errorInvalidChars')
     }
     return null
   }
@@ -81,7 +83,7 @@ export default function KullaniciAdiPage() {
     }
 
     if (!isAvailable) {
-      setError('Bu kullanıcı adı zaten alınmış')
+      setError(t('username.errorTaken'))
       return
     }
 
@@ -97,9 +99,9 @@ export default function KullaniciAdiPage() {
 
       if (updateError) {
         if (updateError.message.includes('unique') || updateError.code === '23505') {
-          setError('Bu kullanıcı adı zaten alınmış')
+          setError(t('username.errorTaken'))
         } else {
-          setError('Bir hata oluştu, tekrar dene')
+          setError(t('username.errorGeneric'))
         }
         return
       }
@@ -112,7 +114,7 @@ export default function KullaniciAdiPage() {
       // Redirect to main page
       router.replace('/')
     } catch {
-      setError('Bir hata oluştu, tekrar dene')
+      setError(t('username.errorGeneric'))
     } finally {
       setLoading(false)
     }
@@ -122,13 +124,18 @@ export default function KullaniciAdiPage() {
   if (!user) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-[#0A0E27] to-black flex items-center justify-center">
-        <p className="text-white/60 animate-pulse">Yükleniyor...</p>
+        <p className="text-white/60 animate-pulse">{t('common.loading')}</p>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#0A0E27] to-black flex items-center justify-center px-4">
+    <div className="min-h-screen bg-gradient-to-b from-[#0A0E27] to-black flex items-center justify-center px-4 relative">
+      {/* Language Switcher */}
+      <div className="absolute top-4 right-4">
+        <LanguageSwitcher />
+      </div>
+
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -142,10 +149,10 @@ export default function KullaniciAdiPage() {
             </svg>
           </div>
           <h1 className="text-2xl font-bold text-white mb-2">
-            Hoş Geldin!
+            {t('username.welcome')}
           </h1>
           <p className="text-white/60 text-sm">
-            Evrende seni tanıyabilmemiz için bir kullanıcı adı belirle
+            {t('username.subtitle')}
           </p>
         </div>
 
@@ -153,7 +160,7 @@ export default function KullaniciAdiPage() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label htmlFor="username" className="block text-white/60 text-sm mb-2">
-              Kullanıcı Adı
+              {t('username.label')}
             </label>
             <div className="relative">
               <span className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40">@</span>
@@ -165,7 +172,7 @@ export default function KullaniciAdiPage() {
                   setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))
                   setError(null)
                 }}
-                placeholder="kullanici_adi"
+                placeholder={t('username.placeholder')}
                 className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 pl-9 text-white placeholder:text-white/30 focus:outline-none focus:border-cyan-500/50 transition-colors"
                 maxLength={20}
                 autoFocus
@@ -192,7 +199,7 @@ export default function KullaniciAdiPage() {
             </div>
             {/* Helper text */}
             <p className="text-white/40 text-xs mt-2">
-              3-20 karakter, sadece harf, rakam ve alt çizgi
+              {t('username.requirements')}
             </p>
           </div>
 
@@ -210,7 +217,7 @@ export default function KullaniciAdiPage() {
           {/* Availability message */}
           {username.length >= 3 && !checking && isAvailable === false && !error && (
             <p className="text-red-400 text-sm">
-              Bu kullanıcı adı zaten alınmış
+              {t('username.errorTaken')}
             </p>
           )}
 
@@ -222,7 +229,7 @@ export default function KullaniciAdiPage() {
             disabled={loading || checking || !isAvailable || username.length < 3}
             className="w-full"
           >
-            {loading ? 'Kaydediliyor...' : 'Devam Et'}
+            {loading ? t('username.saving') : t('username.continue')}
           </Button>
         </form>
       </motion.div>

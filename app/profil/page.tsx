@@ -4,8 +4,9 @@ import { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { format } from 'date-fns'
-import { tr } from 'date-fns/locale'
-import { Navbar, Card, Button } from '@/components/ui'
+import { tr, enUS } from 'date-fns/locale'
+import { Navbar, Card, Button, LanguageSwitcher } from '@/components/ui'
+import { useTranslation } from '@/lib/i18n'
 import { BlackHoleContact } from '@/components/BlackHoleContact'
 import { DonutChart, StarListItem } from '@/components/profile'
 import { PendingRequestsList, ConversationList } from '@/components/messaging'
@@ -34,6 +35,7 @@ const STARS_PER_PAGE = 10
 function ProfilPageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const { t, language } = useTranslation()
   const { user, profile, setProfile, signOut } = useAuth()
   const { planets } = usePlanets()
   const { remainingStars, maxStars } = useDailyLimit()
@@ -101,7 +103,7 @@ function ProfilPageContent() {
         const planetStats: PlanetStats[] = planets
           .map((planet) => ({
             planet_id: planet.id,
-            planet_name: planet.name_tr,
+            planet_name: language === 'tr' ? planet.name_tr : (planet.name || planet.name_tr),
             planet_color: planet.color,
             count: countByPlanet[planet.id] || 0,
           }))
@@ -123,7 +125,7 @@ function ProfilPageContent() {
             id: star.id,
             content: star.content,
             planet_id: star.planet_id,
-            planet_name: planet?.name_tr || 'Bilinmeyen',
+            planet_name: planet ? (language === 'tr' ? planet.name_tr : (planet.name || planet.name_tr)) : t('profile.unknown'),
             planet_color: planet?.color || '#888888',
             created_at: star.created_at,
           }
@@ -148,7 +150,7 @@ function ProfilPageContent() {
     if (planets.length > 0) {
       fetchStats()
     }
-  }, [user, planets])
+  }, [user, planets, language, t])
 
   // Fetch messaging data
   useEffect(() => {
@@ -238,14 +240,17 @@ function ProfilPageContent() {
                 d="M15 19l-7-7 7-7"
               />
             </svg>
-            <span>Evrene Dön</span>
+            <span>{t('universe.backToUniverse')}</span>
           </button>
 
           {/* Profile header */}
           <Card>
-            <div>
-              <h1 className="text-xl font-bold text-white">{profile?.username || 'Profilim'}</h1>
-              <p className="text-white/50 text-sm mt-1">{user?.email}</p>
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-xl font-bold text-white">{profile?.username || t('profile.title')}</h1>
+                <p className="text-white/50 text-sm mt-1">{user?.email}</p>
+              </div>
+              <LanguageSwitcher />
             </div>
           </Card>
 
@@ -268,7 +273,7 @@ function ProfilPageContent() {
                     <span className="text-2xl">✨</span>
                   </div>
                   <div>
-                    <p className="text-white/50 text-sm">En çok paylaştığım duygu</p>
+                    <p className="text-white/50 text-sm">{t('profile.mostSharedEmotion')}</p>
                     <p
                       className="text-xl font-bold"
                       style={{ color: dominantEmotion.planet_color }}
@@ -278,7 +283,7 @@ function ProfilPageContent() {
                   </div>
                 </div>
                 <p className="text-white/40 text-sm mt-3">
-                  {dominantEmotion.count} yıldız ile en çok {dominantEmotion.planet_name.toLowerCase()} paylaşıyorsun
+                  {t('profile.starCountWithEmotion', { count: dominantEmotion.count, emotion: dominantEmotion.planet_name.toLowerCase() })}
                 </p>
               </Card>
             </motion.div>
@@ -293,7 +298,7 @@ function ProfilPageContent() {
             >
               <Card>
                 <h2 className="text-lg font-semibold text-white mb-6 text-center">
-                  Duygu Dağılımı
+                  {t('profile.emotionDistribution')}
                 </h2>
                 <DonutChart data={chartData} />
               </Card>
@@ -303,13 +308,13 @@ function ProfilPageContent() {
           {/* Daily limit card */}
           <Card>
             <h2 className="text-lg font-semibold text-white mb-4">
-              Günlük Limit
+              {t('profile.dailyLimit')}
             </h2>
             <div className="space-y-3">
               <div className="flex justify-between items-center">
-                <span className="text-white/60">Bugün paylaşabileceğin</span>
+                <span className="text-white/60">{t('profile.todayCanShare')}</span>
                 <span className="text-white font-medium">
-                  {remainingStars} / {maxStars} yıldız
+                  {t('profile.starsCount', { remaining: remainingStars, max: maxStars })}
                 </span>
               </div>
               {/* Progress bar */}
@@ -329,13 +334,13 @@ function ProfilPageContent() {
           {/* Privacy Settings */}
           <Card>
             <h2 className="text-lg font-semibold text-white mb-4">
-              Gizlilik Ayarları
+              {t('profile.privacySettings')}
             </h2>
             <div className="flex items-center justify-between">
               <div className="flex-1">
-                <p className="text-white/80 text-sm">Sohbetlerde kullanıcı adım gözüksün</p>
+                <p className="text-white/80 text-sm">{t('profile.showUsernameInChats')}</p>
                 <p className="text-white/40 text-xs mt-1">
-                  Kapalıysa sohbetlerde &ldquo;Anonim&rdquo; olarak görünürsün
+                  {t('profile.anonymousIfOff')}
                 </p>
               </div>
               <button
@@ -367,7 +372,7 @@ function ProfilPageContent() {
               <Card>
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-lg font-semibold text-white">
-                    Mesaj İstekleri
+                    {t('profile.messageRequests')}
                   </h2>
                   <span className="bg-cyan-500/20 text-cyan-400 text-xs px-2.5 py-1 rounded-full font-medium">
                     {pendingCount}
@@ -389,7 +394,7 @@ function ProfilPageContent() {
             >
               <Card>
                 <h2 className="text-lg font-semibold text-white mb-4">
-                  Sohbetlerim
+                  {t('profile.myChats')}
                 </h2>
                 <ConversationList conversations={conversations} onDelete={hideConversation} />
               </Card>
@@ -404,11 +409,13 @@ function ProfilPageContent() {
               transition={{ delay: 0.4 }}
               className="text-center text-white/40 text-sm py-2"
             >
-              Bu evrende ilk yıldızını{' '}
-              <span className="text-white/60">
-                {format(new Date(firstStarDate), "d MMMM yyyy'te", { locale: tr })}
-              </span>{' '}
-              paylaştın
+              {t('profile.firstStarDate', {
+                date: format(
+                  new Date(firstStarDate),
+                  language === 'tr' ? "d MMMM yyyy'te" : "MMMM d, yyyy",
+                  { locale: language === 'tr' ? tr : enUS }
+                )
+              })}
             </motion.p>
           )}
 
@@ -420,12 +427,12 @@ function ProfilPageContent() {
           >
             <Card>
               <h2 className="text-lg font-semibold text-white mb-4">
-                Yıldızlarım
+                {t('profile.myStars')}
               </h2>
 
               {loading ? (
                 <div className="py-8 text-center">
-                  <p className="text-white/40 animate-pulse">Yükleniyor...</p>
+                  <p className="text-white/40 animate-pulse">{t('common.loading')}</p>
                 </div>
               ) : displayedStars.length > 0 ? (
                 <>
@@ -453,13 +460,13 @@ function ProfilPageContent() {
                       onClick={handleLoadMore}
                       className="w-full mt-4"
                     >
-                      Daha fazla göster
+                      {t('profile.loadMore')}
                     </Button>
                   )}
                 </>
               ) : (
                 <p className="text-white/40 text-center py-8">
-                  Henüz yıldız paylaşmadın
+                  {t('profile.noStars')}
                 </p>
               )}
             </Card>
@@ -472,7 +479,7 @@ function ProfilPageContent() {
             onClick={handleLogout}
             className="w-full"
           >
-            Çıkış Yap
+            {t('auth.logout')}
           </Button>
 
           {/* Black Hole Contact - Easter egg */}
@@ -484,7 +491,7 @@ function ProfilPageContent() {
               href="/gizlilik"
               className="text-white/50 hover:text-white hover:underline text-xs transition-all"
             >
-              Gizlilik Politikası
+              {t('profile.privacyPolicy')}
             </a>
           </div>
         </motion.div>

@@ -38,7 +38,17 @@
     "passwordsNotMatch": "Şifreler eşleşmiyor",
     "invalidEmail": "Geçerli bir e-posta girin",
     "emailRequired": "E-posta gerekli",
-    "passwordRequired": "Şifre gerekli"
+    "passwordRequired": "Şifre gerekli",
+    "createNewPassword": "Hesabın için yeni bir şifre oluştur",
+    "minChars": "En az 6 karakter",
+    "reenterPassword": "Şifreyi tekrar girin",
+    "updatePassword": "Şifreyi Güncelle",
+    "passwordUpdated": "Şifre Güncellendi!",
+    "redirecting": "Yönlendiriliyorsunuz...",
+    "invalidResetLink": "Geçersiz veya Süresi Dolmuş Link",
+    "invalidResetLinkDesc": "Şifre sıfırlama linki geçersiz veya süresi dolmuş. Lütfen yeni bir şifre sıfırlama isteği gönderin.",
+    "goToLogin": "Giriş Sayfasına Dön",
+    "passwordUpdateError": "Şifre güncellenirken bir hata oluştu"
   },
   "username": {
     "title": "Kullanıcı Adı Seç",
@@ -124,7 +134,28 @@
     "chatDeleted": "Sohbet silindi",
     "firstMessage": "İlk mesajını yaz...",
     "dailyLimitReached": "Bugünkü mesaj isteği limitine ulaştın",
-    "waitForResponse": "Yanıt bekleniyor..."
+    "waitForResponse": "Yanıt bekleniyor...",
+    "enterToSend": "Enter ile gönder, Shift+Enter ile satır atla"
+  },
+  "chat": {
+    "title": "Sohbet",
+    "returnToChat": "Sohbete dön",
+    "minimize": "Küçült",
+    "clickToGoToStar": "Yıldıza gitmek için tıkla",
+    "tapToGoToStar": "Yıldıza gitmek için dokun",
+    "chatStarted": "Sohbet başladı"
+  },
+  "messageRequest": {
+    "title": "Mesaj İsteği Gönder",
+    "messageSentTitle": "Mesaj Gönderildi!",
+    "chatStartedDesc": "Sohbet başladı, artık mesajlaşabilirsiniz.",
+    "starOwnerWillDecide": "Yıldız sahibi isteğini kabul ederse sohbet başlayacak.",
+    "anonymousRequestInfo": "Bu yıldızın sahibine anonim bir mesaj isteği göndereceksin. Kabul edilirse sohbet başlar ve isimler görünür hale gelir.",
+    "yourFirstMessage": "İlk mesajın",
+    "placeholder": "Merhaba, bu yıldızını çok beğendim...",
+    "dailyRequestsRemaining": "Günlük kalan istek hakkın",
+    "giveUp": "Vazgeç",
+    "sending": "Gönderiliyor"
   },
   "notifications": {
     "title": "Bildirimler",
@@ -134,7 +165,8 @@
     "newMessage": "Yeni mesaj",
     "messageRequest": "Mesaj isteği",
     "requestAccepted": "İsteğin kabul edildi",
-    "newConversation": "Yeni sohbet"
+    "newConversation": "Yeni sohbet",
+    "viewAll": "Tüm bildirimleri gör"
   },
   "profile": {
     "title": "Profil",
@@ -149,7 +181,21 @@
     "showUsernameDesc": "Kapalıysa 'Anonim' olarak görünürsün",
     "deleteAccount": "Hesabı Sil",
     "deleteAccountConfirm": "Hesabını silmek istediğine emin misin? Bu işlem geri alınamaz.",
-    "accountDeleted": "Hesabın silindi"
+    "accountDeleted": "Hesabın silindi",
+    "mostSharedEmotion": "En çok paylaştığım duygu",
+    "starCountWithEmotion": "{{count}} yıldız ile en çok {{emotion}} paylaşıyorsun",
+    "emotionDistribution": "Duygu Dağılımı",
+    "dailyLimit": "Günlük Limit",
+    "todayCanShare": "Bugün paylaşabileceğin",
+    "starsCount": "{{remaining}} / {{max}} yıldız",
+    "privacySettings": "Gizlilik Ayarları",
+    "showUsernameInChats": "Sohbetlerde kullanıcı adım gözüksün",
+    "anonymousIfOff": "Kapalıysa sohbetlerde \"Anonim\" olarak görünürsün",
+    "messageRequests": "Mesaj İstekleri",
+    "firstStarDate": "Bu evrende ilk yıldızını {{date}} paylaştın",
+    "loadMore": "Daha fazla göster",
+    "privacyPolicy": "Gizlilik Politikası",
+    "unknown": "Bilinmeyen"
   },
   "privacy": {
     "title": "Gizlilik Politikası",

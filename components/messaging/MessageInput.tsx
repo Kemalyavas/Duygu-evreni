@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
+import { useTranslation } from '@/lib/i18n'
 
 interface MessageInputProps {
   onSend: (message: string) => Promise<unknown>
@@ -11,6 +12,7 @@ export function MessageInput({ onSend, disabled }: MessageInputProps) {
   const [message, setMessage] = useState('')
   const [sending, setSending] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const { t } = useTranslation()
 
   // Auto-resize textarea
   useEffect(() => {
@@ -49,7 +51,7 @@ export function MessageInput({ onSend, disabled }: MessageInputProps) {
           value={message}
           onChange={(e) => setMessage(e.target.value.slice(0, 1000))}
           onKeyDown={handleKeyDown}
-          placeholder="Mesajınızı yazın..."
+          placeholder={t('messages.typeMessage')}
           disabled={disabled || sending}
           rows={1}
           className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm placeholder:text-white/30 focus:outline-none focus:border-white/20 resize-none disabled:opacity-50 transition-colors"
@@ -72,7 +74,7 @@ export function MessageInput({ onSend, disabled }: MessageInputProps) {
         </button>
       </div>
       <p className="text-white/30 text-xs mt-2">
-        Enter ile gönder, Shift+Enter ile satır atla
+        {t('messages.enterToSend')}
       </p>
     </div>
   )

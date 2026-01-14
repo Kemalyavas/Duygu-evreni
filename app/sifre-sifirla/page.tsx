@@ -4,11 +4,13 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { Button, Input } from '@/components/ui'
+import { Button, Input, LanguageSwitcher } from '@/components/ui'
+import { useTranslation } from '@/lib/i18n'
 import { createClient } from '@/lib/supabase/fetch'
 
 export default function PasswordResetPage() {
   const router = useRouter()
+  const { t } = useTranslation()
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -62,12 +64,12 @@ export default function PasswordResetPage() {
 
     // Validation
     if (password.length < 6) {
-      setError('Şifre en az 6 karakter olmalı')
+      setError(t('auth.passwordMinLength'))
       return
     }
 
     if (password !== confirmPassword) {
-      setError('Şifreler eşleşmiyor')
+      setError(t('auth.passwordsNotMatch'))
       return
     }
 
@@ -90,7 +92,7 @@ export default function PasswordResetPage() {
         router.push('/')
       }, 2000)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Şifre güncellenirken bir hata oluştu')
+      setError(err instanceof Error ? err.message : t('auth.passwordUpdateError'))
     } finally {
       setLoading(false)
     }
@@ -100,7 +102,7 @@ export default function PasswordResetPage() {
   if (isValidSession === null) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#0A0E27] to-black">
-        <div className="text-white animate-pulse">Yükleniyor...</div>
+        <div className="text-white animate-pulse">{t('common.loading')}</div>
       </div>
     )
   }
@@ -109,6 +111,10 @@ export default function PasswordResetPage() {
   if (!isValidSession) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#0A0E27] to-black px-4">
+        {/* Header with LanguageSwitcher */}
+        <div className="fixed top-4 right-4 z-50">
+          <LanguageSwitcher />
+        </div>
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -117,14 +123,14 @@ export default function PasswordResetPage() {
           <div className="glass rounded-2xl p-8 text-center">
             <div className="text-red-400 text-5xl mb-4">⚠️</div>
             <h1 className="text-2xl font-bold text-white mb-4">
-              Geçersiz veya Süresi Dolmuş Link
+              {t('auth.invalidResetLink')}
             </h1>
             <p className="text-white/60 mb-6">
-              Şifre sıfırlama linki geçersiz veya süresi dolmuş. Lütfen yeni bir şifre sıfırlama isteği gönderin.
+              {t('auth.invalidResetLinkDesc')}
             </p>
             <Link href="/giris">
               <Button variant="primary" className="w-full">
-                Giriş Sayfasına Dön
+                {t('auth.goToLogin')}
               </Button>
             </Link>
           </div>
@@ -145,10 +151,10 @@ export default function PasswordResetPage() {
           <div className="glass rounded-2xl p-8 text-center">
             <div className="text-green-400 text-5xl mb-4">✓</div>
             <h1 className="text-2xl font-bold text-white mb-4">
-              Şifre Güncellendi!
+              {t('auth.passwordUpdated')}
             </h1>
             <p className="text-white/60">
-              Yönlendiriliyorsunuz...
+              {t('auth.redirecting')}
             </p>
           </div>
         </motion.div>
@@ -159,6 +165,10 @@ export default function PasswordResetPage() {
   // Password reset form
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#0A0E27] to-black px-4">
+      {/* Header with LanguageSwitcher */}
+      <div className="fixed top-4 right-4 z-50">
+        <LanguageSwitcher />
+      </div>
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -166,21 +176,21 @@ export default function PasswordResetPage() {
       >
         <div className="glass rounded-2xl p-8">
           <h1 className="text-2xl font-bold text-white text-center mb-2">
-            Yeni Şifre Belirle
+            {t('auth.newPassword')}
           </h1>
           <p className="text-white/60 text-center mb-8">
-            Hesabın için yeni bir şifre oluştur
+            {t('auth.createNewPassword')}
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-white/70 mb-2">Yeni Şifre</label>
+              <label className="block text-sm font-medium text-white/70 mb-2">{t('auth.newPassword')}</label>
               <div className="relative">
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="En az 6 karakter"
+                  placeholder={t('auth.minChars')}
                   required
                   minLength={6}
                   className="w-full px-4 py-3 pr-12 bg-white/[0.03] border border-white/[0.08] rounded-xl text-white placeholder-white/30 focus:outline-none focus:border-purple-500/50 focus:bg-white/[0.05] transition-all duration-300"
@@ -205,13 +215,13 @@ export default function PasswordResetPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-white/70 mb-2">Şifre Tekrar</label>
+              <label className="block text-sm font-medium text-white/70 mb-2">{t('auth.confirmPassword')}</label>
               <div className="relative">
                 <input
                   type={showConfirmPassword ? 'text' : 'password'}
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="Şifreyi tekrar girin"
+                  placeholder={t('auth.reenterPassword')}
                   required
                   minLength={6}
                   className="w-full px-4 py-3 pr-12 bg-white/[0.03] border border-white/[0.08] rounded-xl text-white placeholder-white/30 focus:outline-none focus:border-purple-500/50 focus:bg-white/[0.05] transition-all duration-300"
@@ -252,7 +262,7 @@ export default function PasswordResetPage() {
               className="w-full"
               isLoading={loading}
             >
-              Şifreyi Güncelle
+              {t('auth.updatePassword')}
             </Button>
           </form>
         </div>

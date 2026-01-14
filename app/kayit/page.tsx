@@ -5,8 +5,9 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
-import { MusicToggle } from '@/components/ui'
+import { MusicToggle, LanguageSwitcher } from '@/components/ui'
 import { useAuth } from '@/lib/hooks'
+import { useTranslation } from '@/lib/i18n'
 
 // Animated starfield background
 function StarField() {
@@ -71,6 +72,7 @@ function StarField() {
 export default function SignupPage() {
   const router = useRouter()
   const { signUp, signInWithGoogle } = useAuth()
+  const { t } = useTranslation()
   const [username, setUsername] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -89,25 +91,25 @@ export default function SignupPage() {
     setLoading(true)
 
     if (username.length < 2) {
-      setError('Kullanıcı adı en az 2 karakter olmalıdır')
+      setError(t('username.invalid'))
       setLoading(false)
       return
     }
 
     if (username.length > 20) {
-      setError('Kullanıcı adı en fazla 20 karakter olabilir')
+      setError(t('username.invalid'))
       setLoading(false)
       return
     }
 
     if (password.length < 6) {
-      setError('Şifre en az 6 karakter olmalıdır')
+      setError(t('auth.passwordMinLength'))
       setLoading(false)
       return
     }
 
     if (password !== confirmPassword) {
-      setError('Şifreler eşleşmiyor')
+      setError(t('auth.passwordsNotMatch'))
       setLoading(false)
       return
     }
@@ -119,7 +121,7 @@ export default function SignupPage() {
         router.push('/')
       }, 4000)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Kayıt olunamadı')
+      setError(err instanceof Error ? err.message : t('errors.generic'))
     } finally {
       setLoading(false)
     }
@@ -146,11 +148,12 @@ export default function SignupPage() {
             d="M15 19l-7-7 7-7"
           />
         </svg>
-        <span className="text-sm">Evrene Dön</span>
+        <span className="text-sm">{t('universe.backToUniverse')}</span>
       </button>
 
-      {/* Music Toggle - top right */}
-      <div className="fixed top-4 right-4 z-50">
+      {/* Language & Music Toggle - top right */}
+      <div className="fixed top-4 right-4 z-50 flex items-center gap-2">
+        <LanguageSwitcher />
         <MusicToggle />
       </div>
 
@@ -197,16 +200,16 @@ export default function SignupPage() {
             <Link href="/" className="inline-flex items-center gap-0.5 group">
               <Image
                 src="/logo.png"
-                alt="Duygu Evreni"
+                alt={t('home.title')}
                 width={80}
                 height={80}
                 className="w-20 h-20"
               />
               <h1 className="text-2xl font-bold bg-gradient-to-r from-white via-cyan-200 to-white bg-clip-text text-transparent">
-                Duygu Evreni
+                {t('home.title')}
               </h1>
             </Link>
-            <p className="text-white/50 mt-3 text-base">Yeni hesap oluştur</p>
+            <p className="text-white/50 mt-3 text-base">{t('auth.registerSubtitle')}</p>
           </div>
 
           {success ? (
@@ -221,16 +224,13 @@ export default function SignupPage() {
                 </svg>
               </div>
               <h2 className="text-xl font-semibold text-white mb-2">
-                Kayıt Başarılı!
+                {t('auth.registerSuccess')}
               </h2>
               <p className="text-white/60 mb-3">
-                <strong className="text-cyan-300">{email}</strong> adresine doğrulama maili gönderildi.
-              </p>
-              <p className="text-white/40 text-sm mb-4">
-                Hesabını aktifleştirmek için mailini kontrol et.
+                <strong className="text-cyan-300">{email}</strong>
               </p>
               <p className="text-white/50 text-sm">
-                Evrene yönlendiriliyorsunuz...
+                {t('common.loading')}
               </p>
             </motion.div>
           ) : (
@@ -238,10 +238,10 @@ export default function SignupPage() {
               {/* Form */}
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-white/70 mb-2">Kullanıcı Adı</label>
+                  <label className="block text-sm font-medium text-white/70 mb-2">{t('username.title')}</label>
                   <input
                     type="text"
-                    placeholder="kullanici_adi"
+                    placeholder={t('username.placeholder')}
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     required
@@ -250,10 +250,10 @@ export default function SignupPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-white/70 mb-2">E-posta</label>
+                  <label className="block text-sm font-medium text-white/70 mb-2">{t('auth.email')}</label>
                   <input
                     type="email"
-                    placeholder="ornek@email.com"
+                    placeholder="example@email.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
@@ -262,7 +262,7 @@ export default function SignupPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-white/70 mb-2">Şifre</label>
+                  <label className="block text-sm font-medium text-white/70 mb-2">{t('auth.password')}</label>
                   <div className="relative">
                     <input
                       type={showPassword ? 'text' : 'password'}
@@ -293,11 +293,11 @@ export default function SignupPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-white/70 mb-2">Şifre Tekrar</label>
+                  <label className="block text-sm font-medium text-white/70 mb-2">{t('auth.confirmPassword')}</label>
                   <div className="relative">
                     <input
                       type={showConfirmPassword ? 'text' : 'password'}
-                      placeholder="Şifrenizi tekrar girin"
+                      placeholder="••••••••"
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       required
@@ -344,10 +344,10 @@ export default function SignupPage() {
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                       </svg>
-                      Kayıt yapılıyor...
+                      {t('common.loading')}
                     </span>
                   ) : (
-                    'Kayıt Ol'
+                    t('auth.register')
                   )}
                 </button>
               </form>
@@ -355,7 +355,7 @@ export default function SignupPage() {
               {/* Divider */}
               <div className="flex items-center gap-4 my-6">
                 <div className="flex-1 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-                <span className="text-white/30 text-sm">veya</span>
+                <span className="text-white/30 text-sm">{t('common.or')}</span>
                 <div className="flex-1 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
               </div>
 
@@ -368,7 +368,7 @@ export default function SignupPage() {
                   try {
                     await signInWithGoogle()
                   } catch (err) {
-                    setError(err instanceof Error ? err.message : 'Google ile giriş yapılamadı')
+                    setError(err instanceof Error ? err.message : t('errors.generic'))
                     setGoogleLoading(false)
                   }
                 }}
@@ -388,19 +388,19 @@ export default function SignupPage() {
                       <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
                       <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
                     </svg>
-                    <span>Google ile devam et</span>
+                    <span>Google</span>
                   </>
                 )}
               </button>
 
               {/* Login link */}
               <p className="text-center text-white/50 text-sm mt-6">
-                Zaten hesabın var mı?{' '}
+                {t('auth.hasAccount')}{' '}
                 <Link
                   href="/giris"
                   className="text-cyan-400 hover:text-cyan-300 transition-colors font-medium"
                 >
-                  Giriş yap
+                  {t('auth.login')}
                 </Link>
               </p>
 
@@ -410,7 +410,7 @@ export default function SignupPage() {
                   href="/gizlilik"
                   className="text-white/50 hover:text-white hover:underline text-xs transition-all"
                 >
-                  Gizlilik Politikası
+                  {t('privacy.title')}
                 </Link>
               </p>
             </>

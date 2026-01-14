@@ -2,9 +2,10 @@
 
 import { useState } from 'react'
 import { formatDistanceToNow } from 'date-fns'
-import { tr } from 'date-fns/locale'
+import { tr, enUS } from 'date-fns/locale'
 import { useStore } from '@/lib/store/useStore'
 import { useAuth } from '@/lib/hooks'
+import { useTranslation } from '@/lib/i18n'
 import type { ConversationWithDetails } from '@/types'
 
 interface ConversationListProps {
@@ -15,8 +16,10 @@ interface ConversationListProps {
 
 export function ConversationList({ conversations, onSelect, onDelete }: ConversationListProps) {
   const { user } = useAuth()
+  const { t, language } = useTranslation()
   const { activeConversation, setActiveConversation, setMessagingPanelOpen } = useStore()
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const dateLocale = language === 'tr' ? tr : enUS
 
   const handleSelect = (conv: ConversationWithDetails) => {
     setActiveConversation(conv)
@@ -48,8 +51,8 @@ export function ConversationList({ conversations, onSelect, onDelete }: Conversa
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
           </svg>
         </div>
-        <p className="text-white/40 text-sm">Henüz sohbet yok</p>
-        <p className="text-white/30 text-xs mt-1">Yıldızlara mesaj göndererek sohbet başlat</p>
+        <p className="text-white/40 text-sm">{t('messages.noChats')}</p>
+        <p className="text-white/30 text-xs mt-1">{t('messages.noChatsDesc')}</p>
       </div>
     )
   }
@@ -62,7 +65,7 @@ export function ConversationList({ conversations, onSelect, onDelete }: Conversa
         // Respect privacy setting
         const otherUsername = (otherUser?.show_username_in_chats !== false && otherUser?.username)
           ? otherUser.username
-          : 'Anonim'
+          : t('common.anonymous')
 
         return (
           <button
@@ -89,7 +92,7 @@ export function ConversationList({ conversations, onSelect, onDelete }: Conversa
                     {otherUsername}
                   </span>
                   <span className="text-white/40 text-xs flex-shrink-0">
-                    {formatDistanceToNow(new Date(conv.updated_at), { addSuffix: false, locale: tr })}
+                    {formatDistanceToNow(new Date(conv.updated_at), { addSuffix: false, locale: dateLocale })}
                   </span>
                 </div>
                 {conv.last_message?.content && (
@@ -112,7 +115,7 @@ export function ConversationList({ conversations, onSelect, onDelete }: Conversa
                   onClick={(e) => handleDelete(e, conv.id)}
                   disabled={deletingId === conv.id}
                   className="p-1.5 rounded-lg text-white/30 hover:text-red-400 hover:bg-red-500/10 transition-colors opacity-0 group-hover:opacity-100 flex-shrink-0"
-                  title="Sohbeti sil"
+                  title={t('messages.deleteChat')}
                 >
                   {deletingId === conv.id ? (
                     <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">

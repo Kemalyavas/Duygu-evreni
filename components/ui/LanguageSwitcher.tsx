@@ -17,11 +17,10 @@ export function LanguageSwitcher({ className = '' }: LanguageSwitcherProps) {
   return (
     <button
       onClick={toggleLanguage}
-      className={`flex items-center gap-1.5 px-2 py-1 rounded-lg bg-white/10 hover:bg-white/20 transition-colors text-sm font-medium text-white/80 hover:text-white ${className}`}
+      className={`px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 transition-colors text-sm font-medium text-white/80 hover:text-white ${className}`}
       title={language === 'tr' ? 'Switch to English' : 'Türkçe\'ye geç'}
     >
-      <span className="text-base">{language === 'tr' ? '🇹🇷' : '🇬🇧'}</span>
-      <span className="uppercase">{language}</span>
+      {language === 'tr' ? 'TR' : 'EN'}
     </button>
   )
 }

@@ -12,7 +12,7 @@ type Translations = typeof tr
 interface LanguageContextType {
   language: Language
   setLanguage: (lang: Language) => void
-  t: (key: string) => string
+  t: (key: string, params?: Record<string, string | number>) => string
   translations: Translations
 }
 
@@ -46,7 +46,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('language', lang)
   }, [])
 
-  const t = useCallback((key: string): string => {
+  const t = useCallback((key: string, params?: Record<string, string | number>): string => {
     const keys = key.split('.')
     let value: TranslationValue = translations[language]
 
@@ -63,17 +63,27 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
             return key // Return key if not found in fallback either
           }
         }
-        return typeof fallback === 'string' ? fallback : key
+        value = fallback
+        break
       }
     }
 
-    return typeof value === 'string' ? value : key
+    let result = typeof value === 'string' ? value : key
+
+    // Replace {{param}} placeholders with actual values
+    if (params) {
+      Object.entries(params).forEach(([paramKey, paramValue]) => {
+        result = result.replace(new RegExp(`\\{\\{${paramKey}\\}\\}`, 'g'), String(paramValue))
+      })
+    }
+
+    return result
   }, [language])
 
   // Prevent hydration mismatch by not rendering until mounted
   if (!mounted) {
     return (
-      <LanguageContext.Provider value={{ language: 'tr', setLanguage, t: (key) => key, translations: tr }}>
+      <LanguageContext.Provider value={{ language: 'tr', setLanguage, t: (key: string) => key, translations: tr }}>
         {children}
       </LanguageContext.Provider>
     )
