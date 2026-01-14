@@ -112,7 +112,16 @@
     "reportStar": "Report",
     "deleteStar": "Delete Star",
     "deleteConfirm": "Are you sure you want to delete this star?",
-    "deleted": "Star deleted"
+    "deleted": "Star deleted",
+    "loginToShare": "Login to share a star",
+    "dailyLimitReached": "Daily limit reached. Try again tomorrow!",
+    "contentNotAllowed": "Content not allowed",
+    "starCreationFailed": "Star creation failed, please try again",
+    "canShareToday": "You can share {{count}} stars today",
+    "adminUnlimited": "👑 Admin - Unlimited stars",
+    "limitReached": "Limit reached",
+    "sendStar": "Send Star",
+    "addEmoji": "Add emoji"
   },
   "messages": {
     "title": "Messages",

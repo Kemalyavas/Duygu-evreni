@@ -112,7 +112,16 @@
     "reportStar": "Şikayet Et",
     "deleteStar": "Yıldızı Sil",
     "deleteConfirm": "Bu yıldızı silmek istediğine emin misin?",
-    "deleted": "Yıldız silindi"
+    "deleted": "Yıldız silindi",
+    "loginToShare": "Yıldız paylaşmak için giriş yap",
+    "dailyLimitReached": "Günlük limitine ulaştın. Yarın tekrar dene!",
+    "contentNotAllowed": "İçerik uygun değil",
+    "starCreationFailed": "Yıldız oluşturulamadı, lütfen tekrar dene",
+    "canShareToday": "Bugün {{count}} yıldız paylaşabilirsin",
+    "adminUnlimited": "👑 Admin - Sınırsız yıldız",
+    "limitReached": "Limit Doldu",
+    "sendStar": "Yıldızı Gönder",
+    "addEmoji": "Emoji ekle"
   },
   "messages": {
     "title": "Mesajlar",

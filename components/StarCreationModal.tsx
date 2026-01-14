@@ -4,6 +4,7 @@ import { useState, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Modal, Button } from '@/components/ui'
 import { useDailyLimit, useStars, useAuth, generateOrbitPosition } from '@/lib/hooks'
+import { useTranslation } from '@/lib/i18n'
 import { moderateContent } from '@/lib/moderation'
 import type { Planet, Star } from '@/types'
 
@@ -38,10 +39,13 @@ export function StarCreationModal({
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   const { user } = useAuth()
+  const { t, language } = useTranslation()
   const { canShareStar, remainingStars, checkRealLimit, incrementStarCount, isAdmin } = useDailyLimit()
   const { createStar } = useStars()
 
   const isLoggedIn = !!user
+  const planetName = language === 'tr' ? planet.name_tr : (planet.name_en || planet.name_tr)
+  const planetDescription = language === 'tr' ? planet.description_tr : (planet.description_en || planet.description_tr)
 
   const insertEmoji = (emoji: string) => {
     const textarea = textareaRef.current
@@ -70,20 +74,20 @@ export function StarCreationModal({
     try {
       // Check if user is logged in
       if (!isLoggedIn) {
-        setError('Yıldız paylaşmak için giriş yapmalısın')
+        setError(t('star.loginToShare'))
         return
       }
 
       // Check daily limit from local state first
       if (!canShareStar) {
-        setError('Günlük limitine ulaştın. Yarın tekrar dene!')
+        setError(t('star.dailyLimitReached'))
         return
       }
 
       // Double-check with database to avoid race conditions
       const hasRealLimit = await checkRealLimit()
       if (!hasRealLimit) {
-        setError('Günlük limitine ulaştın. Yarın tekrar dene!')
+        setError(t('star.dailyLimitReached'))
         return
       }
 
@@ -96,7 +100,7 @@ export function StarCreationModal({
       }
 
       if (!moderationResult.allowed) {
-        setError(moderationResult.reason || 'İçerik uygun değil')
+        setError(moderationResult.reason || t('star.contentNotAllowed'))
         return
       }
 
@@ -118,10 +122,10 @@ export function StarCreationModal({
         onSuccess?.(newStar)
         onClose()
       } else {
-        setError('Yıldız oluşturulamadı, lütfen tekrar dene')
+        setError(t('star.starCreationFailed'))
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Yıldız oluşturulamadı')
+      setError(err instanceof Error ? err.message : t('star.starCreationFailed'))
     } finally {
       setLoading(false)
     }
@@ -143,8 +147,8 @@ export function StarCreationModal({
             }}
           />
           <div>
-            <h2 className="text-xl font-bold text-white">{planet.name_tr}</h2>
-            <p className="text-sm text-white/60">{planet.description_tr}</p>
+            <h2 className="text-xl font-bold text-white">{planetName}</h2>
+            <p className="text-sm text-white/60">{planetDescription}</p>
           </div>
         </div>
 
@@ -155,7 +159,7 @@ export function StarCreationModal({
               ref={textareaRef}
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              placeholder="Duygunu buraya yaz..."
+              placeholder={t('star.writeFeeling')}
               className="w-full h-32 px-4 py-3 pr-12 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-purple-500/50 resize-none"
               maxLength={MAX_CHARS + 10}
               disabled={!isLoggedIn || !canShareStar}
@@ -171,7 +175,7 @@ export function StarCreationModal({
                   ? 'hover:bg-white/10 text-white/50 hover:text-white/80'
                   : 'text-white/20 cursor-not-allowed'
               }`}
-              title="Emoji ekle"
+              title={t('star.addEmoji')}
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <circle cx="12" cy="12" r="10" />
@@ -210,12 +214,12 @@ export function StarCreationModal({
             <div className="flex justify-between items-center mt-2">
               <span className="text-xs text-white/40">
                 {!isLoggedIn
-                  ? 'Yıldız paylaşmak için giriş yap'
+                  ? t('star.loginToShare')
                   : isAdmin
-                  ? '👑 Admin - Sınırsız yıldız'
+                  ? t('star.adminUnlimited')
                   : remainingStars > 0
-                  ? `Bugün ${remainingStars} yıldız paylaşabilirsin`
-                  : 'Günlük limitine ulaştın'}
+                  ? t('star.canShareToday', { count: remainingStars })
+                  : t('universe.dailyLimitReached')}
               </span>
               <span
                 className={`text-sm ${
@@ -264,7 +268,7 @@ export function StarCreationModal({
             isLoading={loading}
             disabled={!isLoggedIn || !canShareStar || isOverLimit || content.trim().length === 0}
           >
-            {!isLoggedIn ? 'Giriş Yap' : canShareStar ? 'Yıldızı Gönder' : 'Limit Doldu'}
+            {!isLoggedIn ? t('auth.login') : canShareStar ? t('star.sendStar') : t('star.limitReached')}
           </Button>
         </form>
       </div>

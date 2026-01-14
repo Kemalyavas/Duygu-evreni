@@ -2,6 +2,7 @@
 
 import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from '@/components/ui'
+import { useTranslation } from '@/lib/i18n'
 import type { Planet, Star } from '@/types'
 
 interface PlanetModeUIProps {
@@ -30,7 +31,12 @@ export function PlanetModeUI({
   onBackToUniverse,
   onOpenModal,
 }: PlanetModeUIProps) {
+  const { t, language } = useTranslation()
+
   if (!isVisible || !planet) return null
+
+  const planetName = language === 'tr' ? planet.name_tr : (planet.name_en || planet.name_tr)
+  const planetDescription = language === 'tr' ? planet.description_tr : (planet.description_en || planet.description_tr)
 
   return (
     <AnimatePresence>
@@ -56,7 +62,7 @@ export function PlanetModeUI({
             d="M15 19l-7-7 7-7"
           />
         </svg>
-        <span>Evrene Dön</span>
+        <span>{t('universe.backToUniverse')}</span>
       </motion.button>
 
       {/* Planet info */}
@@ -72,11 +78,11 @@ export function PlanetModeUI({
             className="text-xl font-bold mb-2"
             style={{ color: planet.color }}
           >
-            {planet.name_tr}
+            {planetName}
           </h1>
-          <p className="text-sm text-white/60">{planet.description_tr}</p>
+          <p className="text-sm text-white/60">{planetDescription}</p>
           <p className="text-xs text-white/40 mt-2">
-            {starCount} yıldız
+            {starCount} {language === 'tr' ? 'yıldız' : 'stars'}
           </p>
         </div>
       </motion.div>
@@ -95,7 +101,7 @@ export function PlanetModeUI({
           onClick={onOpenModal}
           className="shadow-lg shadow-purple-500/25"
         >
-          Yıldız Paylaş ({remainingStars} kaldı)
+          {t('universe.shareStar')} ({remainingStars} {t('universe.starsRemaining')})
         </Button>
       </motion.div>
 
@@ -109,7 +115,7 @@ export function PlanetModeUI({
           className="absolute right-4 top-1/2 -translate-y-1/2 glass rounded-xl p-4 hidden md:block max-w-xs z-10"
         >
           <p className="text-sm text-white/60 text-center">
-            Bir yıldıza tıkla ve duyguyu oku
+            {t('universe.clickStarHint')}
           </p>
         </motion.div>
       )}
