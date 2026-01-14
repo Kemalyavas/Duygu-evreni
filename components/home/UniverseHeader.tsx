@@ -3,7 +3,8 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
-import { Button } from '@/components/ui'
+import { Button, LanguageSwitcher } from '@/components/ui'
+import { useTranslation } from '@/lib/i18n'
 
 interface UniverseHeaderProps {
   isInPlanetMode: boolean
@@ -23,6 +24,9 @@ export function UniverseHeader({
   authLoading,
   onLogout,
 }: UniverseHeaderProps) {
+  const { t, language } = useTranslation()
+  const siteName = language === 'tr' ? 'Duygu Evreni' : 'Emotion Universe'
+
   return (
     <>
       {/* Logo */}
@@ -37,23 +41,24 @@ export function UniverseHeader({
         >
           <Image
             src="/logo.png"
-            alt="Duygu Evreni"
+            alt={siteName}
             width={75}
             height={75}
             className="w-[75px] h-[75px]"
           />
           <span className="font-bold text-[17px] -ml-1 bg-gradient-to-r from-purple-400 via-pink-400 to-purple-300 bg-clip-text text-transparent group-hover:opacity-80 transition-opacity">
-            Duygu Evreni
+            {siteName}
           </span>
         </button>
       </motion.div>
 
-      {/* Auth Buttons */}
+      {/* Auth Buttons & Language Switcher */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="absolute top-6 right-6 z-20 flex items-center space-x-4"
+        className="absolute top-6 right-6 z-20 flex items-center space-x-3"
       >
+        <LanguageSwitcher />
         {authLoading ? (
           <div className="w-20 h-8 bg-white/10 rounded-lg animate-pulse" />
         ) : user ? (
@@ -62,16 +67,16 @@ export function UniverseHeader({
               href="/profil"
               className="text-sm font-medium text-white/60 hover:text-white transition-colors"
             >
-              Profil
+              {t('nav.profile')}
             </Link>
             <Button variant="ghost" size="sm" onClick={onLogout}>
-              Çıkış Yap
+              {t('auth.logout')}
             </Button>
           </>
         ) : (
           <Link href="/giris">
             <Button variant="primary" size="sm">
-              Giriş Yap
+              {t('auth.login')}
             </Button>
           </Link>
         )}

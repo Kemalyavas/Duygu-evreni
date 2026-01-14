@@ -6,7 +6,8 @@ import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Button, ErrorBoundary, MusicToggle, NotificationPanel } from '@/components/ui'
+import { Button, ErrorBoundary, MusicToggle, NotificationPanel, LanguageSwitcher } from '@/components/ui'
+import { useTranslation } from '@/lib/i18n'
 import { Onboarding } from '@/components/Onboarding'
 import { StarCreationModal } from '@/components/StarCreationModal'
 import { StarViewPanel } from '@/components/StarViewPanel'
@@ -21,7 +22,7 @@ const UnifiedUniverse = dynamic(
     ssr: false,
     loading: () => (
       <div className="w-full h-full flex items-center justify-center bg-gradient-to-b from-[#0A0E27] to-black">
-        <div className="text-white text-lg animate-pulse">Evren yükleniyor...</div>
+        <div className="text-white text-lg animate-pulse">Loading...</div>
       </div>
     ),
   }
@@ -33,6 +34,7 @@ function HomePageContent() {
   const searchParams = useSearchParams()
   const planetIdFromUrl = searchParams.get('planet')
   const starIdFromUrl = searchParams.get('star')
+  const { t, language } = useTranslation()
 
   const { user, profile, isLoading: authLoading, signOut } = useAuth()
 
@@ -323,13 +325,13 @@ function HomePageContent() {
         >
           <Image
             src="/logo.png"
-            alt="Duygu Evreni"
+            alt={t('home.title')}
             width={75}
             height={75}
             className="w-[55px] h-[55px] sm:w-[75px] sm:h-[75px]"
           />
           <span className="font-bold text-[15px] sm:text-[17px] -ml-1 bg-gradient-to-r from-purple-400 via-pink-400 to-purple-300 bg-clip-text text-transparent group-hover:opacity-80 transition-opacity">
-            Duygu Evreni
+            {t('home.title')}
           </span>
         </button>
       </motion.div>
@@ -340,6 +342,7 @@ function HomePageContent() {
         animate={{ opacity: 1, y: 0 }}
         className="absolute top-4 sm:top-6 right-3 sm:right-6 z-20 flex items-center space-x-2 sm:space-x-3"
       >
+        <LanguageSwitcher />
         <MusicToggle />
         {user && <NotificationPanel />}
         {authLoading ? (
@@ -350,16 +353,16 @@ function HomePageContent() {
               href="/profil"
               className="text-sm font-medium text-white/60 hover:text-white transition-colors"
             >
-              Profil
+              {t('nav.profile')}
             </Link>
             <Button variant="ghost" size="sm" onClick={handleLogout}>
-              Çıkış Yap
+              {t('auth.logout')}
             </Button>
           </>
         ) : (
           <Link href="/giris">
             <Button variant="primary" size="sm">
-              Giriş Yap
+              {t('auth.login')}
             </Button>
           </Link>
         )}
@@ -370,15 +373,15 @@ function HomePageContent() {
         {planetsLoading ? (
           <div className="w-full h-full flex items-center justify-center flex-col gap-4">
             <div className="text-white text-lg animate-pulse">
-              Evren yükleniyor...
+              {t('common.loading')}
             </div>
             {planetsError && (
-              <div className="text-red-400 text-sm">Hata: {planetsError}</div>
+              <div className="text-red-400 text-sm">{t('common.error')}: {planetsError}</div>
             )}
           </div>
         ) : planets.length === 0 ? (
           <div className="w-full h-full flex items-center justify-center flex-col gap-4">
-            <div className="text-white text-lg">Gezegen bulunamadı</div>
+            <div className="text-white text-lg">{t('errors.notFound')}</div>
             {planetsError && <div className="text-red-400 text-sm">{planetsError}</div>}
           </div>
         ) : (
@@ -412,7 +415,7 @@ function HomePageContent() {
             className="absolute bottom-8 left-1/2 -translate-x-1/2 bg-black/50 backdrop-blur-md border border-white/10 rounded-xl px-6 py-3 z-20"
           >
             <p className="text-sm text-white/60 text-center">
-              Bir gezegene tıklayarak yıldızları keşfet
+              {t('universe.selectPlanet')}
             </p>
           </motion.div>
         )}
@@ -444,7 +447,7 @@ function HomePageContent() {
                   d="M15 19l-7-7 7-7"
                 />
               </svg>
-              <span>Evrene Dön</span>
+              <span>{t('universe.backToUniverse')}</span>
             </motion.button>
 
             {/* Planet info */}
@@ -460,11 +463,13 @@ function HomePageContent() {
                   className="text-base sm:text-xl font-bold mb-1 sm:mb-2"
                   style={{ color: focusedPlanet.color }}
                 >
-                  {focusedPlanet.name_tr}
+                  {language === 'tr' ? focusedPlanet.name_tr : (focusedPlanet.name_en || focusedPlanet.name_tr)}
                 </h1>
-                <p className="text-xs sm:text-sm text-white/60">{focusedPlanet.description_tr}</p>
+                <p className="text-xs sm:text-sm text-white/60">
+                  {language === 'tr' ? focusedPlanet.description_tr : (focusedPlanet.description_en || focusedPlanet.description_tr)}
+                </p>
                 <p className="text-[10px] sm:text-xs text-white/40 mt-1 sm:mt-2">
-                  {starCounts[focusedPlanetId] ?? stars.filter(s => s.planet_id === focusedPlanetId).length} yıldız
+                  {starCounts[focusedPlanetId] ?? stars.filter(s => s.planet_id === focusedPlanetId).length} {language === 'tr' ? 'yıldız' : 'stars'}
                 </p>
               </div>
             </motion.div>
@@ -501,7 +506,7 @@ function HomePageContent() {
                         d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
                       />
                     </svg>
-                    Keşfet
+                    {t('universe.explore')}
                   </span>
                 </Button>
               )}
@@ -512,7 +517,7 @@ function HomePageContent() {
                 onClick={() => setIsModalOpen(true)}
                 className="shadow-lg shadow-purple-500/25"
               >
-                Yıldız Paylaş {isAdmin ? '(∞)' : `(${remainingStars} kaldı)`}
+                {t('universe.shareStar')} {isAdmin ? '(∞)' : `(${remainingStars} ${t('universe.starsRemaining')})`}
               </Button>
             </motion.div>
 
@@ -526,7 +531,7 @@ function HomePageContent() {
                 className="absolute right-4 top-1/2 -translate-y-1/2 glass rounded-xl p-4 hidden md:block max-w-xs z-10"
               >
                 <p className="text-sm text-white/60 text-center">
-                  Bir yıldıza tıkla ve duyguyu oku
+                  {t('universe.clickStarHint')}
                 </p>
               </motion.div>
             )}
@@ -567,7 +572,7 @@ export default function HomePage() {
   return (
     <Suspense fallback={
       <div className="h-screen w-screen flex items-center justify-center bg-gradient-to-b from-[#0A0E27] to-black">
-        <div className="text-white text-lg animate-pulse">Evren yükleniyor...</div>
+        <div className="text-white text-lg animate-pulse">Loading...</div>
       </div>
     }>
       <HomePageContent />

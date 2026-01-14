@@ -2,8 +2,10 @@ export interface Planet {
   id: string
   name: string
   name_tr: string
+  name_en?: string
   color: string
   description_tr: string
+  description_en?: string
   position_x: number
   position_y: number
   position_z: number

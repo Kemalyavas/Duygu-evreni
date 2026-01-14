@@ -3,6 +3,7 @@
 import { AuthHandler } from './AuthHandler'
 import { MusicProvider } from './MusicProvider'
 import { ChatPanel } from './messaging/ChatPanel'
+import { LanguageProvider } from '@/lib/i18n'
 
 interface ProvidersProps {
   children: React.ReactNode
@@ -14,11 +15,13 @@ interface ProvidersProps {
  */
 export function Providers({ children }: ProvidersProps) {
   return (
-    <MusicProvider>
-      <AuthHandler />
-      {children}
-      {/* Global Chat Panel - tüm sayfalarda görünür */}
-      <ChatPanel />
-    </MusicProvider>
+    <LanguageProvider>
+      <MusicProvider>
+        <AuthHandler />
+        {children}
+        {/* Global Chat Panel - tüm sayfalarda görünür */}
+        <ChatPanel />
+      </MusicProvider>
+    </LanguageProvider>
   )
 }
