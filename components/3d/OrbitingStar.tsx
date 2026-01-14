@@ -85,9 +85,9 @@ export function OrbitingStars({
   const appearProgressRef = useRef(animateIn ? 0 : 1)
   const appearStartTime = useRef<number | null>(null)
   // Total animation duration for Big Bang effect
-  const APPEAR_DURATION = 1200 // ms total for explosion + settle effect
-  const STAGGER_SPREAD = 0.3 // Stars start appearing over 30% of duration
-  const EXPLOSION_SETTLE_TIME = 0.7 // 70% of animation is for explosion settling
+  const APPEAR_DURATION = 800 // ms total for explosion + settle effect
+  const STAGGER_SPREAD = 0 // All stars appear at once (no staggering)
+  const EXPLOSION_SETTLE_TIME = 1 // 100% of animation is for explosion settling
 
   // Refs for material opacity control
   const normalMaterialRef = useRef<THREE.MeshStandardMaterial>(null)
