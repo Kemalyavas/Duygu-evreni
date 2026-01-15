@@ -68,6 +68,7 @@ function NotificationItem({
   onClick,
   deleteTitle,
   dateLocale,
+  anonymousText,
 }: {
   notification: NotificationWithSender
   onMarkAsRead: (id: string) => void
@@ -75,12 +76,25 @@ function NotificationItem({
   onClick: (notification: NotificationWithSender) => void
   deleteTitle: string
   dateLocale: typeof tr | typeof enUS
+  anonymousText: string
 }) {
   const handleClick = () => {
     if (!notification.is_read) {
       onMarkAsRead(notification.id)
     }
     onClick(notification)
+  }
+
+  // Privacy check: if sender has show_username_in_chats = false, replace username with "Anonymous"
+  let displayTitle = notification.title
+  let displayBody = notification.body
+
+  if (notification.sender && notification.sender.show_username_in_chats === false && notification.sender.username) {
+    const username = notification.sender.username
+    displayTitle = displayTitle.replace(username, anonymousText)
+    if (displayBody) {
+      displayBody = displayBody.replace(username, anonymousText)
+    }
   }
 
   return (
@@ -101,11 +115,11 @@ function NotificationItem({
         {/* Content */}
         <div className="flex-1 min-w-0">
           <p className={`text-sm ${notification.is_read ? 'text-white/60' : 'text-white font-medium'}`}>
-            {notification.title}
+            {displayTitle}
           </p>
-          {notification.body && (
+          {displayBody && (
             <p className="text-white/40 text-xs mt-0.5 line-clamp-2">
-              {notification.body}
+              {displayBody}
             </p>
           )}
           <p className="text-white/30 text-[10px] mt-1">
@@ -255,6 +269,7 @@ export function NotificationList({ onClose, showHeader = true }: NotificationLis
                 onClick={handleNotificationClick}
                 deleteTitle={t('common.delete')}
                 dateLocale={dateLocale}
+                anonymousText={t('common.anonymous')}
               />
             ))}
           </AnimatePresence>

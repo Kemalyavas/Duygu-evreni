@@ -371,7 +371,7 @@ export function ChatPanel() {
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.95 }}
-                    className="absolute right-0 top-full mt-1 w-48 bg-[#1a1a2e] border border-white/10 rounded-xl shadow-xl overflow-hidden z-50"
+                    className="absolute right-0 top-full mt-1 w-48 bg-[#0d0d1a] border border-white/20 rounded-xl shadow-2xl shadow-black/50 overflow-hidden z-50"
                   >
                     <button
                       onClick={() => { setIsNicknameModalOpen(true); setIsMenuOpen(false); }}
@@ -578,7 +578,7 @@ export function ChatPanel() {
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.95 }}
-                  className="absolute right-0 top-full mt-1 w-48 bg-[#1a1a2e] border border-white/10 rounded-xl shadow-xl overflow-hidden z-50"
+                  className="absolute right-0 top-full mt-1 w-48 bg-[#0d0d1a] border border-white/20 rounded-xl shadow-2xl shadow-black/50 overflow-hidden z-50"
                 >
                   <button
                     onClick={() => { setIsNicknameModalOpen(true); setIsMenuOpen(false); }}
