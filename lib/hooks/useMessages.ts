@@ -60,6 +60,42 @@ export function useMessages(conversationId: string | null) {
 
       if (!session?.user) throw new Error('Giriş yapmanız gerekiyor')
 
+      // Conversation bilgilerini al - karşı tarafın ID'sini bulmak için
+      const { data: convInfo } = await supabaseFetch<{ initiator_id: string; star_owner_id: string }>('conversations', {
+        filter: `id=eq.${conversationId}`,
+        select: 'initiator_id, star_owner_id',
+        single: true,
+        accessToken: session.access_token,
+      })
+
+      if (!convInfo) throw new Error('Sohbet bulunamadı')
+
+      // Karşı tarafın ID'sini bul
+      const otherUserId = convInfo.initiator_id === session.user.id
+        ? convInfo.star_owner_id
+        : convInfo.initiator_id
+
+      // Çift taraflı engel kontrolü
+      // 1. Ben karşı tarafı engellemişsem
+      const { data: blockedByMe } = await supabaseFetch<{ id: string }[]>('blocked_users', {
+        filter: `blocker_id=eq.${session.user.id}&blocked_id=eq.${otherUserId}`,
+        accessToken: session.access_token,
+      })
+
+      if (blockedByMe && blockedByMe.length > 0) {
+        throw new Error('Bu kullanıcıyı engellediniz. Mesaj göndermek için engeli kaldırın.')
+      }
+
+      // 2. Karşı taraf beni engellemişse
+      const { data: blockedByThem } = await supabaseFetch<{ id: string }[]>('blocked_users', {
+        filter: `blocker_id=eq.${otherUserId}&blocked_id=eq.${session.user.id}`,
+        accessToken: session.access_token,
+      })
+
+      if (blockedByThem && blockedByThem.length > 0) {
+        throw new Error('Bu kullanıcıya mesaj gönderemezsiniz.')
+      }
+
       const { data, error: insertError } = await supabaseInsert<Message>('messages', {
         conversation_id: conversationId,
         sender_id: session.user.id,

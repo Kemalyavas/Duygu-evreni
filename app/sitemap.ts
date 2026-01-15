@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next'
 import { createClient } from '@/lib/supabase/server'
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://duyguevreni.com'
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.duyguevreni.com'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Fetch all planets for dynamic routes

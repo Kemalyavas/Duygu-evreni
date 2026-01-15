@@ -153,7 +153,40 @@
     "minimize": "Küçült",
     "clickToGoToStar": "Yıldıza gitmek için tıkla",
     "tapToGoToStar": "Yıldıza gitmek için dokun",
-    "chatStarted": "Sohbet başladı"
+    "chatStarted": "Sohbet başladı",
+    "userBlocked": "Bu kullanıcıyı engellediniz",
+    "blocked": "Engellendi"
+  },
+  "menu": {
+    "setNickname": "Takma Ad Ver",
+    "block": "Engelle",
+    "unblock": "Engeli Kaldır",
+    "report": "Şikayet Et"
+  },
+  "nickname": {
+    "title": "Takma Ad",
+    "description": "Bu kişiye özel bir takma ad ver",
+    "placeholder": "Örn: Okul arkadaşı",
+    "save": "Kaydet",
+    "remove": "Kaldır",
+    "error": "Takma ad kaydedilemedi"
+  },
+  "report": {
+    "title": "Kullanıcıyı Şikayet Et",
+    "description": "Bu kullanıcıyı neden şikayet etmek istiyorsun?",
+    "selectReason": "Bir sebep seç",
+    "reasons": {
+      "spam": "Spam",
+      "harassment": "Taciz",
+      "inappropriate": "Uygunsuz İçerik",
+      "other": "Diğer"
+    },
+    "additionalInfo": "Ek bilgi (opsiyonel)",
+    "additionalInfoPlaceholder": "Daha fazla detay ekle...",
+    "submit": "Şikayeti Gönder",
+    "success": "Şikayet Gönderildi",
+    "successDescription": "İncelememiz için teşekkürler. En kısa sürede değerlendireceğiz.",
+    "error": "Şikayet gönderilemedi"
   },
   "messageRequest": {
     "title": "Mesaj İsteği Gönder",

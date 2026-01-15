@@ -138,6 +138,7 @@ export function useConversations() {
       }
 
       // Admin için engel kontrolü yok (engellenemez)
+      // Shadow ban: Engellenmişse günlük hak düşür ama hata verme, sessizce başarılı gibi dön
       if (!isAdmin) {
         const { data: blocked } = await supabaseFetch<{ id: string }[]>('blocked_users', {
           filter: `blocker_id=eq.${starOwnerId}&blocked_id=eq.${session.user.id}`,
@@ -145,7 +146,14 @@ export function useConversations() {
         })
 
         if (blocked && blocked.length > 0) {
-          throw new Error('Bu kullanıcıya mesaj gönderemezsiniz')
+          // Shadow ban: Günlük hakkı düşür
+          await supabaseUpdate('profiles',
+            `id=eq.${session.user.id}`,
+            { daily_message_requests_sent: currentRequests + 1 },
+            session.access_token
+          )
+          // Başarılı gibi dön - kullanıcı engellendiğini bilmeyecek
+          return { id: 'shadow-banned', shadowBanned: true } as unknown as Conversation
         }
       }
 

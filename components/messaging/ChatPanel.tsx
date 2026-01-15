@@ -4,10 +4,12 @@ import { useEffect, useRef, useMemo, useCallback, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useStore } from '@/lib/store/useStore'
-import { useMessages, useAuth, useMobile } from '@/lib/hooks'
+import { useMessages, useAuth, useMobile, useBlocking, useNicknames } from '@/lib/hooks'
 import { useTranslation } from '@/lib/i18n'
 import { MessageBubble } from './MessageBubble'
 import { MessageInput } from './MessageInput'
+import { ReportModal } from './ReportModal'
+import { NicknameModal } from './NicknameModal'
 
 // Hook to handle mobile keyboard height
 function useKeyboardHeight(enabled: boolean) {
@@ -168,14 +170,38 @@ export function ChatPanel() {
     setChatCompact,
   } = useStore()
   const { messages, sendMessage, loading, markAsRead } = useMessages(activeConversation?.id || null)
+  const { blockUser, unblockUser, blockedUsers, fetchBlockedUsers } = useBlocking()
+  const { nicknames, fetchNicknames, getNickname } = useNicknames()
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const messagesContainerRef = useRef<HTMLDivElement>(null)
   const [unreadInCompact, setUnreadInCompact] = useState(0)
+
+  // Modal states
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false)
+  const [isNicknameModalOpen, setIsNicknameModalOpen] = useState(false)
+  const [localNickname, setLocalNickname] = useState<string | null>(null)
 
   // Track mount state to prevent SSR/hydration flash
   useEffect(() => {
     setHasMounted(true)
   }, [])
+
+  // Fetch blocked users and nicknames on mount
+  useEffect(() => {
+    if (user) {
+      fetchBlockedUsers()
+      fetchNicknames()
+    }
+  }, [user, fetchBlockedUsers, fetchNicknames])
+
+  // Update local nickname when conversation changes
+  useEffect(() => {
+    if (activeConversation?.id) {
+      const savedNickname = getNickname(activeConversation.id)
+      setLocalNickname(savedNickname)
+    }
+  }, [activeConversation?.id, getNickname, nicknames])
 
   // Auto-scroll to bottom (also when keyboard opens)
   useEffect(() => {
@@ -243,10 +269,41 @@ export function ChatPanel() {
     ? activeConversation.star_owner
     : activeConversation.initiator
 
+  const otherUserId = otherUser?.id
+
+  // Check if other user is blocked
+  const isOtherUserBlocked = otherUserId
+    ? blockedUsers.some(b => b.blocked_id === otherUserId)
+    : false
+
   // Respect privacy setting: show username only if show_username_in_chats is true
   const otherUsername = (otherUser?.show_username_in_chats !== false && otherUser?.username)
     ? otherUser.username
     : t('common.anonymous')
+
+  // Display name: nickname > username > anonymous
+  const displayName = localNickname || otherUsername
+
+  // Handle block/unblock
+  const handleBlock = async () => {
+    if (!otherUserId) return
+    try {
+      await blockUser(otherUserId)
+      setIsMenuOpen(false)
+    } catch {
+      // Error handled in hook
+    }
+  }
+
+  const handleUnblock = async () => {
+    if (!otherUserId) return
+    try {
+      await unblockUser(otherUserId)
+      setIsMenuOpen(false)
+    } catch {
+      // Error handled in hook
+    }
+  }
 
   // Show compact button when minimized (desktop only)
   if (isChatCompact && !isMobile) {
@@ -280,15 +337,85 @@ export function ChatPanel() {
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500/30 to-purple-500/30 flex items-center justify-center">
               <span className="text-white/80 text-sm font-medium">
-                {otherUsername[0]?.toUpperCase() || '?'}
+                {displayName[0]?.toUpperCase() || '?'}
               </span>
             </div>
             <div>
-              <h3 className="text-white font-medium">{otherUsername}</h3>
+              <button
+                onClick={() => setIsNicknameModalOpen(true)}
+                className="text-white font-medium hover:text-cyan-400 transition-colors text-left"
+              >
+                {displayName}
+                {localNickname && (
+                  <span className="text-white/30 text-xs ml-1">({otherUsername})</span>
+                )}
+              </button>
               <p className="text-white/40 text-xs">{t('chat.title')}</p>
             </div>
           </div>
           <div className="flex items-center gap-1">
+            {/* Menu button */}
+            <div className="relative">
+              <button
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                className="p-2 rounded-full hover:bg-white/10 text-white/60 hover:text-white transition-colors"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+                </svg>
+              </button>
+              {/* Dropdown menu */}
+              <AnimatePresence>
+                {isMenuOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    className="absolute right-0 top-full mt-1 w-48 bg-[#1a1a2e] border border-white/10 rounded-xl shadow-xl overflow-hidden z-50"
+                  >
+                    <button
+                      onClick={() => { setIsNicknameModalOpen(true); setIsMenuOpen(false); }}
+                      className="w-full px-4 py-3 text-left text-white/80 hover:bg-white/5 transition-colors flex items-center gap-3"
+                    >
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                      </svg>
+                      {t('menu.setNickname')}
+                    </button>
+                    {isOtherUserBlocked ? (
+                      <button
+                        onClick={handleUnblock}
+                        className="w-full px-4 py-3 text-left text-green-400 hover:bg-white/5 transition-colors flex items-center gap-3"
+                      >
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" />
+                        </svg>
+                        {t('menu.unblock')}
+                      </button>
+                    ) : (
+                      <button
+                        onClick={handleBlock}
+                        className="w-full px-4 py-3 text-left text-red-400 hover:bg-white/5 transition-colors flex items-center gap-3"
+                      >
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                        </svg>
+                        {t('menu.block')}
+                      </button>
+                    )}
+                    <button
+                      onClick={() => { setIsReportModalOpen(true); setIsMenuOpen(false); }}
+                      className="w-full px-4 py-3 text-left text-orange-400 hover:bg-white/5 transition-colors flex items-center gap-3 border-t border-white/5"
+                    >
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                      </svg>
+                      {t('menu.report')}
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
             {/* Minimize button */}
             <button
               onClick={handleMinimize}
@@ -370,9 +497,23 @@ export function ChatPanel() {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input */}
+      {/* Input or Blocked Banner */}
       <div className="relative z-10">
-        <MessageInput onSend={sendMessage} disabled={loading} />
+        {isOtherUserBlocked ? (
+          <div className="p-4 border-t border-white/10 bg-red-500/10">
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-white/70 text-sm">{t('chat.userBlocked')}</p>
+              <button
+                onClick={handleUnblock}
+                className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white text-sm rounded-lg transition-colors"
+              >
+                {t('menu.unblock')}
+              </button>
+            </div>
+          </div>
+        ) : (
+          <MessageInput onSend={sendMessage} disabled={loading} />
+        )}
       </div>
     </motion.div>
   )
@@ -410,10 +551,77 @@ export function ChatPanel() {
             </button>
             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-500/30 to-purple-500/30 flex items-center justify-center">
               <span className="text-white/80 text-xs font-medium">
-                {otherUsername[0]?.toUpperCase() || '?'}
+                {displayName[0]?.toUpperCase() || '?'}
               </span>
             </div>
-            <span className="text-white font-medium">{otherUsername}</span>
+            <button
+              onClick={() => setIsNicknameModalOpen(true)}
+              className="text-white font-medium hover:text-cyan-400 transition-colors"
+            >
+              {displayName}
+            </button>
+          </div>
+          {/* Mobile menu button */}
+          <div className="relative">
+            <button
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="p-2 rounded-full hover:bg-white/10 text-white/60 hover:text-white transition-colors"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+              </svg>
+            </button>
+            {/* Mobile dropdown menu */}
+            <AnimatePresence>
+              {isMenuOpen && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  className="absolute right-0 top-full mt-1 w-48 bg-[#1a1a2e] border border-white/10 rounded-xl shadow-xl overflow-hidden z-50"
+                >
+                  <button
+                    onClick={() => { setIsNicknameModalOpen(true); setIsMenuOpen(false); }}
+                    className="w-full px-4 py-3 text-left text-white/80 hover:bg-white/5 transition-colors flex items-center gap-3"
+                  >
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                    </svg>
+                    {t('menu.setNickname')}
+                  </button>
+                  {isOtherUserBlocked ? (
+                    <button
+                      onClick={handleUnblock}
+                      className="w-full px-4 py-3 text-left text-green-400 hover:bg-white/5 transition-colors flex items-center gap-3"
+                    >
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" />
+                      </svg>
+                      {t('menu.unblock')}
+                    </button>
+                  ) : (
+                    <button
+                      onClick={handleBlock}
+                      className="w-full px-4 py-3 text-left text-red-400 hover:bg-white/5 transition-colors flex items-center gap-3"
+                    >
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                      </svg>
+                      {t('menu.block')}
+                    </button>
+                  )}
+                  <button
+                    onClick={() => { setIsReportModalOpen(true); setIsMenuOpen(false); }}
+                    className="w-full px-4 py-3 text-left text-orange-400 hover:bg-white/5 transition-colors flex items-center gap-3 border-t border-white/5"
+                  >
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                    {t('menu.report')}
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </div>
         {/* Yıldız bilgisi - tıklanabilir */}
@@ -481,21 +689,56 @@ export function ChatPanel() {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input - safe-bottom only when keyboard is closed */}
+      {/* Input or Blocked Banner - safe-bottom only when keyboard is closed */}
       <div
         className="relative z-10"
         style={{
           paddingBottom: keyboardHeight === 0 ? 'var(--safe-area-bottom)' : 0,
         }}
       >
-        <MessageInput onSend={sendMessage} disabled={loading} />
+        {isOtherUserBlocked ? (
+          <div className="p-4 border-t border-white/10 bg-red-500/10">
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-white/70 text-sm">{t('chat.userBlocked')}</p>
+              <button
+                onClick={handleUnblock}
+                className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white text-sm rounded-lg transition-colors"
+              >
+                {t('menu.unblock')}
+              </button>
+            </div>
+          </div>
+        ) : (
+          <MessageInput onSend={sendMessage} disabled={loading} />
+        )}
       </div>
     </motion.div>
   )
 
   return (
-    <AnimatePresence>
-      {isMobile ? mobilePanel : desktopPanel}
-    </AnimatePresence>
+    <>
+      <AnimatePresence>
+        {isMobile ? mobilePanel : desktopPanel}
+      </AnimatePresence>
+
+      {/* Modals */}
+      <ReportModal
+        isOpen={isReportModalOpen}
+        onClose={() => setIsReportModalOpen(false)}
+        userId={otherUserId || ''}
+        conversationId={activeConversation?.id}
+      />
+
+      <NicknameModal
+        isOpen={isNicknameModalOpen}
+        onClose={() => setIsNicknameModalOpen(false)}
+        conversationId={activeConversation?.id || ''}
+        currentNickname={localNickname}
+        onNicknameChange={(nickname) => {
+          setLocalNickname(nickname)
+          fetchNicknames()
+        }}
+      />
+    </>
   )
 }

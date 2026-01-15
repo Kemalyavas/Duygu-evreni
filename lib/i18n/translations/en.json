@@ -153,7 +153,40 @@
     "minimize": "Minimize",
     "clickToGoToStar": "Click to go to star",
     "tapToGoToStar": "Tap to go to star",
-    "chatStarted": "Chat started"
+    "chatStarted": "Chat started",
+    "userBlocked": "You have blocked this user",
+    "blocked": "Blocked"
+  },
+  "menu": {
+    "setNickname": "Set Nickname",
+    "block": "Block",
+    "unblock": "Unblock",
+    "report": "Report"
+  },
+  "nickname": {
+    "title": "Nickname",
+    "description": "Give this person a custom nickname",
+    "placeholder": "e.g., School friend",
+    "save": "Save",
+    "remove": "Remove",
+    "error": "Could not save nickname"
+  },
+  "report": {
+    "title": "Report User",
+    "description": "Why do you want to report this user?",
+    "selectReason": "Select a reason",
+    "reasons": {
+      "spam": "Spam",
+      "harassment": "Harassment",
+      "inappropriate": "Inappropriate Content",
+      "other": "Other"
+    },
+    "additionalInfo": "Additional info (optional)",
+    "additionalInfoPlaceholder": "Add more details...",
+    "submit": "Submit Report",
+    "success": "Report Submitted",
+    "successDescription": "Thanks for letting us know. We'll review it shortly.",
+    "error": "Could not submit report"
   },
   "messageRequest": {
     "title": "Send Message Request",

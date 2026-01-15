@@ -16,7 +16,7 @@ const plusJakarta = Plus_Jakarta_Sans({
   subsets: ["latin", "latin-ext"],
 });
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://duygu-evreni.vercel.app";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.duyguevreni.com";
 
 export const metadata: Metadata = {
   title: {

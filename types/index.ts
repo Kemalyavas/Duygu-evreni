@@ -80,6 +80,8 @@ export interface ConversationWithDetails extends Conversation {
   star_owner?: Profile
   last_message?: Message
   unread_count?: number
+  partner_nickname?: string // Karşı tarafa verdiğim takma ad
+  is_partner_blocked?: boolean // Karşı tarafı engelledim mi
 }
 
 export interface Message {
@@ -100,6 +102,15 @@ export interface BlockedUser {
   blocker_id: string
   blocked_id: string
   created_at: string
+}
+
+export interface ConversationNickname {
+  id: string
+  conversation_id: string
+  user_id: string
+  nickname: string
+  created_at: string
+  updated_at: string
 }
 
 export type ReportReason = 'spam' | 'harassment' | 'inappropriate' | 'other'

@@ -1,10 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { formatDistanceToNow } from 'date-fns'
 import { tr, enUS } from 'date-fns/locale'
 import { useStore } from '@/lib/store/useStore'
-import { useAuth } from '@/lib/hooks'
+import { useAuth, useBlocking, useNicknames } from '@/lib/hooks'
 import { useTranslation } from '@/lib/i18n'
 import type { ConversationWithDetails } from '@/types'
 
@@ -18,8 +18,18 @@ export function ConversationList({ conversations, onSelect, onDelete }: Conversa
   const { user } = useAuth()
   const { t, language } = useTranslation()
   const { activeConversation, setActiveConversation, setMessagingPanelOpen } = useStore()
+  const { blockedUsers, fetchBlockedUsers } = useBlocking()
+  const { nicknames, fetchNicknames, getNickname } = useNicknames()
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const dateLocale = language === 'tr' ? tr : enUS
+
+  // Fetch blocked users and nicknames on mount
+  useEffect(() => {
+    if (user) {
+      fetchBlockedUsers()
+      fetchNicknames()
+    }
+  }, [user, fetchBlockedUsers, fetchNicknames])
 
   const handleSelect = (conv: ConversationWithDetails) => {
     setActiveConversation(conv)
@@ -62,10 +72,23 @@ export function ConversationList({ conversations, onSelect, onDelete }: Conversa
       {conversations.map((conv) => {
         const isActive = activeConversation?.id === conv.id
         const otherUser = conv.initiator_id === user?.id ? conv.star_owner : conv.initiator
+        const otherUserId = otherUser?.id
+
+        // Check if other user is blocked
+        const isBlocked = otherUserId
+          ? blockedUsers.some(b => b.blocked_id === otherUserId)
+          : false
+
+        // Get nickname for this conversation
+        const nickname = getNickname(conv.id)
+
         // Respect privacy setting
         const otherUsername = (otherUser?.show_username_in_chats !== false && otherUser?.username)
           ? otherUser.username
           : t('common.anonymous')
+
+        // Display name: nickname > username > anonymous
+        const displayName = nickname || otherUsername
 
         return (
           <button
@@ -74,36 +97,54 @@ export function ConversationList({ conversations, onSelect, onDelete }: Conversa
             className={`w-full text-left p-3 rounded-xl transition-colors group ${
               isActive
                 ? 'bg-cyan-500/20 border border-cyan-500/30'
-                : 'bg-white/5 hover:bg-white/10 border border-transparent'
-            }`}
+                : isBlocked
+                  ? 'bg-red-500/5 hover:bg-red-500/10 border border-red-500/10'
+                  : 'bg-white/5 hover:bg-white/10 border border-transparent'
+            } ${isBlocked ? 'opacity-60' : ''}`}
           >
             <div className="flex items-center gap-3">
               {/* Avatar */}
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500/30 to-purple-500/30 flex items-center justify-center flex-shrink-0">
-                <span className="text-white/80 text-sm font-medium">
-                  {otherUsername[0]?.toUpperCase() || '?'}
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
+                isBlocked
+                  ? 'bg-gradient-to-br from-red-500/20 to-red-500/10'
+                  : 'bg-gradient-to-br from-cyan-500/30 to-purple-500/30'
+              }`}>
+                <span className={`text-sm font-medium ${isBlocked ? 'text-red-300/80' : 'text-white/80'}`}>
+                  {displayName[0]?.toUpperCase() || '?'}
                 </span>
               </div>
 
               {/* Content */}
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between gap-2">
-                  <span className="text-white font-medium text-sm truncate">
-                    {otherUsername}
-                  </span>
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className={`font-medium text-sm truncate ${isBlocked ? 'text-white/50' : 'text-white'}`}>
+                      {displayName}
+                    </span>
+                    {nickname && (
+                      <span className="text-white/30 text-xs truncate hidden sm:inline">
+                        ({otherUsername})
+                      </span>
+                    )}
+                    {isBlocked && (
+                      <span className="text-red-400/80 text-xs flex-shrink-0 px-1.5 py-0.5 bg-red-500/10 rounded">
+                        {t('chat.blocked')}
+                      </span>
+                    )}
+                  </div>
                   <span className="text-white/40 text-xs flex-shrink-0">
                     {formatDistanceToNow(new Date(conv.updated_at), { addSuffix: false, locale: dateLocale })}
                   </span>
                 </div>
                 {conv.last_message?.content && (
-                  <p className="text-white/50 text-xs truncate mt-0.5">
+                  <p className={`text-xs truncate mt-0.5 ${isBlocked ? 'text-white/30' : 'text-white/50'}`}>
                     {conv.last_message.content}
                   </p>
                 )}
               </div>
 
-              {/* Unread indicator */}
-              {conv.unread_count && conv.unread_count > 0 && (
+              {/* Unread indicator - hide for blocked */}
+              {!isBlocked && conv.unread_count && conv.unread_count > 0 && (
                 <div className="w-5 h-5 rounded-full bg-cyan-500 flex items-center justify-center flex-shrink-0">
                   <span className="text-white text-xs font-medium">{conv.unread_count}</span>
                 </div>
