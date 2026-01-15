@@ -371,11 +371,12 @@ export function ChatPanel() {
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.95 }}
-                    className="absolute right-0 top-full mt-1 w-48 bg-[#0d0d1a] border border-white/20 rounded-xl shadow-2xl shadow-black/50 overflow-hidden z-50"
+                    className="absolute right-0 top-full mt-1 w-48 border border-white/20 rounded-xl shadow-2xl shadow-black/50 overflow-hidden z-50"
+                    style={{ backgroundColor: '#0d0d1a' }}
                   >
                     <button
                       onClick={() => { setIsNicknameModalOpen(true); setIsMenuOpen(false); }}
-                      className="w-full px-4 py-3 text-left text-white/80 hover:bg-white/5 transition-colors flex items-center gap-3"
+                      className="w-full px-4 py-3 text-left text-white/80 hover:bg-white/10 transition-colors flex items-center gap-3"
                     >
                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
@@ -385,7 +386,7 @@ export function ChatPanel() {
                     {isOtherUserBlocked ? (
                       <button
                         onClick={handleUnblock}
-                        className="w-full px-4 py-3 text-left text-green-400 hover:bg-white/5 transition-colors flex items-center gap-3"
+                        className="w-full px-4 py-3 text-left text-green-400 hover:bg-white/10 transition-colors flex items-center gap-3"
                       >
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" />
@@ -395,7 +396,7 @@ export function ChatPanel() {
                     ) : (
                       <button
                         onClick={handleBlock}
-                        className="w-full px-4 py-3 text-left text-red-400 hover:bg-white/5 transition-colors flex items-center gap-3"
+                        className="w-full px-4 py-3 text-left text-red-400 hover:bg-white/10 transition-colors flex items-center gap-3"
                       >
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
@@ -405,7 +406,7 @@ export function ChatPanel() {
                     )}
                     <button
                       onClick={() => { setIsReportModalOpen(true); setIsMenuOpen(false); }}
-                      className="w-full px-4 py-3 text-left text-orange-400 hover:bg-white/5 transition-colors flex items-center gap-3 border-t border-white/5"
+                      className="w-full px-4 py-3 text-left text-orange-400 hover:bg-white/10 transition-colors flex items-center gap-3 border-t border-white/10"
                     >
                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
@@ -578,11 +579,12 @@ export function ChatPanel() {
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.95 }}
-                  className="absolute right-0 top-full mt-1 w-48 bg-[#0d0d1a] border border-white/20 rounded-xl shadow-2xl shadow-black/50 overflow-hidden z-50"
+                  className="absolute right-0 top-full mt-1 w-48 border border-white/20 rounded-xl shadow-2xl shadow-black/50 overflow-hidden z-50"
+                  style={{ backgroundColor: '#0d0d1a' }}
                 >
                   <button
                     onClick={() => { setIsNicknameModalOpen(true); setIsMenuOpen(false); }}
-                    className="w-full px-4 py-3 text-left text-white/80 hover:bg-white/5 transition-colors flex items-center gap-3"
+                    className="w-full px-4 py-3 text-left text-white/80 hover:bg-white/10 transition-colors flex items-center gap-3"
                   >
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
@@ -592,7 +594,7 @@ export function ChatPanel() {
                   {isOtherUserBlocked ? (
                     <button
                       onClick={handleUnblock}
-                      className="w-full px-4 py-3 text-left text-green-400 hover:bg-white/5 transition-colors flex items-center gap-3"
+                      className="w-full px-4 py-3 text-left text-green-400 hover:bg-white/10 transition-colors flex items-center gap-3"
                     >
                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" />
@@ -602,7 +604,7 @@ export function ChatPanel() {
                   ) : (
                     <button
                       onClick={handleBlock}
-                      className="w-full px-4 py-3 text-left text-red-400 hover:bg-white/5 transition-colors flex items-center gap-3"
+                      className="w-full px-4 py-3 text-left text-red-400 hover:bg-white/10 transition-colors flex items-center gap-3"
                     >
                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
@@ -612,7 +614,7 @@ export function ChatPanel() {
                   )}
                   <button
                     onClick={() => { setIsReportModalOpen(true); setIsMenuOpen(false); }}
-                    className="w-full px-4 py-3 text-left text-orange-400 hover:bg-white/5 transition-colors flex items-center gap-3 border-t border-white/5"
+                    className="w-full px-4 py-3 text-left text-orange-400 hover:bg-white/10 transition-colors flex items-center gap-3 border-t border-white/10"
                   >
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
