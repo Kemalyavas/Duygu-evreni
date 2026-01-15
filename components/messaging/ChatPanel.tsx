@@ -722,12 +722,14 @@ export function ChatPanel() {
       </AnimatePresence>
 
       {/* Modals */}
-      <ReportModal
-        isOpen={isReportModalOpen}
-        onClose={() => setIsReportModalOpen(false)}
-        userId={otherUserId || ''}
-        conversationId={activeConversation?.id}
-      />
+      {otherUserId && (
+        <ReportModal
+          isOpen={isReportModalOpen}
+          onClose={() => setIsReportModalOpen(false)}
+          userId={otherUserId}
+          conversationId={activeConversation?.id}
+        />
+      )}
 
       <NicknameModal
         isOpen={isNicknameModalOpen}

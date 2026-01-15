@@ -29,7 +29,7 @@ export function ReportModal({ isOpen, onClose, userId, conversationId }: ReportM
   const [error, setError] = useState<string | null>(null)
 
   const handleSubmit = async () => {
-    if (!selectedReason) return
+    if (!selectedReason || !userId) return
 
     try {
       setError(null)
@@ -71,7 +71,7 @@ export function ReportModal({ isOpen, onClose, userId, conversationId }: ReportM
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.9, opacity: 0 }}
-            className="w-full max-w-md bg-[#0d0d1a]/95 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden"
+            className="w-full max-w-md bg-[#0d0d1a] border border-white/20 rounded-2xl overflow-hidden shadow-2xl shadow-black/50"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
