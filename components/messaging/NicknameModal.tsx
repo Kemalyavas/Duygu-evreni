@@ -84,8 +84,7 @@ export function NicknameModal({
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.9, opacity: 0 }}
-            className="w-full max-w-sm border border-white/10 rounded-2xl overflow-hidden shadow-2xl shadow-black/50"
-            style={{ backgroundColor: '#0d0d1a' }}
+            className="w-full max-w-sm bg-[#0d0d1a]/95 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
