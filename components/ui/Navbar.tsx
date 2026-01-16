@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
@@ -15,6 +15,8 @@ export function Navbar() {
   const pathname = usePathname()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const { user, isLoading, signOut } = useAuth()
+  const [isAdmin, setIsAdmin] = useState(false)
+  const [adminChecked, setAdminChecked] = useState(false)
 
   const handleLogout = async () => {
     await signOut()
@@ -24,6 +26,36 @@ export function Navbar() {
   const navLinks = [
     { href: '/profil', label: 'Profil' },
   ]
+
+  useEffect(() => {
+    if (!user) {
+      setIsAdmin(false)
+      setAdminChecked(false)
+      return
+    }
+
+    if (adminChecked) return
+
+    const checkAdminStatus = async () => {
+      try {
+        const response = await fetch('/api/admin/check')
+        if (response.ok) {
+          const data = await response.json()
+          setIsAdmin(data?.isAdmin === true)
+        } else {
+          setIsAdmin(false)
+        }
+      } catch {
+        setIsAdmin(false)
+      } finally {
+        setAdminChecked(true)
+      }
+    }
+
+    checkAdminStatus()
+  }, [user, adminChecked])
+
+  const adminLink = { href: '/admin/reports', label: 'Admin' }
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-40 glass">
@@ -65,6 +97,19 @@ export function Navbar() {
                 {link.label}
               </Link>
             ))}
+            {!isLoading && user && isAdmin && (
+              <Link
+                href={adminLink.href}
+                className={clsx(
+                  'text-sm font-medium transition-colors',
+                  pathname === adminLink.href
+                    ? 'text-white'
+                    : 'text-white/60 hover:text-white'
+                )}
+              >
+                {adminLink.label}
+              </Link>
+            )}
 
             {isLoading ? (
               <div className="w-20 h-8 bg-white/10 rounded-lg animate-pulse" />
@@ -140,6 +185,20 @@ export function Navbar() {
                   {link.label}
                 </Link>
               ))}
+              {!isLoading && user && isAdmin && (
+                <Link
+                  href={adminLink.href}
+                  className={clsx(
+                    'block px-3 py-2 rounded-lg text-sm font-medium transition-colors',
+                    pathname === adminLink.href
+                      ? 'bg-white/10 text-white'
+                      : 'text-white/60 hover:text-white hover:bg-white/5'
+                  )}
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  {adminLink.label}
+                </Link>
+              )}
 
               {isLoading ? (
                 <div className="w-full h-10 bg-white/10 rounded-lg animate-pulse" />

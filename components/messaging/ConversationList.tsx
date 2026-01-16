@@ -91,10 +91,18 @@ export function ConversationList({ conversations, onSelect, onDelete }: Conversa
         const displayName = nickname || otherUsername
 
         return (
-          <button
+          <div
             key={conv.id}
+            role="button"
+            tabIndex={0}
             onClick={() => handleSelect(conv)}
-            className={`w-full text-left p-3 rounded-xl transition-colors group ${
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault()
+                handleSelect(conv)
+              }
+            }}
+            className={`w-full text-left p-3 rounded-xl transition-colors group cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500/60 ${
               isActive
                 ? 'bg-cyan-500/20 border border-cyan-500/30'
                 : isBlocked
@@ -171,7 +179,7 @@ export function ConversationList({ conversations, onSelect, onDelete }: Conversa
                 </button>
               )}
             </div>
-          </button>
+          </div>
         )
       })}
     </div>

@@ -332,7 +332,7 @@ export function ChatPanel() {
       <FloatingStars />
 
       {/* Header */}
-      <div className="relative z-10 border-b border-white/10">
+      <div className="relative z-30 border-b border-white/10">
         <div className="flex items-center justify-between p-4">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500/30 to-purple-500/30 flex items-center justify-center">
@@ -538,7 +538,7 @@ export function ChatPanel() {
       <FloatingStars />
 
       {/* Header */}
-      <div className="relative z-10 border-b border-white/10 safe-top">
+      <div className="relative z-30 border-b border-white/10 safe-top">
         <div className="flex items-center justify-between p-4">
           <div className="flex items-center gap-3">
             <button

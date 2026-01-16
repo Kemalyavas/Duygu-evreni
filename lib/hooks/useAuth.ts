@@ -46,6 +46,21 @@ export function useAuth() {
   const [isLoading, setIsLoading] = useState(!authChecked)
   const supabaseRef = useRef(createClient())
 
+  const handleBannedProfile = useCallback(async (reason?: string | null, shouldThrow = false) => {
+    try {
+      await supabaseRef.current.auth.signOut()
+    } catch {
+      // ignore
+    }
+    setUser(null)
+    setProfile(null)
+    authChecked = true
+    setIsLoading(false)
+    if (shouldThrow) {
+      throw new Error(reason || 'Hesabınız banlanmış')
+    }
+  }, [setProfile, setUser])
+
   // Fetch user session on mount
   useEffect(() => {
     if (authChecked) {
@@ -108,6 +123,9 @@ export function useAuth() {
 
             if (profileData && isMounted) {
               setProfile(profileData)
+              if (profileData.is_banned) {
+                await handleBannedProfile(profileData.banned_reason, false)
+              }
             }
           } catch {
             console.warn('[Auth] Could not fetch profile')
@@ -151,6 +169,9 @@ export function useAuth() {
 
               if (profileData && isMounted) {
                 setProfile(profileData)
+                if (profileData.is_banned) {
+                  await handleBannedProfile(profileData.banned_reason, false)
+                }
               }
             } catch {
               console.warn('[Auth] Could not fetch profile on sign in')
@@ -207,6 +228,9 @@ export function useAuth() {
 
           if (profileData) {
             setProfile(profileData)
+            if (profileData.is_banned) {
+              await handleBannedProfile(profileData.banned_reason, true)
+            }
           }
         } catch {
           console.warn('[Auth] Could not fetch profile on sign in')
@@ -215,7 +239,7 @@ export function useAuth() {
 
       return data
     },
-    [setUser, setProfile]
+    [handleBannedProfile, setUser, setProfile]
   )
 
   const signUp = useCallback(

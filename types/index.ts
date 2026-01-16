@@ -32,6 +32,10 @@ export interface Profile {
   daily_views_used: number
   last_reset_date: string
   show_username_in_chats: boolean
+  is_admin?: boolean
+  is_banned?: boolean
+  banned_reason?: string | null
+  banned_at?: string | null
   created_at: string
 }
 

@@ -50,6 +50,29 @@ export async function middleware(request: NextRequest) {
 
   const pathname = request.nextUrl.pathname
 
+  // Block banned users
+  if (user) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('is_banned')
+      .eq('id', user.id)
+      .single()
+
+    if (profile?.is_banned) {
+      const redirectUrl = request.nextUrl.clone()
+      redirectUrl.pathname = '/giris'
+      redirectUrl.searchParams.set('banned', '1')
+
+      supabaseResponse = NextResponse.redirect(redirectUrl)
+      try {
+        await supabase.auth.signOut()
+      } catch {
+        // ignore
+      }
+      return supabaseResponse
+    }
+  }
+
   // Check if accessing protected route without auth
   if (protectedRoutes.some(route => pathname.startsWith(route))) {
     if (!user) {

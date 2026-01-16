@@ -46,9 +46,11 @@ export async function POST(request: NextRequest) {
         .select('ip_address')
         .eq('user_id', user_id)
 
-      if (ipHistory && ipHistory.length > 0) {
-        const bans = ipHistory.map(h => ({
-          ip_address: h.ip_address,
+      const bannedIps = (ipHistory || []).map(h => h.ip_address)
+
+      if (bannedIps.length > 0) {
+        const bans = bannedIps.map(ip => ({
+          ip_address: ip,
           reason: reason || `Kullanıcı banı: ${user_id}`,
           banned_by: user.id,
         }))
@@ -56,25 +58,34 @@ export async function POST(request: NextRequest) {
         await getSupabaseAdmin()
           .from('banned_ips')
           .upsert(bans, { onConflict: 'ip_address' })
-
-        // Also ban the user
-        await getSupabaseAdmin().auth.admin.updateUserById(user_id, {
-          ban_duration: 'none', // Permanent
-          user_metadata: { banned: true }
-        })
-
-        // Set banned_until to infinity
-        try {
-          await getSupabaseAdmin().rpc('ban_user_permanently', { target_user_id: user_id })
-        } catch {
-          // RPC might not exist, ignore
-        }
-
-        return NextResponse.json({
-          success: true,
-          banned_ips: ipHistory.map(h => h.ip_address)
-        })
       }
+
+      // Also ban the user (Auth + profile flag)
+      await getSupabaseAdmin().auth.admin.updateUserById(user_id, {
+        ban_duration: 'none', // Permanent
+        user_metadata: { banned: true }
+      })
+
+      await getSupabaseAdmin()
+        .from('profiles')
+        .update({
+          is_banned: true,
+          banned_reason: reason || `Kullanıcı banı: ${user_id}`,
+          banned_at: new Date().toISOString(),
+        })
+        .eq('id', user_id)
+
+      // Set banned_until to infinity
+      try {
+        await getSupabaseAdmin().rpc('ban_user_permanently', { target_user_id: user_id })
+      } catch {
+        // RPC might not exist, ignore
+      }
+
+      return NextResponse.json({
+        success: true,
+        banned_ips: bannedIps
+      })
     }
 
     // Single IP ban
