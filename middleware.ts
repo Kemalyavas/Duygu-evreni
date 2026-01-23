@@ -8,6 +8,16 @@ const protectedRoutes = ['/profil']
 const authRoutes = ['/giris', '/kayit']
 
 export async function middleware(request: NextRequest) {
+  // 1. Hostname Redirect (SEO fix for vercel.app domain indexing)
+  // Google'da 'duygu-evreni.vercel.app' çıkmasını engellemek için ana domaine yönlendiriyoruz.
+  const hostname = request.headers.get('host')
+  if (hostname && hostname.includes('duygu-evreni.vercel.app')) {
+    const newUrl = new URL(request.url)
+    newUrl.host = 'www.duyguevreni.com'
+    newUrl.protocol = 'https:'
+    return NextResponse.redirect(newUrl, 301)
+  }
+
   let supabaseResponse = NextResponse.next({
     request,
   })
