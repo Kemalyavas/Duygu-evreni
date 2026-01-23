@@ -9,11 +9,13 @@ import "./globals.css";
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin", "latin-ext"],
+  display: "swap",
 });
 
 const plusJakarta = Plus_Jakarta_Sans({
   variable: "--font-jakarta",
   subsets: ["latin", "latin-ext"],
+  display: "swap",
 });
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.duyguevreni.com";
@@ -111,6 +113,9 @@ export default function RootLayout({
     <html lang="tr">
       <head>
         <HomePageJsonLd />
+        {/* Preconnect to Supabase for faster API calls */}
+        <link rel="preconnect" href={process.env.NEXT_PUBLIC_SUPABASE_URL} />
+        <link rel="dns-prefetch" href={process.env.NEXT_PUBLIC_SUPABASE_URL} />
       </head>
       <body
         className={`${inter.variable} ${plusJakarta.variable} antialiased`}

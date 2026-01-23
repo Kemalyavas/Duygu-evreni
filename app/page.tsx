@@ -15,16 +15,70 @@ import { MessageRequestModal, ChatPanel } from '@/components/messaging'
 import { useAuth, usePlanets, useStars, useStarCounts, useDailyLimit, useReadStars, useMobile, useSoundEffects } from '@/lib/hooks'
 import type { Planet, Star } from '@/types'
 
+// Static star positions for loading screen (avoids hydration mismatch)
+const LOADER_STARS = [
+  { left: '10%', top: '20%', delay: '0s', opacity: 0.3 },
+  { left: '85%', top: '15%', delay: '0.5s', opacity: 0.5 },
+  { left: '25%', top: '80%', delay: '1s', opacity: 0.4 },
+  { left: '70%', top: '60%', delay: '0.3s', opacity: 0.6 },
+  { left: '45%', top: '10%', delay: '1.5s', opacity: 0.3 },
+  { left: '90%', top: '85%', delay: '0.8s', opacity: 0.5 },
+  { left: '5%', top: '50%', delay: '1.2s', opacity: 0.4 },
+  { left: '60%', top: '30%', delay: '0.2s', opacity: 0.7 },
+  { left: '30%', top: '45%', delay: '1.8s', opacity: 0.3 },
+  { left: '75%', top: '90%', delay: '0.6s', opacity: 0.5 },
+  { left: '15%', top: '70%', delay: '1.1s', opacity: 0.4 },
+  { left: '50%', top: '5%', delay: '0.4s', opacity: 0.6 },
+]
+
+// Branded loading component for 3D scene
+function UniverseLoader() {
+  return (
+    <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-b from-[#0A0E27] to-black">
+      {/* Animated stars background */}
+      <div className="absolute inset-0 overflow-hidden">
+        {LOADER_STARS.map((star, i) => (
+          <div
+            key={i}
+            className="absolute w-1 h-1 bg-white rounded-full animate-pulse"
+            style={{
+              left: star.left,
+              top: star.top,
+              animationDelay: star.delay,
+              opacity: star.opacity,
+            }}
+          />
+        ))}
+      </div>
+      {/* Logo and loading text */}
+      <div className="relative z-10 flex flex-col items-center gap-4">
+        <div className="w-20 h-20 relative">
+          <div className="absolute inset-0 bg-gradient-to-r from-purple-500 via-pink-500 to-purple-500 rounded-full animate-spin opacity-30 blur-xl" />
+          <img
+            src="/logo.png"
+            alt="Duygu Evreni"
+            className="w-20 h-20 relative z-10 animate-pulse"
+          />
+        </div>
+        <div className="flex flex-col items-center gap-2">
+          <p className="text-white/80 text-sm font-medium">Evren yükleniyor...</p>
+          <div className="flex gap-1">
+            <span className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+            <span className="w-2 h-2 bg-pink-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+            <span className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // Dynamic import for 3D component (client-side only)
 const UnifiedUniverse = dynamic(
   () => import('@/components/3d/UnifiedUniverse').then((mod) => mod.UnifiedUniverse),
   {
     ssr: false,
-    loading: () => (
-      <div className="w-full h-full flex items-center justify-center bg-gradient-to-b from-[#0A0E27] to-black">
-        <div className="text-white text-lg animate-pulse">Loading...</div>
-      </div>
-    ),
+    loading: () => <UniverseLoader />,
   }
 )
 
@@ -328,6 +382,7 @@ function HomePageContent() {
             alt={t('home.title')}
             width={75}
             height={75}
+            priority
             className="w-[55px] h-[55px] sm:w-[75px] sm:h-[75px]"
           />
           <span className="font-bold text-[15px] sm:text-[17px] -ml-1 bg-gradient-to-r from-purple-400 via-pink-400 to-purple-300 bg-clip-text text-transparent group-hover:opacity-80 transition-opacity">
@@ -570,11 +625,7 @@ function HomePageContent() {
 // Main export with Suspense boundary for useSearchParams
 export default function HomePage() {
   return (
-    <Suspense fallback={
-      <div className="h-screen w-screen flex items-center justify-center bg-gradient-to-b from-[#0A0E27] to-black">
-        <div className="text-white text-lg animate-pulse">Loading...</div>
-      </div>
-    }>
+    <Suspense fallback={<UniverseLoader />}>
       <HomePageContent />
     </Suspense>
   )
