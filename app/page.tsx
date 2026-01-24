@@ -425,20 +425,8 @@ function HomePageContent() {
 
       {/* 3D Universe - Full screen */}
       <div className="absolute inset-0">
-        {planetsLoading ? (
-          <div className="w-full h-full flex items-center justify-center flex-col gap-4">
-            <div className="text-white text-lg animate-pulse">
-              {t('common.loading')}
-            </div>
-            {planetsError && (
-              <div className="text-red-400 text-sm">{t('common.error')}: {planetsError}</div>
-            )}
-          </div>
-        ) : planets.length === 0 ? (
-          <div className="w-full h-full flex items-center justify-center flex-col gap-4">
-            <div className="text-white text-lg">{t('errors.notFound')}</div>
-            {planetsError && <div className="text-red-400 text-sm">{planetsError}</div>}
-          </div>
+        {planetsLoading || planets.length === 0 ? (
+          <UniverseLoader />
         ) : (
           <ErrorBoundary>
             <UnifiedUniverse

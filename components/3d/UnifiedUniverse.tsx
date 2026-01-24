@@ -2,8 +2,9 @@
 
 import { Suspense, useMemo, useRef, useState, useEffect, useCallback } from 'react'
 import { Canvas } from '@react-three/fiber'
-import { OrbitControls, PerspectiveCamera, Html, useProgress } from '@react-three/drei'
+import { OrbitControls, PerspectiveCamera, useProgress } from '@react-three/drei'
 import { EffectComposer, Bloom } from '@react-three/postprocessing'
+import { useSpring, animated } from '@react-spring/three'
 
 // Components
 import { StarField } from './StarField'
@@ -27,38 +28,6 @@ import {
 
 // Types
 import type { Planet as PlanetType, Star } from '@/types'
-
-// Loading overlay component - shows while 3D assets are loading
-function LoadingOverlay() {
-  const { progress, active } = useProgress()
-
-  // Hide when loading is complete
-  if (!active && progress >= 100) return null
-
-  return (
-    <Html fullscreen zIndexRange={[100, 0]}>
-      <div className="fixed inset-0 bg-gradient-to-b from-[#0A0E27] to-black flex items-center justify-center z-50">
-        <div className="text-center">
-          <div className="relative w-24 h-24 mx-auto mb-6">
-            {/* Spinning ring */}
-            <div className="absolute inset-0 rounded-full border-2 border-white/10" />
-            <div
-              className="absolute inset-0 rounded-full border-2 border-transparent border-t-cyan-500 animate-spin"
-              style={{ animationDuration: '1s' }}
-            />
-            {/* Progress text */}
-            <div className="absolute inset-0 flex items-center justify-center">
-              <span className="text-white/80 text-lg font-medium">
-                {Math.round(progress)}%
-              </span>
-            </div>
-          </div>
-          <p className="text-white/60 text-lg animate-pulse">Evren yükleniyor...</p>
-        </div>
-      </div>
-    </Html>
-  )
-}
 
 // ============================================
 // Types
@@ -142,23 +111,27 @@ function Scene({
   // Track loading progress for 3D assets
   const { progress, active } = useProgress()
 
-  // Track when planets are ready to show
+  // Track when planets are ready to show (with fade-in)
   const [planetsReady, setPlanetsReady] = useState(false)
+  const [planetsVisible, setPlanetsVisible] = useState(false)
 
-  // Show planets when loading is complete (progress = 100) or after timeout
+  // Show planets when loading is complete (progress >= 95) or after max timeout
   useEffect(() => {
-    // If loading is complete, show planets immediately
-    if (!active && progress === 100) {
+    // If loading is complete, show planets
+    if (!active && progress >= 95) {
       setPlanetsReady(true)
-      return
+      // Small delay for smooth fade-in after render
+      const fadeTimer = setTimeout(() => setPlanetsVisible(true), 50)
+      return () => clearTimeout(fadeTimer)
     }
 
-    // Fallback: show planets after 500ms even if still loading
-    const timer = setTimeout(() => {
+    // Max fallback: show planets after 2 seconds even if still loading
+    const maxTimer = setTimeout(() => {
       setPlanetsReady(true)
-    }, 500)
+      setTimeout(() => setPlanetsVisible(true), 50)
+    }, 2000)
 
-    return () => clearTimeout(timer)
+    return () => clearTimeout(maxTimer)
   }, [progress, active])
 
   // Track which planets have completed vortex animation
@@ -204,9 +177,6 @@ function Scene({
 
   return (
     <>
-      {/* Loading overlay - shows progress while assets load */}
-      <LoadingOverlay />
-
       <PerspectiveCamera
         makeDefault
         position={DEFAULT_CAMERA.POSITION}
@@ -285,8 +255,92 @@ function Scene({
         />
       )}
 
-      {/* Planets - only render when ready to prevent one-by-one loading appearance */}
-      {planetsReady && planets.map((planet) => {
+      {/* Planets container with fade-in animation */}
+      <PlanetsContainer
+        planets={planets}
+        planetsReady={planetsReady}
+        planetsVisible={planetsVisible}
+        focusedPlanetId={focusedPlanetId}
+        viewMode={viewMode}
+        starsByPlanet={starsByPlanet}
+        starCounts={starCounts}
+        starsLoading={starsLoading}
+        starsReadyToShow={starsReadyToShow}
+        setStarsReadyToShow={setStarsReadyToShow}
+        onPlanetClick={onPlanetClick}
+        onStarClick={onStarClick}
+        selectedStarId={selectedStarId}
+        readStarIds={readStarIds}
+        onSelectedStarPosition={onSelectedStarPosition}
+        activeMobileTooltipId={activeMobileTooltipId}
+        setActiveMobileTooltipId={setActiveMobileTooltipId}
+      />
+
+      {/* Bloom effect - disabled on mobile for performance */}
+      {!isMobile && (
+        <EffectComposer>
+          <Bloom
+            intensity={BLOOM.INTENSITY}
+            luminanceThreshold={BLOOM.LUMINANCE_THRESHOLD}
+            luminanceSmoothing={BLOOM.LUMINANCE_SMOOTHING}
+            mipmapBlur
+            radius={BLOOM.RADIUS}
+          />
+        </EffectComposer>
+      )}
+    </>
+  )
+}
+
+// Separate component for planets with animation
+function PlanetsContainer({
+  planets,
+  planetsReady,
+  planetsVisible,
+  focusedPlanetId,
+  viewMode,
+  starsByPlanet,
+  starCounts,
+  starsLoading,
+  starsReadyToShow,
+  setStarsReadyToShow,
+  onPlanetClick,
+  onStarClick,
+  selectedStarId,
+  readStarIds,
+  onSelectedStarPosition,
+  activeMobileTooltipId,
+  setActiveMobileTooltipId,
+}: {
+  planets: PlanetType[]
+  planetsReady: boolean
+  planetsVisible: boolean
+  focusedPlanetId: string | null
+  viewMode: ViewMode
+  starsByPlanet: Record<string, Star[]>
+  starCounts?: Record<string, number>
+  starsLoading?: boolean
+  starsReadyToShow: Record<string, boolean>
+  setStarsReadyToShow: React.Dispatch<React.SetStateAction<Record<string, boolean>>>
+  onPlanetClick?: (planet: PlanetType) => void
+  onStarClick?: (star: Star) => void
+  selectedStarId?: string
+  readStarIds?: Set<string>
+  onSelectedStarPosition?: (position: [number, number, number]) => void
+  activeMobileTooltipId: string | null
+  setActiveMobileTooltipId: (id: string | null) => void
+}) {
+  // Smooth scale animation for all planets appearing together
+  const { scale } = useSpring({
+    scale: planetsVisible ? 1 : 0,
+    config: { tension: 200, friction: 20 },
+  })
+
+  if (!planetsReady) return null
+
+  return (
+    <animated.group scale={scale}>
+      {planets.map((planet) => {
         const isHope = planet.name === 'Hope'
         const isDepression = planet.name === 'Depression'
         const isFocused = planet.id === focusedPlanetId
@@ -343,35 +397,16 @@ function Scene({
           </group>
         )
       })}
-
-      {/* Bloom effect - disabled on mobile for performance */}
-      {!isMobile && (
-        <EffectComposer>
-          <Bloom
-            intensity={BLOOM.INTENSITY}
-            luminanceThreshold={BLOOM.LUMINANCE_THRESHOLD}
-            luminanceSmoothing={BLOOM.LUMINANCE_SMOOTHING}
-            mipmapBlur
-            radius={BLOOM.RADIUS}
-          />
-        </EffectComposer>
-      )}
-    </>
+    </animated.group>
   )
 }
 
 // ============================================
-// Loading Fallback
+// Loading Fallback (minimal - main loading is handled by parent)
 // ============================================
 
 function LoadingFallback() {
-  return (
-    <Html center>
-      <div className="text-white text-lg animate-pulse">
-        Evren yükleniyor...
-      </div>
-    </Html>
-  )
+  return null
 }
 
 // ============================================
