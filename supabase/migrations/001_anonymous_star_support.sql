@@ -2,10 +2,9 @@
 -- Anonymous Star Support Migration
 -- ============================================
 -- Supabase Dashboard > SQL Editor'da çalıştır.
---
--- SIRALAMA:
--- 1. Önce /api/setup/init-anonymous endpoint'ini çağır (anonymous user oluşturur)
--- 2. Sonra bu SQL'i çalıştır (trigger'a exemption ekler)
+-- Deploy sonrası tek yapman gereken bu SQL'i çalıştırmak.
+-- Anonymous user ilk anonim yıldız request'inde otomatik oluşturulur
+-- (getOrCreateAnonymousUser fonksiyonu lazy creation yapıyor).
 --
 -- SORUN: Tüm anonim yıldızlar tek bir user_id kullanıyor.
 -- check_daily_star_limit trigger'ı günde 3 yıldız koyunca,
