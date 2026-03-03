@@ -240,6 +240,10 @@ export async function POST(request: NextRequest) {
     // Get or create anonymous user
     const anonymousUserId = await getOrCreateAnonymousUser(admin)
 
+    // NOT: check_daily_star_limit trigger'ında anonymous user exempt edilmeli.
+    // supabase/migrations/001_anonymous_star_support.sql dosyasını çalıştır.
+    // Günlük limit kontrolü yukarıdaki IP rate limiter ile sağlanıyor.
+
     // Insert star with service role (bypasses RLS)
     const { data: star, error: insertError } = await admin
       .from('stars')
