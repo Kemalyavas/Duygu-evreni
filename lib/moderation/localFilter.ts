@@ -106,6 +106,7 @@ const POLITICAL_FIGURES_KEYWORDS = [
   'tayib',
   'tayyib',
   'rte',
+  // 'reis' bırakıldı - siyasi bağlamda çok kullanılıyor, matchWordStart ile "reisçi" vb. yakalanır
   'reis',
   'recep tayyip',
   'r t e',
@@ -121,10 +122,10 @@ const POLITICAL_FIGURES_KEYWORDS = [
   'kılıçdar',
   'kilicdar',
   'kemal kılıçdaroğlu',
-  'kk',
+  // 'kk' çıkarıldı - çok kısa, false positive ("ok" gibi eşleşiyor)
   'özgür özel',
   'ozgur ozel',
-  'özel',
+  // 'özel' çıkarıldı - "özel gün", "özel biri" gibi günlük kullanımda çok yaygın
 
   // ==========================================
   // MHP
@@ -133,7 +134,7 @@ const POLITICAL_FIGURES_KEYWORDS = [
   'bahceli',
   'devlet bahçeli',
   'devlet bahceli',
-  'db',
+  // 'db' çıkarıldı - "database" kısaltması, çok kısa
 
   // ==========================================
   // İYİ PARTİ
@@ -152,6 +153,7 @@ const POLITICAL_FIGURES_KEYWORDS = [
   'imam son',
   'ekrem imamoğlu',
   'ekrem imamoglu',
+  // 'ekrem' bırakıldı - isim olarak yaygın ama siyasi bağlamda da çok kullanılıyor
   'ekrem',
   'ibb başkan',
   'ibb baskani',
@@ -165,7 +167,7 @@ const POLITICAL_FIGURES_KEYWORDS = [
   // ==========================================
   'süleyman soylu',
   'suleyman soylu',
-  'soylu',
+  // 'soylu' çıkarıldı - "soylu bir insan" (noble) gibi günlük kullanım
   'binali yıldırım',
   'binali yildirim',
   'ali babacan',
@@ -186,7 +188,7 @@ const POLITICAL_FIGURES_KEYWORDS = [
   'sinan ogan',
   'muharrem ince',
   'muharrem ınce',
-  'ince',
+  // 'ince' çıkarıldı - "ince düşünceli", "ince belli" gibi günlük kullanımda çok yaygın
   'selahattin demirtaş',
   'demirtas',
   'demirtaş',
@@ -225,17 +227,17 @@ const POLITICAL_FIGURES_KEYWORDS = [
   'demparti',
   'saadet partisi',
   'saadet',
-  'sp',
+  // 'sp' çıkarıldı - "spor", "sponsor" gibi kelimeleri yakalar (matchWordStart ile)
   'yeniden refah',
   'refah partisi',
   'zafer partisi',
-  'zp',
+  // 'zp' çıkarıldı - çok kısa
   'deva partisi',
-  'deva',
+  // 'deva' çıkarıldı - "deva bulmak", "deva olmak" gibi günlük kullanım
   'gelecek partisi',
   'memleket partisi',
   'tdp',
-  'tip',
+  // 'tip' çıkarıldı - "tip" (tür/görünüş), "tipik" gibi günlük kullanım
   'türkiye işçi partisi',
   'vatan partisi',
   'doğu perinçek',
@@ -264,8 +266,8 @@ const POLITICAL_FIGURES_KEYWORDS = [
   'başbakan',
   'basbakan',
   'milletvekil',
-  'mv',
-  'bakan',
+  // 'mv' çıkarıldı - çok kısa
+  // 'bakan' çıkarıldı - "bakarak", "bakanım" (sevgi), "bakan" (looking) çok yaygın
   'bakanlık',
   'vali',
   'kaymakam',
@@ -445,7 +447,8 @@ export function runLocalFilter(content: string): LocalFilterResult {
   }
 
   // Check political figures - requires AI review
-  const politicalMatches = containsKeywords(content, POLITICAL_FIGURES_KEYWORDS)
+  // matchWordStart = true: Türkçe ekleri yakalamak için (rteyi, erdogana, tayyibe vb.)
+  const politicalMatches = containsKeywords(content, POLITICAL_FIGURES_KEYWORDS, true)
   if (politicalMatches.length > 0) {
     result.requiresAIReview = true
     result.triggeredCategories.push('POLITICAL_FIGURES')

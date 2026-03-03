@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { formatDistanceToNow } from 'date-fns'
 import { tr } from 'date-fns/locale'
 import { MessageRequestButton } from '@/components/messaging'
+import { ShareButtons } from '@/components/ShareButtons'
 import type { Star } from '@/types'
 
 interface StarViewPanelProps {
@@ -76,6 +77,14 @@ export function StarViewPanel({ star, onClose, planetColor = '#ffffff' }: StarVi
               {/* Message Button */}
               <MessageRequestButton star={star} />
 
+              {/* Share Button */}
+              <div className="pt-3">
+                <ShareButtons
+                  url={`/?planet=${star.planet_id}&star=${star.id}`}
+                  text={star.content}
+                />
+              </div>
+
               {/* Footer */}
               <div className="pt-4 border-t border-white/10">
                 <span className="text-white/40 text-sm">
@@ -136,6 +145,14 @@ export function StarViewPanel({ star, onClose, planetColor = '#ffffff' }: StarVi
 
               {/* Message Button */}
               <MessageRequestButton star={star} />
+
+              {/* Share Button */}
+              <div className="pt-3">
+                <ShareButtons
+                  url={`/?planet=${star.planet_id}&star=${star.id}`}
+                  text={star.content}
+                />
+              </div>
 
               {/* Footer */}
               <div className="pt-4 border-t border-white/10 mt-4">

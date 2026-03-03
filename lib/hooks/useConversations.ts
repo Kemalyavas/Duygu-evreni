@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useRef } from 'react'
+import { useState, useCallback, useRef, useEffect } from 'react'
 import { supabaseFetch, supabaseInsert, supabaseUpdate, createClient } from '@/lib/supabase/fetch'
 import type { Conversation, ConversationWithDetails } from '@/types'
 
@@ -12,6 +12,14 @@ export function useConversations() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const isMountedRef = useRef(true)
+
+  // Cleanup on unmount
+  useEffect(() => {
+    isMountedRef.current = true
+    return () => {
+      isMountedRef.current = false
+    }
+  }, [])
 
   // Kullanıcının tüm sohbetlerini getir (kabul edilmiş olanlar, gizlenmemiş)
   const fetchConversations = useCallback(async () => {

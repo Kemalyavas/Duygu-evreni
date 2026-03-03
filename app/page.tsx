@@ -560,7 +560,7 @@ function HomePageContent() {
                 onClick={() => setIsModalOpen(true)}
                 className="shadow-lg shadow-purple-500/25"
               >
-                {t('universe.shareStar')} {isAdmin ? '(∞)' : `(${remainingStars} ${t('universe.starsRemaining')})`}
+                {t('universe.shareStar')} {user ? (isAdmin ? '(∞)' : `(${remainingStars} ${t('universe.starsRemaining')})`) : ''}
               </Button>
             </motion.div>
 

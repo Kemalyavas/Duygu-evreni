@@ -9,20 +9,33 @@ function getSupabaseAdmin() {
   )
 }
 
+// Normalize IP address (handle IPv4-mapped IPv6 addresses)
+function normalizeIP(ip: string): string {
+  // Handle IPv4-mapped IPv6 (::ffff:192.168.1.1 -> 192.168.1.1)
+  if (ip.startsWith('::ffff:')) {
+    return ip.substring(7)
+  }
+  // Handle localhost IPv6
+  if (ip === '::1') {
+    return '127.0.0.1'
+  }
+  return ip
+}
+
 function getClientIP(request: NextRequest): string {
   const forwardedFor = request.headers.get('x-forwarded-for')
   if (forwardedFor) {
-    return forwardedFor.split(',')[0].trim()
+    return normalizeIP(forwardedFor.split(',')[0].trim())
   }
 
   const realIP = request.headers.get('x-real-ip')
   if (realIP) {
-    return realIP
+    return normalizeIP(realIP)
   }
 
   const cfConnectingIP = request.headers.get('cf-connecting-ip')
   if (cfConnectingIP) {
-    return cfConnectingIP
+    return normalizeIP(cfConnectingIP)
   }
 
   return '0.0.0.0'

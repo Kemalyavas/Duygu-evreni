@@ -293,7 +293,7 @@ export function useAuth() {
     const { error } = await supabaseRef.current.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/`,
+        redirectTo: `${window.location.origin}/auth/callback`,
       },
     })
 
