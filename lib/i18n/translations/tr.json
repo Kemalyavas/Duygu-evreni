@@ -122,7 +122,19 @@
     "adminUnlimited": "👑 Admin - Sınırsız yıldız",
     "limitReached": "Limit Doldu",
     "sendStar": "Yıldızı Gönder",
-    "addEmoji": "Emoji ekle"
+    "addEmoji": "Emoji ekle",
+    "firstStarSuccess": "İlk yıldızın evrene yerleşti!",
+    "registerToShareMore": "Daha fazla yıldız paylaşmak için kayıt ol",
+    "shareYourStar": "Yıldızını paylaş",
+    "registerNow": "Kayıt Ol",
+    "maybeLater": "Sonra",
+    "alreadySharedAnonymous": "İlk yıldızını zaten paylaştın! Daha fazlası için kayıt ol.",
+    "copiedToClipboard": "Link kopyalandı!",
+    "shareOnWhatsApp": "WhatsApp",
+    "shareOnTwitter": "Twitter",
+    "copyLink": "Link Kopyala",
+    "shareNative": "Paylaş",
+    "shareStar": "Yıldızı Paylaş"
   },
   "messages": {
     "title": "Mesajlar",

@@ -122,7 +122,19 @@
     "adminUnlimited": "👑 Admin - Unlimited stars",
     "limitReached": "Limit reached",
     "sendStar": "Send Star",
-    "addEmoji": "Add emoji"
+    "addEmoji": "Add emoji",
+    "firstStarSuccess": "Your first star is now in the universe!",
+    "registerToShareMore": "Sign up to share more stars",
+    "shareYourStar": "Share your star",
+    "registerNow": "Sign Up",
+    "maybeLater": "Later",
+    "alreadySharedAnonymous": "You already shared your first star! Sign up for more.",
+    "copiedToClipboard": "Link copied!",
+    "shareOnWhatsApp": "WhatsApp",
+    "shareOnTwitter": "Twitter",
+    "copyLink": "Copy Link",
+    "shareNative": "Share",
+    "shareStar": "Share Star"
   },
   "messages": {
     "title": "Messages",
