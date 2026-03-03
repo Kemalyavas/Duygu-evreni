@@ -29,6 +29,104 @@ function getSupabaseAdmin() {
 }
 
 // ============================================
+// RATE LIMITER (per-user, in-memory)
+// ============================================
+
+const RATE_LIMIT_WINDOW_MS = 60_000 // 1 dakika
+const RATE_LIMIT_MAX_REQUESTS = 10  // Dakikada max 10 istek
+
+// userId -> { count, windowStart }
+const rateLimitMap = new Map<string, { count: number; windowStart: number }>()
+
+// Her 5 dakikada eski kayıtları temizle
+let lastCleanup = Date.now()
+function cleanupRateLimits() {
+  const now = Date.now()
+  if (now - lastCleanup < 300_000) return // 5 dk'dan sık temizleme
+  lastCleanup = now
+  for (const [key, value] of rateLimitMap) {
+    if (now - value.windowStart > RATE_LIMIT_WINDOW_MS * 2) {
+      rateLimitMap.delete(key)
+    }
+  }
+}
+
+function checkRateLimit(userId: string): boolean {
+  cleanupRateLimits()
+  const now = Date.now()
+  const entry = rateLimitMap.get(userId)
+
+  if (!entry || now - entry.windowStart > RATE_LIMIT_WINDOW_MS) {
+    // Yeni pencere
+    rateLimitMap.set(userId, { count: 1, windowStart: now })
+    return true
+  }
+
+  if (entry.count >= RATE_LIMIT_MAX_REQUESTS) {
+    return false // Rate limit aşıldı
+  }
+
+  entry.count++
+  return true
+}
+
+// ============================================
+// CONTENT CACHE (aynı içerik tekrar Gemini'ye gitmesin)
+// ============================================
+
+const CACHE_TTL_MS = 300_000 // 5 dakika
+
+interface CachedResult {
+  response: ModerationResponse
+  timestamp: number
+}
+
+const contentCache = new Map<string, CachedResult>()
+
+let lastCacheCleanup = Date.now()
+function cleanupCache() {
+  const now = Date.now()
+  if (now - lastCacheCleanup < 60_000) return
+  lastCacheCleanup = now
+  for (const [key, value] of contentCache) {
+    if (now - value.timestamp > CACHE_TTL_MS) {
+      contentCache.delete(key)
+    }
+  }
+}
+
+// Basit hash fonksiyonu (content -> cache key)
+function hashContent(content: string): string {
+  let hash = 0
+  for (let i = 0; i < content.length; i++) {
+    const char = content.charCodeAt(i)
+    hash = ((hash << 5) - hash) + char
+    hash |= 0 // 32-bit integer
+  }
+  return hash.toString(36)
+}
+
+function getCachedResult(content: string): ModerationResponse | null {
+  cleanupCache()
+  const key = hashContent(content.trim().toLowerCase())
+  const cached = contentCache.get(key)
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
+    return cached.response
+  }
+  return null
+}
+
+function setCachedResult(content: string, response: ModerationResponse) {
+  const key = hashContent(content.trim().toLowerCase())
+  contentCache.set(key, { response, timestamp: Date.now() })
+  // Cache boyutunu sınırla
+  if (contentCache.size > 500) {
+    const firstKey = contentCache.keys().next().value
+    if (firstKey !== undefined) contentCache.delete(firstKey)
+  }
+}
+
+// ============================================
 // API ROUTE HANDLER
 // ============================================
 
@@ -53,6 +151,14 @@ export async function POST(request: NextRequest): Promise<NextResponse<Moderatio
       )
     }
 
+    // Rate limit check
+    if (!checkRateLimit(user.id)) {
+      return NextResponse.json(
+        { allowed: false, reason: 'Çok fazla istek gönderdiniz. Lütfen biraz bekleyin.' },
+        { status: 429 }
+      )
+    }
+
     const body = await request.json() as ModerationRequest
     const { content } = body
 
@@ -71,15 +177,23 @@ export async function POST(request: NextRequest): Promise<NextResponse<Moderatio
       )
     }
 
+    // Check cache first (aynı içerik için tekrar Gemini'ye gitmemek)
+    const cached = getCachedResult(content)
+    if (cached) {
+      return NextResponse.json(cached)
+    }
+
     // Step 1: Run local filter (fast, synchronous)
     const localResult = runLocalFilter(content)
 
     // If content should be blocked immediately (e.g., child abuse)
     if (localResult.blockImmediately) {
-      return NextResponse.json({
+      const response: ModerationResponse = {
         allowed: false,
         reason: 'Bu içerik platformumuzda paylaşılamaz',
-      })
+      }
+      setCachedResult(content, response)
+      return NextResponse.json(response)
     }
 
     // Step 2: If local filter triggered, run AI moderation
@@ -100,6 +214,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<Moderatio
           response.helpResources = getSuicidePreventionResources()
         }
 
+        setCachedResult(content, response)
         return NextResponse.json(response)
       }
 
@@ -109,15 +224,19 @@ export async function POST(request: NextRequest): Promise<NextResponse<Moderatio
         geminiResult.showHelpResources &&
         localResult.triggeredCategories.includes('SUICIDE_SELF_HARM')
       ) {
-        return NextResponse.json({
+        const response: ModerationResponse = {
           allowed: true,
           helpResources: getSuicidePreventionResources(),
-        })
+        }
+        setCachedResult(content, response)
+        return NextResponse.json(response)
       }
     }
 
     // Content passed all checks
-    return NextResponse.json({ allowed: true })
+    const response: ModerationResponse = { allowed: true }
+    setCachedResult(content, response)
+    return NextResponse.json(response)
   } catch (error) {
     console.error('[Moderation API] Error:', error)
 
