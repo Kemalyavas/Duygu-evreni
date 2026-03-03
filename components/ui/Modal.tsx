@@ -22,14 +22,18 @@ export function Modal({
   const modalRef = useRef<HTMLDivElement>(null)
   const previousActiveElement = useRef<HTMLElement | null>(null)
 
-  // Close on escape key
+  // Use ref for onClose to avoid re-creating event listeners on every parent render
+  const onCloseRef = useRef(onClose)
+  onCloseRef.current = onClose
+
+  // Close on escape key - uses ref so callback identity is stable
   const handleEscape = useCallback(
     (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        onClose()
+        onCloseRef.current()
       }
     },
-    [onClose]
+    []
   )
 
   // Focus trap - keep focus within modal
@@ -59,16 +63,12 @@ export function Modal({
     }
   }, [])
 
+  // Auto-focus first element only once when modal opens
   useEffect(() => {
     if (isOpen) {
-      // Store previously focused element
       previousActiveElement.current = document.activeElement as HTMLElement
-
-      document.addEventListener('keydown', handleEscape)
-      document.addEventListener('keydown', handleTabKey)
       document.body.style.overflow = 'hidden'
 
-      // Focus first focusable element in modal
       setTimeout(() => {
         const firstFocusable = modalRef.current?.querySelector<HTMLElement>(
           'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
@@ -76,13 +76,23 @@ export function Modal({
         firstFocusable?.focus()
       }, 50)
     }
+
+    return () => {
+      if (!isOpen) return
+      document.body.style.overflow = 'unset'
+      previousActiveElement.current?.focus()
+    }
+  }, [isOpen])
+
+  // Event listeners - separate from auto-focus so they don't trigger re-focus
+  useEffect(() => {
+    if (isOpen) {
+      document.addEventListener('keydown', handleEscape)
+      document.addEventListener('keydown', handleTabKey)
+    }
     return () => {
       document.removeEventListener('keydown', handleEscape)
       document.removeEventListener('keydown', handleTabKey)
-      document.body.style.overflow = 'unset'
-
-      // Restore focus to previously focused element
-      previousActiveElement.current?.focus()
     }
   }, [isOpen, handleEscape, handleTabKey])
 

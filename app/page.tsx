@@ -329,6 +329,10 @@ function HomePageContent() {
     setSelectedStar(null)
   }, [])
 
+  const handleCloseModal = useCallback(() => {
+    setIsModalOpen(false)
+  }, [])
+
   const handleStarCreated = useCallback((newStar: Star) => {
     playAddStar()
     if (focusedPlanetId) {
@@ -595,7 +599,7 @@ function HomePageContent() {
       {focusedPlanet && (
         <StarCreationModal
           isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
+          onClose={handleCloseModal}
           planet={focusedPlanet}
           onSuccess={handleStarCreated}
         />
