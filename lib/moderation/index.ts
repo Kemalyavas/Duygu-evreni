@@ -36,17 +36,18 @@ export interface ModerationResult {
  * Moderate user-submitted content
  *
  * @param content - The text content to moderate
+ * @param accessToken - User's Supabase access token for authentication
  * @returns ModerationResult indicating if content is allowed
  *
  * @example
- * const result = await moderateContent("Bugün çok mutluyum!")
+ * const result = await moderateContent("Bugün çok mutluyum!", session.access_token)
  * if (result.allowed) {
  *   // Proceed with submission
  * } else {
  *   // Show error: result.reason
  * }
  */
-export async function moderateContent(content: string): Promise<ModerationResult> {
+export async function moderateContent(content: string, accessToken?: string): Promise<ModerationResult> {
   // Basic validation (client-side, fast)
   if (!content || content.trim().length === 0) {
     return {
@@ -63,12 +64,18 @@ export async function moderateContent(content: string): Promise<ModerationResult
   }
 
   try {
+    // Build headers with auth token
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    }
+    if (accessToken) {
+      headers['Authorization'] = `Bearer ${accessToken}`
+    }
+
     // Call moderation API
     const response = await fetch('/api/moderate', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers,
       body: JSON.stringify({ content: content.trim() }),
     })
 

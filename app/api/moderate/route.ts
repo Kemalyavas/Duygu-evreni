@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@supabase/supabase-js'
 import { runLocalFilter, getSuicidePreventionResources } from '@/lib/moderation/localFilter'
 import { moderateWithGemini } from '@/lib/moderation/geminiModeration'
 
@@ -17,11 +18,41 @@ interface ModerationResponse {
 }
 
 // ============================================
+// AUTH HELPER
+// ============================================
+
+function getSupabaseAdmin() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+}
+
+// ============================================
 // API ROUTE HANDLER
 // ============================================
 
 export async function POST(request: NextRequest): Promise<NextResponse<ModerationResponse>> {
   try {
+    // Auth check - only authenticated users can use moderation
+    const authHeader = request.headers.get('authorization')
+    if (!authHeader?.startsWith('Bearer ')) {
+      return NextResponse.json(
+        { allowed: false, reason: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
+
+    const token = authHeader.split(' ')[1]
+    const { data: { user }, error: authError } = await getSupabaseAdmin().auth.getUser(token)
+
+    if (authError || !user) {
+      return NextResponse.json(
+        { allowed: false, reason: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
+
     const body = await request.json() as ModerationRequest
     const { content } = body
 

@@ -38,7 +38,6 @@ export function useNotifications() {
 
   // Bildirimleri getir
   const fetchNotifications = useCallback(async () => {
-    console.log('[Notifications] fetchNotifications called')
     try {
       setLoading(true)
       setError(null)
@@ -46,10 +45,7 @@ export function useNotifications() {
       const supabase = createClient()
       const { data: { session } } = await supabase.auth.getSession()
 
-      console.log('[Notifications] Session:', session ? `User: ${session.user.id}` : 'No session')
-
       if (!session?.user) {
-        console.log('[Notifications] No session, returning empty')
         return []
       }
 
@@ -64,8 +60,6 @@ export function useNotifications() {
           accessToken: session.access_token,
         }
       )
-
-      console.log('[Notifications] Fetch result:', { data: rawNotifications?.length || 0, error: fetchError })
 
       if (fetchError) {
         throw new Error(fetchError)
@@ -99,7 +93,6 @@ export function useNotifications() {
         setNotifications(data)
         const unreadCount = data.filter(n => !n.is_read).length
         setUnreadNotificationsCount(unreadCount)
-        console.log('[Notifications] Set notifications:', data.length, 'unread:', unreadCount)
       }
 
       return data
@@ -303,15 +296,11 @@ export function useNotifications() {
 
   // Auth state change listener - session değiştiğinde bildirimleri yeniden fetch et
   useEffect(() => {
-    console.log('[Notifications] Setting up auth listener')
     const supabase = createClient()
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event: AuthChangeEvent) => {
-      console.log('[Notifications] Auth state changed:', event)
       // INITIAL_SESSION: sayfa yenilendiğinde, SIGNED_IN: giriş yapıldığında, TOKEN_REFRESHED: token yenilendiğinde
       if (event === 'INITIAL_SESSION' || event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-        console.log('[Notifications] Fetching notifications due to auth event:', event)
-        // Session değiştiğinde bildirimleri yeniden fetch et
         fetchNotifications()
       } else if (event === 'SIGNED_OUT') {
         // Çıkış yapıldığında bildirimleri temizle
@@ -322,9 +311,8 @@ export function useNotifications() {
       }
     })
 
-    // İlk yüklemede de fetch yap
-    console.log('[Notifications] Initial fetch')
-    fetchNotifications()
+    // onAuthStateChange INITIAL_SESSION event'i zaten fetch yapacak,
+    // ayrıca burada tekrar çağırmaya gerek yok (çift fetch önleme)
 
     return () => {
       subscription.unsubscribe()

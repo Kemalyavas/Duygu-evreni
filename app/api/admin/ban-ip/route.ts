@@ -61,8 +61,10 @@ export async function POST(request: NextRequest) {
       }
 
       // Also ban the user (Auth + profile flag)
+      // ban_duration: 'none' means "no ban" in Supabase Auth API
+      // Use '876000h' (~100 years) for permanent ban
       await getSupabaseAdmin().auth.admin.updateUserById(user_id, {
-        ban_duration: 'none', // Permanent
+        ban_duration: '876000h',
         user_metadata: { banned: true }
       })
 

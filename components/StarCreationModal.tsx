@@ -6,6 +6,7 @@ import { Modal, Button } from '@/components/ui'
 import { useDailyLimit, useStars, useAuth, generateOrbitPosition } from '@/lib/hooks'
 import { useTranslation } from '@/lib/i18n'
 import { moderateContent } from '@/lib/moderation'
+import { createClient } from '@/lib/supabase/client'
 import type { Planet, Star } from '@/types'
 
 // Popüler emojiler
@@ -91,8 +92,10 @@ export function StarCreationModal({
         return
       }
 
-      // Content moderation
-      const moderationResult = await moderateContent(content)
+      // Content moderation - pass access token for auth
+      const supabase = createClient()
+      const { data: { session } } = await supabase.auth.getSession()
+      const moderationResult = await moderateContent(content, session?.access_token)
 
       // Show help resources if provided (even if allowed)
       if (moderationResult.helpResources) {
