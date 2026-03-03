@@ -445,7 +445,8 @@ export function runLocalFilter(content: string): LocalFilterResult {
   }
 
   // Check political figures - requires AI review
-  const politicalMatches = containsKeywords(content, POLITICAL_FIGURES_KEYWORDS)
+  // matchWordStart = true: Türkçe ekleri yakalamak için (rteyi, erdogana, tayyibe vb.)
+  const politicalMatches = containsKeywords(content, POLITICAL_FIGURES_KEYWORDS, true)
   if (politicalMatches.length > 0) {
     result.requiresAIReview = true
     result.triggeredCategories.push('POLITICAL_FIGURES')
