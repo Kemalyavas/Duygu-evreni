@@ -1,6 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
+import { useTranslation } from '@/lib/i18n'
 
 interface DonutChartData {
   label: string
@@ -15,6 +16,7 @@ interface DonutChartProps {
 }
 
 export function DonutChart({ data, size = 200, strokeWidth = 28 }: DonutChartProps) {
+  const { t } = useTranslation()
   const radius = (size - strokeWidth) / 2
   const circumference = 2 * Math.PI * radius
   const center = size / 2
@@ -42,7 +44,7 @@ export function DonutChart({ data, size = 200, strokeWidth = 28 }: DonutChartPro
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center">
             <span className="text-3xl font-bold text-white">0</span>
-            <span className="text-sm text-white/60">yıldız</span>
+            <span className="text-sm text-white/60">{t('misc.starsLabel')}</span>
           </div>
         </div>
       </div>
@@ -118,7 +120,7 @@ export function DonutChart({ data, size = 200, strokeWidth = 28 }: DonutChartPro
           >
             {total}
           </motion.span>
-          <span className="text-sm text-white/60">yıldız</span>
+          <span className="text-sm text-white/60">{t('misc.starsLabel')}</span>
         </div>
       </div>
 

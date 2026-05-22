@@ -269,5 +269,29 @@
     "terms": "Kullanım Şartları",
     "contact": "İletişim",
     "madeWith": "ile yapıldı"
+  },
+  "onboarding": {
+    "welcomeTitle": "Duygu Evreni'ne Hoş Geldin",
+    "welcomeDesc": "Duygularını yıldızlara dönüştür ve kozmik evrende anonim olarak paylaş.",
+    "planetsTitle": "10 Duygu Gezegeni",
+    "planetsDesc": "Her gezegen bir duyguyu temsil eder: Mutluluk, Aşk, Umut, Özlem, Hüzün, Öfke, Depresyon, Korku, Pişmanlık ve Huzur.",
+    "dailyTitle": "Günde 3 Yıldız",
+    "dailyDesc": "Her gün 3 yıldız paylaşabilirsin. Bir gezegene tıkla ve duygunu yaz.",
+    "skip": "Atla",
+    "start": "Başla",
+    "continue": "Devam"
+  },
+  "misc": {
+    "processing": "İşleniyor...",
+    "actionFailed": "İşlem başarısız",
+    "admin": "Admin",
+    "clickPlanetHint": "Bir gezegene tıklayarak yıldızları keşfet",
+    "starsLabel": "yıldız",
+    "starLabel": "Yıldız",
+    "sentViaThisStar": "Bu yıldızın üzerinden mesaj gönderdi",
+    "refreshPage": "Sayfayı Yenile",
+    "refreshToRetry": "Sayfayı yenileyerek tekrar deneyin.",
+    "musicOff": "Müziği Kapat",
+    "musicOn": "Müziği Aç"
   }
 }

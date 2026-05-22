@@ -2,9 +2,10 @@
 
 import { motion, AnimatePresence } from 'framer-motion'
 import { formatDistanceToNow } from 'date-fns'
-import { tr } from 'date-fns/locale'
+import { tr, enUS } from 'date-fns/locale'
 import { MessageRequestButton } from '@/components/messaging'
 import { ShareButtons } from '@/components/ShareButtons'
+import { useTranslation } from '@/lib/i18n'
 import type { Star } from '@/types'
 
 interface StarViewPanelProps {
@@ -14,11 +15,12 @@ interface StarViewPanelProps {
 }
 
 export function StarViewPanel({ star, onClose, planetColor = '#ffffff' }: StarViewPanelProps) {
+  const { t, language } = useTranslation()
   const formatDate = (dateString: string) => {
     try {
       return formatDistanceToNow(new Date(dateString), {
         addSuffix: true,
-        locale: tr,
+        locale: language === 'en' ? enUS : tr,
       })
     } catch {
       return ''
@@ -46,7 +48,7 @@ export function StarViewPanel({ star, onClose, planetColor = '#ffffff' }: StarVi
                     className="w-3 h-3 rounded-full"
                     style={{ backgroundColor: planetColor }}
                   />
-                  <span className="text-white/60 text-sm">Yıldız</span>
+                  <span className="text-white/60 text-sm">{t('misc.starLabel')}</span>
                 </div>
                 <button
                   onClick={onClose}
@@ -115,7 +117,7 @@ export function StarViewPanel({ star, onClose, planetColor = '#ffffff' }: StarVi
                     className="w-3 h-3 rounded-full"
                     style={{ backgroundColor: planetColor }}
                   />
-                  <span className="text-white/60 text-sm">Yıldız</span>
+                  <span className="text-white/60 text-sm">{t('misc.starLabel')}</span>
                 </div>
                 <button
                   onClick={onClose}

@@ -3,9 +3,10 @@
 import { useState, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { formatDistanceToNow } from 'date-fns'
-import { tr } from 'date-fns/locale'
+import { tr, enUS } from 'date-fns/locale'
 import { Button } from '@/components/ui'
 import { useConversations } from '@/lib/hooks'
+import { useTranslation } from '@/lib/i18n'
 import type { ConversationWithDetails } from '@/types'
 
 interface PendingRequestCardProps {
@@ -17,6 +18,7 @@ export function PendingRequestCard({ request, onRespond }: PendingRequestCardPro
   const [responding, setResponding] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const { respondToRequest } = useConversations()
+  const { t, language } = useTranslation()
 
   // Ref to prevent double-click race condition
   const isProcessingRef = useRef(false)
@@ -37,7 +39,7 @@ export function PendingRequestCard({ request, onRespond }: PendingRequestCardPro
       await respondToRequest(request.id, accept)
       onRespond?.()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'İşlem başarısız')
+      setError(err instanceof Error ? err.message : t('misc.actionFailed'))
       // Reset ref on error so user can retry
       isProcessingRef.current = false
     } finally {
@@ -73,7 +75,7 @@ export function PendingRequestCard({ request, onRespond }: PendingRequestCardPro
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-white/40 text-xs mb-1">
-            Bu yıldızın üzerinden mesaj gönderdi · {formatDistanceToNow(new Date(request.created_at), { addSuffix: false, locale: tr })}
+            {t('misc.sentViaThisStar')} · {formatDistanceToNow(new Date(request.created_at), { addSuffix: false, locale: language === 'en' ? enUS : tr })}
           </p>
           <p className="text-white/90 text-sm leading-relaxed line-clamp-3">
             {request.first_message}
@@ -97,7 +99,7 @@ export function PendingRequestCard({ request, onRespond }: PendingRequestCardPro
           disabled={responding}
           className="flex-1 bg-white/5 hover:bg-red-500/20 hover:text-red-400 hover:border-red-500/30"
         >
-          Reddet
+          {t('messages.reject')}
         </Button>
         <Button
           variant="primary"
@@ -106,7 +108,7 @@ export function PendingRequestCard({ request, onRespond }: PendingRequestCardPro
           disabled={responding}
           className="flex-1"
         >
-          {responding ? 'İşleniyor...' : 'Kabul Et'}
+          {responding ? t('misc.processing') : t('messages.accept')}
         </Button>
       </div>
     </motion.div>

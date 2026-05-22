@@ -269,5 +269,29 @@
     "terms": "Terms of Service",
     "contact": "Contact",
     "madeWith": "made with"
+  },
+  "onboarding": {
+    "welcomeTitle": "Welcome to Emotion Universe",
+    "welcomeDesc": "Turn your emotions into stars and share them anonymously in a cosmic universe.",
+    "planetsTitle": "10 Emotion Planets",
+    "planetsDesc": "Each planet represents an emotion: Happiness, Love, Hope, Longing, Sadness, Anger, Depression, Fear, Regret and Peace.",
+    "dailyTitle": "3 Stars a Day",
+    "dailyDesc": "You can share 3 stars each day. Click a planet and write your feeling.",
+    "skip": "Skip",
+    "start": "Start",
+    "continue": "Continue"
+  },
+  "misc": {
+    "processing": "Processing...",
+    "actionFailed": "Action failed",
+    "admin": "Admin",
+    "clickPlanetHint": "Click on a planet to explore stars",
+    "starsLabel": "stars",
+    "starLabel": "Star",
+    "sentViaThisStar": "sent a message via this star",
+    "refreshPage": "Refresh Page",
+    "refreshToRetry": "Refresh the page to try again.",
+    "musicOff": "Turn off music",
+    "musicOn": "Turn on music"
   }
 }

@@ -8,7 +8,7 @@
  * - Organization: Brand information
  */
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://duygu-evreni.vercel.app'
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.duyguevreni.com'
 
 // Website Schema
 export function WebsiteJsonLd() {
@@ -20,14 +20,6 @@ export function WebsiteJsonLd() {
     url: siteUrl,
     description: 'Duygularını yıldızlara dönüştür ve evrende paylaş. 3D interaktif bir evren deneyimi ile duygularını keşfet.',
     inLanguage: 'tr-TR',
-    potentialAction: {
-      '@type': 'SearchAction',
-      target: {
-        '@type': 'EntryPoint',
-        urlTemplate: `${siteUrl}/evren?search={search_term_string}`,
-      },
-      'query-input': 'required name=search_term_string',
-    },
   }
 
   return (
@@ -58,10 +50,10 @@ export function WebApplicationJsonLd() {
       '3D interaktif evren deneyimi',
       'Duygu paylaşımı ve keşfi',
       'Anonim duygu yazma',
-      '6 farklı duygu gezegeni',
+      '10 farklı duygu gezegeni',
       'Gerçek zamanlı yıldız animasyonları',
     ],
-    screenshot: `${siteUrl}/og-image.png`,
+    screenshot: `${siteUrl}/opengraph-image`,
     author: {
       '@type': 'Organization',
       name: 'Duygu Evreni',
@@ -120,7 +112,7 @@ export function FAQJsonLd() {
         name: 'Duygu Evreni\'nde kaç gezegen var?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'Duygu Evreni\'nde 6 ana duygu gezegeni bulunur: Umut (yeşil), Sevgi (pembe), Mutluluk (sarı), Üzüntü (mavi), Öfke (kırmızı) ve Korku (mor). Her gezegen ilgili duygu kategorisindeki yıldızları barındırır.',
+          text: 'Duygu Evreni\'nde 10 duygu gezegeni bulunur: Mutluluk, Aşk, Umut, Özlem, Hüzün, Öfke, Korku, Pişmanlık, Huzur ve Depresyon. Her gezegen ilgili duygu kategorisindeki yıldızları barındırır.',
         },
       },
     ],

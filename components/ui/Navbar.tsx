@@ -10,9 +10,11 @@ import { Button } from './Button'
 import { MusicToggle } from './MusicToggle'
 import { NotificationBell } from './NotificationBell'
 import { useAuth } from '@/lib/hooks'
+import { useTranslation } from '@/lib/i18n'
 
 export function Navbar() {
   const pathname = usePathname()
+  const { t } = useTranslation()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const { user, isLoading, signOut } = useAuth()
   const [isAdmin, setIsAdmin] = useState(false)
@@ -24,7 +26,7 @@ export function Navbar() {
   }
 
   const navLinks = [
-    { href: '/profil', label: 'Profil' },
+    { href: '/profil', label: t('nav.profile') },
   ]
 
   useEffect(() => {
@@ -55,7 +57,7 @@ export function Navbar() {
     checkAdminStatus()
   }, [user, adminChecked])
 
-  const adminLink = { href: '/admin/reports', label: 'Admin' }
+  const adminLink = { href: '/admin/reports', label: t('misc.admin') }
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-40 glass">
@@ -115,12 +117,12 @@ export function Navbar() {
               <div className="w-20 h-8 bg-white/10 rounded-lg animate-pulse" />
             ) : user ? (
               <Button variant="ghost" size="sm" onClick={handleLogout}>
-                Çıkış Yap
+                {t('auth.logout')}
               </Button>
             ) : (
               <Link href="/giris">
                 <Button variant="primary" size="sm">
-                  Giriş Yap
+                  {t('auth.login')}
                 </Button>
               </Link>
             )}
@@ -207,7 +209,7 @@ export function Navbar() {
                   onClick={handleLogout}
                   className="w-full px-3 py-2 text-left rounded-lg text-sm font-medium text-white/60 hover:text-white hover:bg-white/5 transition-colors"
                 >
-                  Çıkış Yap
+                  {t('auth.logout')}
                 </button>
               ) : (
                 <Link
@@ -216,7 +218,7 @@ export function Navbar() {
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   <Button variant="primary" size="sm" className="w-full">
-                    Giriş Yap
+                    {t('auth.login')}
                   </Button>
                 </Link>
               )}

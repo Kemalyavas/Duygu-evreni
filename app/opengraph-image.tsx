@@ -121,7 +121,7 @@ export default async function Image() {
               marginTop: 40,
             }}
           >
-            {['3D İnteraktif', 'Anonim', '6 Gezegen'].map((tag) => (
+            {['3D İnteraktif', 'Anonim', '10 Gezegen'].map((tag) => (
               <div
                 key={tag}
                 style={{

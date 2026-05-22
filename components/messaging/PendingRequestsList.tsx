@@ -2,6 +2,7 @@
 
 import { AnimatePresence } from 'framer-motion'
 import { PendingRequestCard } from './PendingRequestCard'
+import { useTranslation } from '@/lib/i18n'
 import type { ConversationWithDetails } from '@/types'
 
 interface PendingRequestsListProps {
@@ -10,6 +11,7 @@ interface PendingRequestsListProps {
 }
 
 export function PendingRequestsList({ requests, onRespond }: PendingRequestsListProps) {
+  const { t } = useTranslation()
   if (requests.length === 0) {
     return (
       <div className="text-center py-8">
@@ -18,7 +20,7 @@ export function PendingRequestsList({ requests, onRespond }: PendingRequestsList
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
           </svg>
         </div>
-        <p className="text-white/40 text-sm">Bekleyen mesaj isteği yok</p>
+        <p className="text-white/40 text-sm">{t('messages.noRequests')}</p>
       </div>
     )
   }

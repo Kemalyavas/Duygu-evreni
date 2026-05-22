@@ -14,6 +14,7 @@ import { StarViewPanel } from '@/components/StarViewPanel'
 import { MessageRequestModal, ChatPanel } from '@/components/messaging'
 import { useAuth, usePlanets, useStars, useStarCounts, useDailyLimit, useReadStars, useMobile, useSoundEffects } from '@/lib/hooks'
 import type { Planet, Star } from '@/types'
+import { EMOTIONS } from '@/lib/constants/emotions'
 
 // Static star positions for loading screen (avoids hydration mismatch)
 const LOADER_STARS = [
@@ -364,6 +365,35 @@ function HomePageContent() {
 
   return (
     <div className="h-screen w-screen overflow-hidden bg-gradient-to-b from-[#0A0E27] to-black">
+      {/*
+        SEO & erişilebilirlik içeriği.
+        3D sahne <canvas> içinde çizildiği için arama motorları ve ekran
+        okuyucular tarafından okunamaz. Bu blok, sayfanın anlamlı bir H1'i,
+        açıklaması ve duygu sayfalarına crawl edilebilir iç linkleri olmasını sağlar.
+      */}
+      <section className="sr-only">
+        <h1>Duygu Evreni — Duygularını Yıldızlara Dönüştür</h1>
+        <p>
+          Duygu Evreni, duygularını anonim olarak yıldızlara dönüştürüp
+          paylaşabileceğin 3D interaktif bir platformdur. Aşk, mutluluk, umut,
+          özlem, hüzün, öfke, korku, pişmanlık, huzur ve depresyon gibi farklı
+          duygu gezegenlerini keşfet; içindekileri yaz ve başkalarının
+          paylaşımlarını oku.
+        </p>
+        <nav aria-label="Duygu gezegenleri">
+          <ul>
+            {EMOTIONS.map((e) => (
+              <li key={e.slug}>
+                <Link href={`/gezegen/${e.slug}`}>{e.name_tr} duyguları</Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
+        <p>
+          <Link href="/gizlilik">Gizlilik Politikası</Link>
+        </p>
+      </section>
+
       {/* Onboarding for first-time visitors */}
       {!isInPlanetMode && <Onboarding />}
 
@@ -502,12 +532,12 @@ function HomePageContent() {
               className="absolute top-32 sm:top-36 left-3 sm:left-6 z-10"
             >
               <div className="glass rounded-lg sm:rounded-xl p-2.5 sm:p-4 max-w-[180px] sm:max-w-xs">
-                <h1
+                <h2
                   className="text-base sm:text-xl font-bold mb-1 sm:mb-2"
                   style={{ color: focusedPlanet.color }}
                 >
                   {language === 'tr' ? focusedPlanet.name_tr : (focusedPlanet.name_en || focusedPlanet.name_tr)}
-                </h1>
+                </h2>
                 <p className="text-xs sm:text-sm text-white/60">
                   {language === 'tr' ? focusedPlanet.description_tr : (focusedPlanet.description_en || focusedPlanet.description_tr)}
                 </p>

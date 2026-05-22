@@ -55,21 +55,14 @@ export const metadata: Metadata = {
     title: "Duygu Evreni - Duygularını Yıldızlara Dönüştür",
     description:
       "Duygularını yıldızlara dönüştür ve evrende paylaş. 3D interaktif bir evren deneyimi.",
-    images: [
-      {
-        url: "/og-image.png",
-        width: 1200,
-        height: 630,
-        alt: "Duygu Evreni - 3D interaktif duygu evreni",
-      },
-    ],
+    // OG görseli app/opengraph-image.tsx tarafından otomatik üretilir
   },
   twitter: {
     card: "summary_large_image",
     title: "Duygu Evreni - Duygularını Yıldızlara Dönüştür",
     description:
       "Duygularını yıldızlara dönüştür ve evrende paylaş. 3D interaktif bir evren deneyimi.",
-    images: ["/og-image.png"],
+    // Twitter görseli app/twitter-image.tsx tarafından otomatik üretilir
   },
   robots: {
     index: true,
@@ -100,8 +93,8 @@ export const viewport: Viewport = {
   ],
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
+  maximumScale: 5,
+  userScalable: true,
 };
 
 export default function RootLayout({

@@ -2,28 +2,18 @@
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useTranslation } from '@/lib/i18n'
 
 const ONBOARDING_KEY = 'duygu-evreni-onboarding-seen'
 
 const steps = [
-  {
-    icon: '🌌',
-    title: 'Duygu Evreni\'ne Hoş Geldin',
-    description: 'Duygularını yıldızlara dönüştür ve kozmik evrende anonim olarak paylaş.',
-  },
-  {
-    icon: '🪐',
-    title: '10 Duygu Gezegeni',
-    description: 'Her gezegen bir duyguyu temsil eder: Mutluluk, Aşk, Umut, Özlem, Hüzün, Öfke, Depresyon, Korku, Pişmanlık ve Huzur.',
-  },
-  {
-    icon: '✨',
-    title: 'Günde 3 Yıldız',
-    description: 'Her gün 3 yıldız paylaşabilirsin. Bir gezegene tıkla ve duygunu yaz.',
-  },
+  { icon: '🌌', titleKey: 'onboarding.welcomeTitle', descKey: 'onboarding.welcomeDesc' },
+  { icon: '🪐', titleKey: 'onboarding.planetsTitle', descKey: 'onboarding.planetsDesc' },
+  { icon: '✨', titleKey: 'onboarding.dailyTitle', descKey: 'onboarding.dailyDesc' },
 ]
 
 export function Onboarding() {
+  const { t } = useTranslation()
   const [show, setShow] = useState(false)
   const [currentStep, setCurrentStep] = useState(0)
 
@@ -97,10 +87,10 @@ export function Onboarding() {
               >
                 <div className="text-6xl mb-6">{steps[currentStep].icon}</div>
                 <h2 className="text-2xl font-bold text-white mb-3">
-                  {steps[currentStep].title}
+                  {t(steps[currentStep].titleKey)}
                 </h2>
                 <p className="text-white/60 text-lg leading-relaxed">
-                  {steps[currentStep].description}
+                  {t(steps[currentStep].descKey)}
                 </p>
               </motion.div>
             </AnimatePresence>
@@ -111,14 +101,14 @@ export function Onboarding() {
                 onClick={handleSkip}
                 className="text-white/40 hover:text-white/60 transition-colors text-sm"
               >
-                Atla
+                {t('onboarding.skip')}
               </button>
 
               <button
                 onClick={handleNext}
                 className="px-8 py-3 bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white font-semibold rounded-xl transition-all duration-200 shadow-lg shadow-purple-500/25"
               >
-                {currentStep === steps.length - 1 ? 'Başla' : 'Devam'}
+                {currentStep === steps.length - 1 ? t('onboarding.start') : t('onboarding.continue')}
               </button>
             </div>
           </div>

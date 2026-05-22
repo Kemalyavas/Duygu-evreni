@@ -3,9 +3,11 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { useMusic } from '@/components/MusicProvider'
+import { useTranslation } from '@/lib/i18n'
 
 export function MusicToggle() {
   const { musicEnabled, toggleMusic, isLoaded } = useMusic()
+  const { t } = useTranslation()
   const [mounted, setMounted] = useState(false)
 
   // Prevent hydration mismatch
@@ -35,8 +37,8 @@ export function MusicToggle() {
         }
         ${!isLoaded ? 'opacity-50 cursor-wait' : 'hover:scale-110'}
       `}
-      title={musicEnabled ? 'Müziği Kapat' : 'Müziği Aç'}
-      aria-label={musicEnabled ? 'Müziği Kapat' : 'Müziği Aç'}
+      title={musicEnabled ? t('misc.musicOff') : t('misc.musicOn')}
+      aria-label={musicEnabled ? t('misc.musicOff') : t('misc.musicOn')}
     >
       {musicEnabled ? (
         // Sound on icon
