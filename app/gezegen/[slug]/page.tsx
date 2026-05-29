@@ -8,6 +8,7 @@ import {
   getEmotionBySlug,
   type EmotionContent,
 } from '@/lib/constants/emotions'
+import { SiteFooter } from '@/components/SiteFooter'
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.duyguevreni.com'
 
@@ -118,6 +119,16 @@ export default async function PlanetContentPage({ params }: Params) {
     ...(starCount != null ? { numberOfItems: starCount } : {}),
   }
 
+  const faqLd = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: emotion.faqs.map((f) => ({
+      '@type': 'Question',
+      name: f.q,
+      acceptedAnswer: { '@type': 'Answer', text: f.a },
+    })),
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#0A0E27] to-black text-white">
       <script
@@ -127,6 +138,10 @@ export default async function PlanetContentPage({ params }: Params) {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }}
       />
 
       {/* Header */}
@@ -190,6 +205,19 @@ export default async function PlanetContentPage({ params }: Params) {
           </Link>
         </div>
 
+        {/* SSS */}
+        <section className="mt-12 border-t border-white/10 pt-8">
+          <h2 className="text-2xl font-bold mb-6">Sık Sorulan Sorular</h2>
+          <div className="space-y-5">
+            {emotion.faqs.map((f) => (
+              <div key={f.q}>
+                <h3 className="font-semibold text-white/90 mb-1.5">{f.q}</h3>
+                <p className="text-white/65 leading-relaxed text-sm">{f.a}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
         {/* Related */}
         <section className="mt-12 border-t border-white/10 pt-8">
           <h2 className="text-xl font-semibold mb-4">Diğer duygular</h2>
@@ -213,6 +241,8 @@ export default async function PlanetContentPage({ params }: Params) {
           </p>
         </section>
       </main>
+
+      <SiteFooter />
     </div>
   )
 }

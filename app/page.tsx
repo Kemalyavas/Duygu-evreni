@@ -14,7 +14,7 @@ import { StarViewPanel } from '@/components/StarViewPanel'
 import { MessageRequestModal, ChatPanel } from '@/components/messaging'
 import { useAuth, usePlanets, useStars, useStarCounts, useDailyLimit, useReadStars, useMobile, useSoundEffects } from '@/lib/hooks'
 import type { Planet, Star } from '@/types'
-import { EMOTIONS } from '@/lib/constants/emotions'
+import { HomeSeoSections } from '@/components/home/HomeSeoSections'
 
 // Static star positions for loading screen (avoids hydration mismatch)
 const LOADER_STARS = [
@@ -364,36 +364,7 @@ function HomePageContent() {
   const isInPlanetMode = !!focusedPlanetId
 
   return (
-    <div className="h-screen w-screen overflow-hidden bg-gradient-to-b from-[#0A0E27] to-black">
-      {/*
-        SEO & erişilebilirlik içeriği.
-        3D sahne <canvas> içinde çizildiği için arama motorları ve ekran
-        okuyucular tarafından okunamaz. Bu blok, sayfanın anlamlı bir H1'i,
-        açıklaması ve duygu sayfalarına crawl edilebilir iç linkleri olmasını sağlar.
-      */}
-      <section className="sr-only">
-        <h1>Duygu Evreni — Duygularını Yıldızlara Dönüştür</h1>
-        <p>
-          Duygu Evreni, duygularını anonim olarak yıldızlara dönüştürüp
-          paylaşabileceğin 3D interaktif bir platformdur. Aşk, mutluluk, umut,
-          özlem, hüzün, öfke, korku, pişmanlık, huzur ve depresyon gibi farklı
-          duygu gezegenlerini keşfet; içindekileri yaz ve başkalarının
-          paylaşımlarını oku.
-        </p>
-        <nav aria-label="Duygu gezegenleri">
-          <ul>
-            {EMOTIONS.map((e) => (
-              <li key={e.slug}>
-                <Link href={`/gezegen/${e.slug}`}>{e.name_tr} duyguları</Link>
-              </li>
-            ))}
-          </ul>
-        </nav>
-        <p>
-          <Link href="/gizlilik">Gizlilik Politikası</Link>
-        </p>
-      </section>
-
+    <div className="relative h-screen w-screen overflow-hidden bg-gradient-to-b from-[#0A0E27] to-black">
       {/* Onboarding for first-time visitors */}
       {!isInPlanetMode && <Onboarding />}
 
@@ -643,8 +614,14 @@ function HomePageContent() {
 // Main export with Suspense boundary for useSearchParams
 export default function HomePage() {
   return (
-    <Suspense fallback={<UniverseLoader />}>
-      <HomePageContent />
-    </Suspense>
+    <>
+      <Suspense fallback={<UniverseLoader />}>
+        <HomePageContent />
+      </Suspense>
+      {/* 3D hero'nun ALTINDA: arama motorları için statik, görünür içerik + iç linkler.
+          Suspense DIŞINDA tutuluyor — useSearchParams fallback'i bunu gizlemez,
+          böylece içerik prerender edilen HTML'e girer. */}
+      <HomeSeoSections />
+    </>
   )
 }
