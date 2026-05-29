@@ -14,7 +14,7 @@ import { StarViewPanel } from '@/components/StarViewPanel'
 import { MessageRequestModal, ChatPanel } from '@/components/messaging'
 import { useAuth, usePlanets, useStars, useStarCounts, useDailyLimit, useReadStars, useMobile, useSoundEffects } from '@/lib/hooks'
 import type { Planet, Star } from '@/types'
-import { HomeSeoSections } from '@/components/home/HomeSeoSections'
+import { HomeSeoLinks } from '@/components/home/HomeSeoLinks'
 
 // Static star positions for loading screen (avoids hydration mismatch)
 const LOADER_STARS = [
@@ -618,10 +618,10 @@ export default function HomePage() {
       <Suspense fallback={<UniverseLoader />}>
         <HomePageContent />
       </Suspense>
-      {/* 3D hero'nun ALTINDA: arama motorları için statik, görünür içerik + iç linkler.
-          Suspense DIŞINDA tutuluyor — useSearchParams fallback'i bunu gizlemez,
-          böylece içerik prerender edilen HTML'e girer. */}
-      <HomeSeoSections />
+      {/* Ana sayfa saf 3D evren olarak kalır. Bu sr-only blok 3D'yi bozmadan
+          arama motorlarına H1 + iç linkler (gezegenler + /hakkinda) sağlar.
+          Görünür tanıtım içeriği /hakkinda sayfasında. Suspense DIŞINDA. */}
+      <HomeSeoLinks />
     </>
   )
 }

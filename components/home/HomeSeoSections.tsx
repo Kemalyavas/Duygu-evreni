@@ -77,7 +77,7 @@ export function HomeSeoSections() {
       {/* Hakkında / intro */}
       <section id="hakkinda" className="max-w-4xl mx-auto px-4 py-16 sm:py-20">
         <h1 className="text-3xl sm:text-4xl font-bold mb-5">
-          Duygu Evreni — Duygularını Yıldızlara Dönüştür
+          Duygu Evreni Nedir?
         </h1>
         <p className="text-lg text-white/75 leading-relaxed max-w-3xl">
           Duygu Evreni, içindekileri <strong>anonim</strong> olarak paylaşabileceğin

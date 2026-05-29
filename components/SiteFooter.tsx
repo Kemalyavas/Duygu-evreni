@@ -41,6 +41,9 @@ export function SiteFooter() {
             <Link href="/" className="hover:text-white/70 transition-colors">
               3D Evren
             </Link>
+            <Link href="/hakkinda" className="hover:text-white/70 transition-colors">
+              Nedir?
+            </Link>
             <Link href="/gizlilik" className="hover:text-white/70 transition-colors">
               Gizlilik Politikası
             </Link>
