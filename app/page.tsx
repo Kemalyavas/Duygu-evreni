@@ -398,6 +398,12 @@ function HomePageContent() {
         animate={{ opacity: 1, y: 0 }}
         className="absolute top-4 sm:top-6 right-3 sm:right-6 z-20 flex items-center space-x-2 sm:space-x-3"
       >
+        <Link
+          href="/hakkinda"
+          className="hidden sm:inline-flex text-sm font-medium text-white/60 hover:text-white transition-colors"
+        >
+          Hakkında
+        </Link>
         <LanguageSwitcher />
         <MusicToggle />
         {user && <NotificationPanel />}
