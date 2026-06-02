@@ -67,7 +67,11 @@ export function MusicProvider({ children }: { children: ReactNode }) {
     const audio = new Audio(MUSIC_PATH)
     audio.loop = true
     audio.volume = DEFAULT_VOLUME
-    audio.preload = 'auto'
+    // 'none' (not 'auto'): the 21.8 MB track must NOT be fetched on mount —
+    // on mobile music defaults OFF yet 'auto' still downloaded the whole file,
+    // and on desktop it competed with the planet GLBs during first paint.
+    // play() (on first interaction / toggle) loads it on demand when enabled.
+    audio.preload = 'none'
 
     // Named handlers for proper cleanup
     const handleCanPlayThrough = () => setIsLoaded(true)
