@@ -39,6 +39,16 @@ export interface Profile {
   created_at: string
 }
 
+// Columns the browser/SSR client is allowed to read from `profiles`.
+// Deliberately EXCLUDES PII the app never reads (email, last_ip,
+// last_ip_updated_at). Those columns are REVOKEd from the `authenticated`
+// role at the DB level so a logged-in user cannot dump other users' email/IP
+// via PostgREST. A bare `select=*` would 403 once revoked, so every own-profile
+// read must use this list. Keep in sync with
+// supabase/migrations/004_profiles_pii_column_revoke.sql.
+export const PROFILE_SELECT_COLUMNS =
+  'id,username,show_username_in_chats,is_admin,is_banned,banned_reason,banned_at,daily_stars_added,daily_views_used,daily_message_requests_sent,last_reset_date,created_at'
+
 export interface StarCreateInput {
   planet_id: string
   content: string

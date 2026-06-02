@@ -3,7 +3,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { supabaseUpdate, supabaseFetch, createClient } from '@/lib/supabase/fetch'
 import { useStore } from '@/lib/store/useStore'
-import type { Profile } from '@/types'
+import { type Profile, PROFILE_SELECT_COLUMNS } from '@/types'
 
 const MAX_DAILY_STARS = 3
 
@@ -131,6 +131,7 @@ export function useDailyLimit() {
 
         // Fetch fresh profile to ensure we have the latest data
         const { data: freshProfile } = await supabaseFetch<Profile>('profiles', {
+          select: PROFILE_SELECT_COLUMNS,
           filter: `id=eq.${profile.id}`,
           single: true,
           accessToken: session.access_token,
@@ -183,6 +184,7 @@ export function useDailyLimit() {
       if (!session?.user) return false
 
       const { data: currentProfile } = await supabaseFetch<Profile>('profiles', {
+        select: PROFILE_SELECT_COLUMNS,
         filter: `id=eq.${session.user.id}`,
         single: true,
         accessToken: session.access_token,
@@ -244,6 +246,7 @@ export function useDailyLimit() {
 
       // First fetch current profile to get accurate count
       const { data: currentProfile } = await supabaseFetch<Profile>('profiles', {
+        select: PROFILE_SELECT_COLUMNS,
         filter: `id=eq.${session.user.id}`,
         single: true,
         accessToken: session.access_token,

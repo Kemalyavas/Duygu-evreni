@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { supabaseFetch } from '@/lib/supabase/fetch'
 import { useStore } from '@/lib/store/useStore'
 import { resetDailyLimitCache } from './useDailyLimit'
-import type { Profile } from '@/types'
+import { type Profile, PROFILE_SELECT_COLUMNS } from '@/types'
 import type { AuthChangeEvent, Session } from '@supabase/supabase-js'
 
 // Global flag to track if auth has been checked
@@ -116,6 +116,7 @@ export function useAuth() {
           // Fetch profile using fetch API with access token for RLS
           try {
             const { data: profileData } = await supabaseFetch<Profile>('profiles', {
+              select: PROFILE_SELECT_COLUMNS,
               filter: `id=eq.${session.user.id}`,
               single: true,
               accessToken: session.access_token,
@@ -162,6 +163,7 @@ export function useAuth() {
             // Fetch profile using fetch API with access token for RLS
             try {
               const { data: profileData } = await supabaseFetch<Profile>('profiles', {
+                select: PROFILE_SELECT_COLUMNS,
                 filter: `id=eq.${session.user.id}`,
                 single: true,
                 accessToken: session.access_token,
@@ -221,6 +223,7 @@ export function useAuth() {
         // Fetch and set profile
         try {
           const { data: profileData } = await supabaseFetch<Profile>('profiles', {
+            select: PROFILE_SELECT_COLUMNS,
             filter: `id=eq.${data.session.user.id}`,
             single: true,
             accessToken: data.session.access_token,
