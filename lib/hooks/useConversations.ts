@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useRef, useEffect } from 'react'
 import { supabaseFetch, supabaseInsert, supabaseUpdate, createClient } from '@/lib/supabase/fetch'
+import { moderateContent } from '@/lib/moderation'
 import type { Conversation, ConversationWithDetails } from '@/types'
 
 const MAX_DAILY_REQUESTS = 5
@@ -128,6 +129,12 @@ export function useConversations() {
 
       if (!session?.user) throw new Error('Giriş yapmanız gerekiyor')
       if (session.user.id === starOwnerId) throw new Error('Kendi yıldızınıza mesaj gönderemezsiniz')
+
+      // Moderate the cold-contact opener server-side (the highest-risk DM vector)
+      const moderation = await moderateContent(firstMessage, session.access_token)
+      if (!moderation.allowed) {
+        throw new Error(moderation.reason || 'Bu mesaj gönderilemez')
+      }
 
       // Profil bilgilerini al (admin kontrolü + günlük limit)
       const { data: profile } = await supabaseFetch<{ daily_message_requests_sent: number; is_admin: boolean }>('profiles', {
