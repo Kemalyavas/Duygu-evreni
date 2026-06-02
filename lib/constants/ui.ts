@@ -12,9 +12,11 @@ export const STAR_CONTENT = {
 } as const
 
 // Daily Limits
+// NOTE: The enforced limit lives in lib/hooks/useDailyLimit.ts (MAX_DAILY_STARS) and the
+// `check_daily_star_limit` DB trigger (Europe/Istanbul). Keep this value in sync — it is 3/day.
 export const DAILY_LIMITS = {
   /** Maximum stars a user can create per day */
-  MAX_STARS_PER_DAY: 5,
+  MAX_STARS_PER_DAY: 3,
 } as const
 
 // Star Visual

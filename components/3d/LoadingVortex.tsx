@@ -135,6 +135,14 @@ export function LoadingVortex({
     }
   }, [])
 
+  // Dispose the vortex geometry on unmount (prevents a GPU buffer leak per popular-planet visit)
+  useEffect(() => {
+    const geo = vortexData.geometry
+    return () => {
+      geo.dispose()
+    }
+  }, [vortexData])
+
   useFrame(({ clock }) => {
     if (!isVisible) return
 

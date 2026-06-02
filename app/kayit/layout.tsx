@@ -11,8 +11,9 @@ export const metadata: Metadata = {
     description: 'Duygu Evreni\'ne ücretsiz kayıt ol. Duygularını yıldızlara dönüştür ve evrende paylaş.',
     type: 'website',
   },
+  // Auth utility page — no SEO value, keep out of the index (link equity still flows).
   robots: {
-    index: true,
+    index: false,
     follow: true,
   },
 }

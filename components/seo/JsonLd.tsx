@@ -69,63 +69,6 @@ export function WebApplicationJsonLd() {
   )
 }
 
-// FAQ Schema for GEO Optimization
-export function FAQJsonLd() {
-  const schema = {
-    '@context': 'https://schema.org',
-    '@type': 'FAQPage',
-    mainEntity: [
-      {
-        '@type': 'Question',
-        name: 'Duygu Evreni nedir?',
-        acceptedAnswer: {
-          '@type': 'Answer',
-          text: 'Duygu Evreni, duygularınızı yıldızlara dönüştürebildiğiniz 3D interaktif bir web uygulamasıdır. Umut, sevgi, mutluluk, üzüntü, öfke ve korku gibi farklı duygu kategorileri için gezegenler bulunur. Her paylaşılan duygu evrende bir yıldız olarak görünür.',
-        },
-      },
-      {
-        '@type': 'Question',
-        name: 'Duygu Evreni nasıl kullanılır?',
-        acceptedAnswer: {
-          '@type': 'Answer',
-          text: 'Duygu Evreni\'ni kullanmak için: 1) Siteye girin ve ücretsiz kayıt olun, 2) 3D evrende gezinip bir gezegen seçin, 3) "Yıldız Oluştur" butonuna tıklayarak duygularınızı yazın, 4) Başkalarının yıldızlarına tıklayarak duygularını okuyun.',
-        },
-      },
-      {
-        '@type': 'Question',
-        name: 'Duygu Evreni ücretsiz mi?',
-        acceptedAnswer: {
-          '@type': 'Answer',
-          text: 'Evet, Duygu Evreni tamamen ücretsizdir. Kayıt olarak sınırsız duygu okuyabilir ve günlük yıldız oluşturma hakkınızı kullanabilirsiniz.',
-        },
-      },
-      {
-        '@type': 'Question',
-        name: 'Paylaştığım duygular anonim mi?',
-        acceptedAnswer: {
-          '@type': 'Answer',
-          text: 'Evet, Duygu Evreni\'nde paylaşılan tüm duygular anonimdir. Yıldızlarda sadece duygu metni ve oluşturulma tarihi görünür, kullanıcı bilgileri gizlidir.',
-        },
-      },
-      {
-        '@type': 'Question',
-        name: 'Duygu Evreni\'nde kaç gezegen var?',
-        acceptedAnswer: {
-          '@type': 'Answer',
-          text: 'Duygu Evreni\'nde 10 duygu gezegeni bulunur: Mutluluk, Aşk, Umut, Özlem, Hüzün, Öfke, Korku, Pişmanlık, Huzur ve Depresyon. Her gezegen ilgili duygu kategorisindeki yıldızları barındırır.',
-        },
-      },
-    ],
-  }
-
-  return (
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
-    />
-  )
-}
-
 // Organization Schema
 export function OrganizationJsonLd() {
   const schema = {
@@ -148,48 +91,16 @@ export function OrganizationJsonLd() {
   )
 }
 
-// Combined JsonLd for homepage
+// Combined JsonLd for the site (WebSite + WebApplication + Organization).
+// NOTE: FAQPage schema intentionally lives ONLY on pages with matching visible FAQ
+// content (/hakkinda and /gezegen/[slug]) — not site-wide — to avoid duplicate
+// FAQPage blocks on every route, which Google may flag.
 export function HomePageJsonLd() {
   return (
     <>
       <WebsiteJsonLd />
       <WebApplicationJsonLd />
-      <FAQJsonLd />
       <OrganizationJsonLd />
     </>
-  )
-}
-
-// Planet page specific schema
-interface PlanetJsonLdProps {
-  planetName: string
-  planetDescription: string
-  starCount: number
-}
-
-export function PlanetJsonLd({ planetName, planetDescription, starCount }: PlanetJsonLdProps) {
-  const schema = {
-    '@context': 'https://schema.org',
-    '@type': 'CollectionPage',
-    name: `${planetName} - Duygu Evreni`,
-    description: planetDescription,
-    isPartOf: {
-      '@type': 'WebSite',
-      name: 'Duygu Evreni',
-      url: siteUrl,
-    },
-    about: {
-      '@type': 'Thing',
-      name: planetName,
-      description: `${planetName} kategorisindeki duygular. ${starCount} yıldız paylaşıldı.`,
-    },
-    numberOfItems: starCount,
-  }
-
-  return (
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
-    />
   )
 }

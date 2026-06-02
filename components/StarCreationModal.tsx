@@ -5,9 +5,8 @@ import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
 import { Modal, Button } from '@/components/ui'
 import { ShareButtons } from '@/components/ShareButtons'
-import { useDailyLimit, useStars, useAuth, generateOrbitPosition } from '@/lib/hooks'
+import { useDailyLimit, useAuth, generateOrbitPosition } from '@/lib/hooks'
 import { useTranslation } from '@/lib/i18n'
-import { moderateContent } from '@/lib/moderation'
 import { createClient } from '@/lib/supabase/client'
 import type { Planet, Star } from '@/types'
 
@@ -59,7 +58,6 @@ export function StarCreationModal({
   const { user } = useAuth()
   const { t, language } = useTranslation()
   const { canShareStar, remainingStars, checkRealLimit, isAdmin } = useDailyLimit()
-  const { createStar } = useStars()
 
   const isLoggedIn = !!user
   const planetName = language === 'tr' ? planet.name_tr : (planet.name_en || planet.name_tr)
@@ -129,7 +127,8 @@ export function StarCreationModal({
     onSuccess?.(newStar)
   }
 
-  // Authenticated star creation (existing flow)
+  // Authenticated star creation — moderation runs SERVER-SIDE in /api/stars
+  // so it cannot be bypassed by the client.
   const handleAuthenticatedSubmit = async () => {
     if (!canShareStar) {
       setError(t('star.dailyLimitReached'))
@@ -144,34 +143,42 @@ export function StarCreationModal({
 
     const supabase = createClient()
     const { data: { session } } = await supabase.auth.getSession()
-    const moderationResult = await moderateContent(content, session?.access_token)
-
-    if (moderationResult.helpResources) {
-      setHelpResources(moderationResult.helpResources)
-    }
-
-    if (!moderationResult.allowed) {
-      setError(moderationResult.reason || t('star.contentNotAllowed'))
+    if (!session?.access_token) {
+      setError(t('star.starCreationFailed'))
       return
     }
 
     const [position_x, position_y, position_z] = generateOrbitPosition(planet.scale)
 
-    const newStar = await createStar({
-      planet_id: planet.id,
-      content: content.trim(),
-      position_x,
-      position_y,
-      position_z,
+    const response = await fetch('/api/stars', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify({
+        content: content.trim(),
+        planet_id: planet.id,
+        position_x,
+        position_y,
+        position_z,
+      }),
     })
 
-    if (newStar) {
-      setContent('')
-      onSuccess?.(newStar)
-      onClose()
-    } else {
-      setError(t('star.starCreationFailed'))
+    const data = await response.json()
+
+    if (data.helpResources) {
+      setHelpResources(data.helpResources)
     }
+
+    if (!response.ok) {
+      setError(data.error || t('star.contentNotAllowed'))
+      return
+    }
+
+    setContent('')
+    onSuccess?.(data.star as Star)
+    onClose()
   }
 
   const handleSubmit = async (e: React.FormEvent) => {

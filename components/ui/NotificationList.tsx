@@ -169,23 +169,19 @@ export function NotificationList({ onClose, showHeader = true }: NotificationLis
   const { setActiveConversation } = useStore()
 
   const handleNotificationClick = async (notification: NotificationWithSender) => {
-    console.log('[NotificationList] Click:', notification)
-
     // Sohbet varsa, direkt sohbeti aç (sayfa fark etmez)
     if (notification.conversation_id) {
       // Önce local listeden bak
       let conversation = conversations.find(c => c.id === notification.conversation_id)
-      console.log('[NotificationList] Local conversation:', conversation ? 'found' : 'not found', 'total:', conversations.length)
 
       // Yoksa fetch et
       if (!conversation && user) {
         try {
           const supabase = createClient()
           const { data: { session } } = await supabase.auth.getSession()
-          console.log('[NotificationList] Session:', session ? 'exists' : 'none')
 
           if (session?.access_token) {
-            const { data, error } = await supabaseFetch<ConversationWithDetails[]>(
+            const { data } = await supabaseFetch<ConversationWithDetails[]>(
               'conversations',
               {
                 select: `
@@ -199,7 +195,6 @@ export function NotificationList({ onClose, showHeader = true }: NotificationLis
                 accessToken: session.access_token,
               }
             )
-            console.log('[NotificationList] Fetch result:', { data, error })
             if (data) {
               conversation = Array.isArray(data) ? data[0] : data
             }
@@ -209,13 +204,10 @@ export function NotificationList({ onClose, showHeader = true }: NotificationLis
         }
       }
 
-      console.log('[NotificationList] Final conversation:', conversation)
       if (conversation) {
-        console.log('[NotificationList] Setting active conversation')
         setActiveConversation(conversation)
       } else {
         // Hala bulunamadıysa profil sayfasına git
-        console.log('[NotificationList] No conversation, redirecting to profile')
         router.push(`/profil?conversation=${notification.conversation_id}`)
       }
     } else if (notification.type === 'message_request') {

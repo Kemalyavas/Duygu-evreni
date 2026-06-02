@@ -23,6 +23,32 @@ Bu dosya, Claude Code'un bu projede çalışırken ihtiyaç duyacağı tüm bilg
 
 ---
 
+## 🔧 Güncel Durum & Düzeltmeler (2 Haziran 2026)
+
+> Bu bölüm aşağıdaki bazı eski detayları **geçersiz kılar**. Kod incelemesi + canlı RLS denetimi sonrası eklendi. Aşağıdaki dökümana güvenmeden önce burayı oku.
+
+**Canlı 3D bileşen grafiği** (aşağıdaki "3D Rendering" tablosu eskiydi):
+`app/page.tsx` → `UnifiedUniverse` → `PlanetRenderer` (Planet3D) + `OrbitingStar` (InstancedMesh) + `UniverseCamera` (CameraAnimator) + `LoadingVortex` + `StarField`.
+- **Silindi (ölü koddu):** `components/3d/{Planet,Universe,PlanetScene,CameraController,PlanetModel,FresnelGlow,index}.tsx`, `lib/utils/shaders.ts`, `lib/constants/planets.ts`, `proxy.ts.bak`, `lib/moderation/{openaiModeration,profanityFilter}.ts`.
+- Gezegenler **GLB model** (Fresnel shader değil); Umut = sahne ışık kaynağı, Depresyon = ışık yutan.
+
+**Route'lar:** dinamik segment `gezegen/[slug]` (eski `[id]` DEĞİL; uuid → 301 `/?planet=`). Ek route'lar: `/hakkinda`, `/admin/reports`, `/api/stars` (YENİ), `/api/stars/anonymous`. `/evren` kaldırıldı → `next.config.ts`'de kalıcı 308 → `/`.
+
+**Güvenlik modeli (ÖNEMLİ):**
+- Giriş yapmış kullanıcı yıldızı artık **sunucu-tarafı moderasyondan** geçiyor: `POST /api/stars` (StarCreationModal oradan çağırıyor, eski client-side `moderateContent`+`createStar` değil). Anonim yol zaten `/api/stars/anonymous`.
+- **Bekleyen RLS sıkılaştırması:** `supabase/migrations/002_security_hardening.sql` (henüz UYGULANMADI). `stars` doğrudan client INSERT'ini kapatır (→ /api/stars zorunlu olur), `messages`'a engelleme trigger'ı ekler, `notifications` always-true INSERT policy'sini kaldırır, trigger fonksiyonlarına `search_path` pinler + anon/authenticated RPC EXECUTE'unu revoke eder. **App değişikliğiyle BİRLİKTE deploy edilmeli** yoksa yıldız oluşturma kırılır.
+- Hâlâ client-side (DB backstop yok): shadow-ban, 5/gün mesaj isteği limiti, DM içerik moderasyonu (politika kararı).
+
+**Günlük yıldız limiti = 3** (kanonik: `useDailyLimit.MAX_DAILY_STARS` + `check_daily_star_limit` trigger). `lib/constants/ui.ts` artık 3'e hizalı (eskiden yanlışlıkla 5).
+
+**profiles** (DB gerçeği): hem `daily_views_used` hem `daily_message_requests_sent` var; ayrıca `last_ip`, `last_ip_updated_at`, `is_banned`, `banned_reason`, `banned_at`.
+
+**Testler:** `__tests__/lib/moderation/localFilter.test.ts` (22) + `orbit.test.ts` (22, eski stale beklentiler düzeltildi) = **44 geçiyor**. `localFilter` death-pattern aşırı geniş ("oldu/olmak/gol" yanlış-pozitif) — test olarak belgelendi.
+
+**Supabase projesi:** `zfrhpasivazpknvwjnwl` (ap-southeast-1). DB şeması repoda değil, canlıda.
+
+---
+
 ## Tech Stack
 
 | Kategori | Teknoloji | Versiyon |

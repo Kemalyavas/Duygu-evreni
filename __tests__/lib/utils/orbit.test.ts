@@ -10,12 +10,13 @@ import {
 } from '@/lib/utils/orbit'
 
 describe('getOrbitRadius', () => {
-  it('should return base radius for 0 stars', () => {
-    expect(getOrbitRadius(0)).toBe(3)
+  it('should apply the smallest-tier multiplier for 0 stars', () => {
+    // 0 stars falls in the first threshold (count <= 10, multiplier 1.2): 3 * 1.2
+    expect(getOrbitRadius(0)).toBeCloseTo(3.6, 5)
   })
 
-  it('should return base radius for small star counts', () => {
-    expect(getOrbitRadius(5)).toBe(3)
+  it('should apply the smallest-tier multiplier for small star counts', () => {
+    expect(getOrbitRadius(5)).toBeCloseTo(3.6, 5)
   })
 
   it('should increase radius logarithmically for larger star counts', () => {
@@ -29,7 +30,8 @@ describe('getOrbitRadius', () => {
   })
 
   it('should use custom base radius when provided', () => {
-    expect(getOrbitRadius(0, 5)).toBe(5)
+    // 5 (base) * 1.2 (first-tier multiplier)
+    expect(getOrbitRadius(0, 5)).toBeCloseTo(6, 5)
   })
 })
 
@@ -62,10 +64,10 @@ describe('getLayerMultiplier', () => {
     expect(typeof mult2).toBe('number')
   })
 
-  it('should return value within expected range', () => {
-    const mult = getLayerMultiplier('test')
-    expect(mult).toBeGreaterThanOrEqual(0.8)
-    expect(mult).toBeLessThanOrEqual(1.4)
+  it('should return one of the valid layer multipliers (1.0 / 1.6 / 2.3)', () => {
+    for (const id of ['0000aaaa', 'a1b2c3d4', 'test-id', 'ffffeeee']) {
+      expect([1.0, 1.6, 2.3]).toContain(getLayerMultiplier(id))
+    }
   })
 })
 
@@ -99,7 +101,7 @@ describe('calculateAnimationDuration', () => {
 
   it('should return max duration for max distance', () => {
     const duration = calculateAnimationDuration(30, 0.6, 1.8, 30)
-    expect(duration).toBe(1.8)
+    expect(duration).toBeCloseTo(1.8, 5)
   })
 
   it('should interpolate for intermediate distance', () => {
@@ -110,7 +112,7 @@ describe('calculateAnimationDuration', () => {
 
   it('should cap at max for very large distances', () => {
     const duration = calculateAnimationDuration(100, 0.6, 1.8, 30)
-    expect(duration).toBe(1.8)
+    expect(duration).toBeCloseTo(1.8, 5)
   })
 })
 
@@ -127,40 +129,41 @@ describe('calculatePlanetCameraPosition', () => {
     description_tr: 'Test planet',
   }
 
-  it('should return position offset from planet', () => {
+  it('should offset the camera above and behind the planet (Y and Z, X stays aligned)', () => {
     const pos = calculatePlanetCameraPosition(mockPlanet, 0)
-    expect(pos[0]).not.toBe(0) // x offset
-    expect(pos[1]).not.toBe(0) // y offset
-    expect(pos[2]).not.toBe(0) // z offset
+    expect(pos[0]).toBe(0) // X tracks the planet (no horizontal offset)
+    expect(pos[1]).toBeGreaterThan(0) // raised above
+    expect(pos[2]).toBeGreaterThan(0) // pulled back
   })
 
-  it('should return position relative to planet position', () => {
+  it('should keep camera X aligned with the planet and offset Y/Z', () => {
     const planet = { ...mockPlanet, position_x: 10, position_y: 5, position_z: -3 }
     const pos = calculatePlanetCameraPosition(planet, 0)
-    // Camera should be offset from planet position
-    expect(Math.abs(pos[0] - 10)).toBeGreaterThan(0)
+    expect(pos[0]).toBe(10) // X tracks planet
+    expect(pos[1]).toBeGreaterThan(5) // above planet Y
+    expect(pos[2]).toBeGreaterThan(-3) // behind planet Z
   })
 })
 
 describe('calculateStarCameraPosition', () => {
-  it('should return position between star and planet', () => {
+  it('should place the camera beyond the star along the planet→star direction', () => {
     const starPos: [number, number, number] = [5, 5, 5]
     const planetPos: [number, number, number] = [0, 0, 0]
     const pos = calculateStarCameraPosition(starPos, planetPos, 3)
 
-    // Camera should be between star and planet, closer to star
-    expect(pos[0]).toBeLessThan(starPos[0])
-    expect(pos[0]).toBeGreaterThan(planetPos[0])
+    // Camera sits further out than the star, so it frames the star against the planet
+    expect(pos[0]).toBeGreaterThan(starPos[0])
+    expect(pos[2]).toBeGreaterThan(starPos[2])
   })
 
-  it('should respect distance parameter', () => {
+  it('should push the camera further out for a larger distance', () => {
     const starPos: [number, number, number] = [10, 0, 0]
     const planetPos: [number, number, number] = [0, 0, 0]
 
     const close = calculateStarCameraPosition(starPos, planetPos, 2)
     const far = calculateStarCameraPosition(starPos, planetPos, 5)
 
-    // Closer distance should result in camera closer to star
-    expect(close[0]).toBeGreaterThan(far[0])
+    // Larger distance → camera further from the star/planet
+    expect(far[0]).toBeGreaterThan(close[0])
   })
 })

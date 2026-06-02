@@ -119,6 +119,3 @@ export async function moderateContent(content: string, accessToken?: string): Pr
 
 // Export local filter for direct use if needed
 export { runLocalFilter, type LocalFilterResult, type FilterCategory } from './localFilter'
-
-// Export profanity filter (legacy, kept for backward compatibility)
-export { checkProfanity } from './profanityFilter'

@@ -263,8 +263,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Yıldız oluşturulamadı' }, { status: 500 })
     }
 
-    // Build share URL
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://duygu-evreni.com'
+    // Build share URL (use the canonical site URL — same var as sitemap/robots/JsonLd)
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.duyguevreni.com'
     const shareUrl = `${baseUrl}/?planet=${planet_id}&star=${star.id}`
 
     return NextResponse.json({

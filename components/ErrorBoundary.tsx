@@ -159,7 +159,7 @@ export class Canvas3DErrorBoundary extends Component<Canvas3DErrorBoundaryProps,
             <p className="text-white/40 text-xs mt-4">
               Sorun devam ederse farklı bir tarayıcı deneyin veya{' '}
               <a
-                href="mailto:destek@duygu-evreni.com"
+                href="mailto:destek@duyguevreni.com"
                 className="text-purple-400 hover:underline"
               >
                 destek ekibimize

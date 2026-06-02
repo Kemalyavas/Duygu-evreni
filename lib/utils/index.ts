@@ -4,4 +4,3 @@
  */
 
 export * from './orbit'
-export * from './shaders'

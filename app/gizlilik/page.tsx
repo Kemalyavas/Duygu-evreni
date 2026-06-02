@@ -76,7 +76,7 @@ export default function PrivacyPage() {
                 <ul className="list-disc list-inside space-y-2 text-white/60">
                   <li>Diğer kullanıcılar yıldızların kime ait olduğunu göremez</li>
                   <li>Kullanıcı adın veya emailin yıldızlarla birlikte gösterilmez</li>
-                  <li>Profilindeki "Yıldızlarım" bölümü sadece sana özeldir</li>
+                  <li>Profilindeki &quot;Yıldızlarım&quot; bölümü sadece sana özeldir</li>
                 </ul>
               </div>
             </section>

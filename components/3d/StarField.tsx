@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useMemo } from 'react'
+import { useRef, useMemo, useEffect } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 
@@ -131,6 +131,15 @@ export function StarField({ count = 2500, brightness = 1.0 }: StarFieldProps) {
 
     return { geometry: geo, material: mat }
   }, [count, brightness])
+
+  // Dispose GPU resources when geometry/material change or on unmount (prevents a leak
+  // on every mobile<->desktop toggle and when leaving the universe view).
+  useEffect(() => {
+    return () => {
+      geometry.dispose()
+      material.dispose()
+    }
+  }, [geometry, material])
 
   // Animate rotation and twinkling
   useFrame((state, delta) => {
