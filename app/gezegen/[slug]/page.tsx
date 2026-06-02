@@ -1,14 +1,8 @@
 import type { Metadata } from 'next'
 import { notFound, redirect } from 'next/navigation'
-import Link from 'next/link'
-import Image from 'next/image'
 import { createClient as createSupabaseClient } from '@supabase/supabase-js'
-import {
-  EMOTION_SLUGS,
-  getEmotionBySlug,
-  type EmotionContent,
-} from '@/lib/constants/emotions'
-import { SiteFooter } from '@/components/SiteFooter'
+import { EMOTION_SLUGS, getEmotionBySlug } from '@/lib/constants/emotions'
+import { PlanetArticle } from '@/components/PlanetArticle'
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.duyguevreni.com'
 
@@ -91,13 +85,11 @@ export default async function PlanetContentPage({ params }: Params) {
   if (!emotion) notFound()
 
   const { id: planetId, starCount } = await getPlanetStats(emotion.name_tr)
-  const exploreHref = planetId ? `/?planet=${planetId}` : '/'
-  const related = emotion.related
-    .map(getEmotionBySlug)
-    .filter((e): e is EmotionContent => Boolean(e))
-
   const pageUrl = `${siteUrl}/gezegen/${emotion.slug}`
 
+  // JSON-LD şemaları Türkçe — sayfa Türkçe-canonical (tr_TR); crawler SSR'da
+  // Türkçe içerik + Türkçe şema görür. Görünür makale (PlanetArticle) ise
+  // client'ta dile göre TR/EN render eder (SSR Türkçe → SEO korunur).
   const breadcrumbLd = {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
@@ -144,105 +136,7 @@ export default async function PlanetContentPage({ params }: Params) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }}
       />
 
-      {/* Header */}
-      <header className="border-b border-white/10">
-        <div className="max-w-3xl mx-auto px-4 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <Image src="/logo.png" alt="Duygu Evreni" width={36} height={36} />
-            <span className="font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-purple-300 bg-clip-text text-transparent">
-              Duygu Evreni
-            </span>
-          </Link>
-          <Link href="/" className="text-sm text-white/60 hover:text-white transition-colors">
-            3D Evren
-          </Link>
-        </div>
-      </header>
-
-      <main className="max-w-3xl mx-auto px-4 py-12 sm:py-16">
-        {/* Breadcrumb */}
-        <nav aria-label="breadcrumb" className="text-sm text-white/40 mb-6">
-          <Link href="/" className="hover:text-white/70">
-            Ana Sayfa
-          </Link>
-          <span className="mx-2">/</span>
-          <span className="text-white/70">{emotion.name_tr}</span>
-        </nav>
-
-        <h1
-          className="text-4xl sm:text-5xl font-bold mb-3"
-          style={{ color: emotion.color }}
-        >
-          {emotion.heading}
-        </h1>
-
-        {starCount != null && starCount > 0 && (
-          <p className="text-white/50 mb-8">
-            {starCount} yıldız paylaşıldı
-          </p>
-        )}
-
-        <p className="text-lg text-white/85 leading-relaxed mb-6">{emotion.lead}</p>
-        {emotion.body.map((paragraph, i) => (
-          <p key={i} className="text-white/70 leading-relaxed mb-5">
-            {paragraph}
-          </p>
-        ))}
-
-        {emotion.supportNote && (
-          <div className="my-8 rounded-xl border border-white/15 bg-white/5 p-5">
-            <p className="text-sm text-white/80 leading-relaxed">{emotion.supportNote}</p>
-          </div>
-        )}
-
-        {/* CTA */}
-        <div className="my-10">
-          <Link
-            href={exploreHref}
-            className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 px-6 py-3 font-semibold text-white shadow-lg shadow-purple-500/25 transition-opacity hover:opacity-90"
-          >
-            {emotion.name_tr} gezegenini 3D evrende keşfet
-          </Link>
-        </div>
-
-        {/* SSS */}
-        <section className="mt-12 border-t border-white/10 pt-8">
-          <h2 className="text-2xl font-bold mb-6">Sık Sorulan Sorular</h2>
-          <div className="space-y-5">
-            {emotion.faqs.map((f) => (
-              <div key={f.q}>
-                <h3 className="font-semibold text-white/90 mb-1.5">{f.q}</h3>
-                <p className="text-white/65 leading-relaxed text-sm">{f.a}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* Related */}
-        <section className="mt-12 border-t border-white/10 pt-8">
-          <h2 className="text-xl font-semibold mb-4">Diğer duygular</h2>
-          <ul className="flex flex-wrap gap-3">
-            {related.map((r) => (
-              <li key={r.slug}>
-                <Link
-                  href={`/gezegen/${r.slug}`}
-                  className="inline-block rounded-lg border border-white/15 px-4 py-2 text-sm text-white/80 transition-colors hover:border-white/30 hover:text-white"
-                  style={{ borderColor: `${r.color}40` }}
-                >
-                  {r.name_tr}
-                </Link>
-              </li>
-            ))}
-          </ul>
-          <p className="mt-6">
-            <Link href="/" className="text-purple-300 hover:text-purple-200">
-              Tüm duygu evrenini keşfet →
-            </Link>
-          </p>
-        </section>
-      </main>
-
-      <SiteFooter />
+      <PlanetArticle slug={emotion.slug} starCount={starCount} planetId={planetId} />
     </div>
   )
 }
