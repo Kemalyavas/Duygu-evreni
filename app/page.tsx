@@ -123,7 +123,7 @@ function HomePageContent() {
   const { planets, loading: planetsLoading, error: planetsError, refetch: refetchPlanets } = usePlanets()
   const { stars, loading: starsLoading, fetchAllStars, fetchStarsByPlanet } = useStars()
   const { starCounts, refetchCounts } = useStarCounts()
-  const { remainingStars, isAdmin, incrementViewCount } = useDailyLimit()
+  const { remainingStars, isAdmin, incrementViewCount, checkRealLimit } = useDailyLimit()
   const { readStarIds, markAsRead } = useReadStars()
   const isMobile = useMobile()
   const { playPlanetClick, playStarClick, playAddStar } = useSoundEffects()
@@ -358,10 +358,12 @@ function HomePageContent() {
     }
     // Refetch star counts to update universe view tooltips
     refetchCounts()
+    // Refresh the daily-limit counter so the "remaining" badge updates immediately
+    checkRealLimit()
     // Focus camera on the newly created star
     setSelectedStar(newStar)
     markAsRead(newStar.id)
-  }, [focusedPlanetId, fetchStarsByPlanet, refetchCounts, markAsRead, playAddStar])
+  }, [focusedPlanetId, fetchStarsByPlanet, refetchCounts, markAsRead, playAddStar, checkRealLimit])
 
   const handleLogout = async () => {
     await signOut()

@@ -27,23 +27,19 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     // Load language from localStorage on mount
     const savedLang = localStorage.getItem('language') as Language
-    if (savedLang && (savedLang === 'tr' || savedLang === 'en')) {
-      setLanguageState(savedLang)
-    } else {
-      // Detect browser language
-      const browserLang = navigator.language.split('-')[0]
-      if (browserLang === 'tr') {
-        setLanguageState('tr')
-      } else {
-        setLanguageState('en')
-      }
-    }
+    const chosen: Language = (savedLang === 'tr' || savedLang === 'en')
+      ? savedLang
+      : (navigator.language.split('-')[0] === 'tr' ? 'tr' : 'en')
+    setLanguageState(chosen)
+    // Keep <html lang> in sync for screen readers / SEO (i18n is client-side)
+    document.documentElement.lang = chosen
     setMounted(true)
   }, [])
 
   const setLanguage = useCallback((lang: Language) => {
     setLanguageState(lang)
     localStorage.setItem('language', lang)
+    document.documentElement.lang = lang
   }, [])
 
   const t = useCallback((key: string, params?: Record<string, string | number>): string => {

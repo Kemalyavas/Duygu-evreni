@@ -234,3 +234,21 @@ h1, h2, h3, h4, h5, h6 {
 .safe-all {
   padding: var(--safe-area-top) var(--safe-area-right) var(--safe-area-bottom) var(--safe-area-left);
 }
+
+/* Respect the user's reduced-motion preference (a11y / vestibular safety).
+   Kills looping CSS/Tailwind animations; framer-motion is handled via
+   <MotionConfig reducedMotion="user">, and the 3D auto-rotate is gated in JS. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  .animate-float,
+  .animate-soft-pulse {
+    animation: none !important;
+  }
+}

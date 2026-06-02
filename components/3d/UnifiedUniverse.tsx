@@ -5,6 +5,7 @@ import { Canvas } from '@react-three/fiber'
 import { OrbitControls, PerspectiveCamera, useProgress } from '@react-three/drei'
 import { EffectComposer, Bloom } from '@react-three/postprocessing'
 import { useSpring, animated } from '@react-spring/three'
+import { useReducedMotion } from 'framer-motion'
 
 // Components
 import { StarField } from './StarField'
@@ -108,6 +109,9 @@ function Scene({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const orbitControlsRef = useRef<any>(null)
 
+  // Honor the user's reduced-motion preference (stops continuous camera auto-rotation)
+  const prefersReducedMotion = useReducedMotion()
+
   // Track loading progress for 3D assets
   const { progress, active } = useProgress()
 
@@ -192,7 +196,7 @@ function Scene({
         enableZoom={!isTransitioning}
         minDistance={orbitSettings.minDistance}
         maxDistance={orbitSettings.maxDistance}
-        autoRotate={!isTransitioning && !isFocusedOnStar}
+        autoRotate={!isTransitioning && !isFocusedOnStar && !prefersReducedMotion}
         autoRotateSpeed={orbitSettings.autoRotateSpeed}
         dampingFactor={ORBIT_CONTROLS.DAMPING_FACTOR}
         enableDamping={!isFocusedOnStar}

@@ -1,5 +1,6 @@
 'use client'
 
+import { MotionConfig } from 'framer-motion'
 import { AuthHandler } from './AuthHandler'
 import { MusicProvider } from './MusicProvider'
 import { ChatPanel } from './messaging/ChatPanel'
@@ -16,12 +17,15 @@ interface ProvidersProps {
 export function Providers({ children }: ProvidersProps) {
   return (
     <LanguageProvider>
-      <MusicProvider>
-        <AuthHandler />
-        {children}
-        {/* Global Chat Panel - tüm sayfalarda görünür */}
-        <ChatPanel />
-      </MusicProvider>
+      {/* reducedMotion="user" makes all framer-motion animations respect the OS setting */}
+      <MotionConfig reducedMotion="user">
+        <MusicProvider>
+          <AuthHandler />
+          {children}
+          {/* Global Chat Panel - tüm sayfalarda görünür */}
+          <ChatPanel />
+        </MusicProvider>
+      </MotionConfig>
     </LanguageProvider>
   )
 }
