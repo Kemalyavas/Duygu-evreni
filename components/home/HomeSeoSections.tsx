@@ -1,66 +1,180 @@
+'use client'
+
+import type { ReactNode } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { EMOTIONS } from '@/lib/constants/emotions'
 import { SiteFooter } from '@/components/SiteFooter'
+import { useTranslation } from '@/lib/i18n'
 
-// Ana sayfada 3D hero'nun ALTINDA yer alan, sunucuda render edilen görünür içerik.
-// Amaç: ana sayfanın arama motorları için gerçek metin + iç link içermesi
-// (3D <canvas> içeriği taranamadığı için ana sayfa şu ana dek SEO'da boştu).
+// Visible, server-rendered marketing content for /hakkinda.
+//
+// i18n note: we select content by `language` (NOT the t() helper). Before the
+// LanguageProvider mounts (i.e. during SSR and the first client render) the
+// context returns language='tr' AND a passthrough t() that echoes the key —
+// so using t() here would emit raw keys into the SSR HTML and wreck Turkish
+// SEO. Selecting from this bilingual object keeps SSR Turkish (crawlers + the
+// FAQ schema stay tr_TR, matching the page's canonical/locale) while EN users
+// get English after hydration with no mismatch (SSR tr === first client render).
 
-const TAGLINES: Record<string, string> = {
-  mutluluk: 'Sevincini ve mutlu anlarını paylaş',
-  ask: 'Aşk ve sevgi dolu duygularını yaz',
-  umut: 'Geleceğe dair umut ve dileklerin',
-  huzur: 'Sükunet ve iç huzuru anların',
-  ozlem: 'Özlem ve hasret dolu sözlerin',
-  huzun: 'Hüzün ve üzüntünü paylaş',
-  pismanlik: 'Pişmanlıklarını ve keşkelerini dök',
-  korku: 'Korku ve kaygılarını anlat',
-  ofke: 'Öfke ve kızgınlığını boşalt',
-  depresyon: 'Ağır ruh hâllerinde yalnız değilsin',
+interface StepContent {
+  title: string
+  desc: string
+}
+interface FaqContent {
+  q: string
+  a: string
+}
+interface SeoContent {
+  enter3d: string
+  introTitle: string
+  introBody: ReactNode
+  planetsTitle: string
+  planetsSubtitle: string
+  cardFallback: (name: string) => string
+  taglines: Record<string, string>
+  howTitle: string
+  steps: StepContent[]
+  faqTitle: string
+  faqs: FaqContent[]
 }
 
-const STEPS = [
-  {
-    n: 1,
-    title: 'Bir gezegen seç',
-    desc: 'Her gezegen bir duyguyu temsil eder. Hissine en yakın olanı seç.',
+const CONTENT: Record<'tr' | 'en', SeoContent> = {
+  tr: {
+    enter3d: '3D Evrene Gir',
+    introTitle: 'Duygu Evreni Nedir?',
+    introBody: (
+      <>
+        Duygu Evreni, içindekileri <strong>anonim</strong> olarak paylaşabileceğin
+        3D interaktif bir duygu evrenidir. Aşk, mutluluk, umut, özlem, hüzün, öfke,
+        korku, pişmanlık, huzur ve depresyon için ayrı gezegenler var. Hislerini
+        yaz, evrende parlayan bir yıldıza dönüştür; başkalarının duygularını oku ve
+        yalnız olmadığını hisset.
+      </>
+    ),
+    planetsTitle: 'Duygu Gezegenleri',
+    planetsSubtitle: 'Her gezegen bir duyguyu temsil eder. Keşfetmek istediğin duyguyu seç.',
+    cardFallback: (name) => `${name} duygularını paylaş`,
+    taglines: {
+      mutluluk: 'Sevincini ve mutlu anlarını paylaş',
+      ask: 'Aşk ve sevgi dolu duygularını yaz',
+      umut: 'Geleceğe dair umut ve dileklerin',
+      huzur: 'Sükunet ve iç huzuru anların',
+      ozlem: 'Özlem ve hasret dolu sözlerin',
+      huzun: 'Hüzün ve üzüntünü paylaş',
+      pismanlik: 'Pişmanlıklarını ve keşkelerini dök',
+      korku: 'Korku ve kaygılarını anlat',
+      ofke: 'Öfke ve kızgınlığını boşalt',
+      depresyon: 'Ağır ruh hâllerinde yalnız değilsin',
+    },
+    howTitle: 'Nasıl çalışır?',
+    steps: [
+      {
+        title: 'Bir gezegen seç',
+        desc: 'Her gezegen bir duyguyu temsil eder. Hissine en yakın olanı seç.',
+      },
+      {
+        title: 'Duygunu yaz',
+        desc: 'Birkaç cümleyle içindekini yaz; paylaşımın anonim bir yıldıza dönüşür.',
+      },
+      {
+        title: 'Keşfet ve bağ kur',
+        desc: 'Başkalarının yıldızlarını oku, istersen anonim olarak mesajlaş.',
+      },
+    ],
+    faqTitle: 'Sık Sorulan Sorular',
+    faqs: [
+      {
+        q: 'Duygu Evreni nedir?',
+        a: 'Duygu Evreni, duygularını anonim olarak yıldızlara dönüştürüp paylaşabileceğin 3D interaktif bir platformdur. Her gezegen bir duyguyu temsil eder; paylaştığın her his evrende parlayan bir yıldız olur.',
+      },
+      {
+        q: 'Duygu Evreni nasıl çalışır?',
+        a: 'Ücretsiz kayıt olursun, bir duygu gezegeni seçersin, içindekileri birkaç cümleyle yazarsın ve paylaşımın anonim bir yıldıza dönüşür. Aynı gezegende başkalarının duygularını da okuyabilirsin.',
+      },
+      {
+        q: 'Paylaşımlar gerçekten anonim mi?',
+        a: 'Evet. Yıldızlarda yalnızca duygu metni ve tarih görünür; kim olduğun gizli kalır. Dilersen biriyle anonim olarak mesajlaşmaya başlayabilirsin.',
+      },
+      {
+        q: 'Duygu Evreni ücretsiz mi?',
+        a: 'Evet, tamamen ücretsizdir. Kayıt olduktan sonra her gün belirli sayıda yıldız paylaşabilir, sınırsızca başkalarının duygularını okuyabilirsin.',
+      },
+    ],
   },
-  {
-    n: 2,
-    title: 'Duygunu yaz',
-    desc: 'Birkaç cümleyle içindekini yaz; paylaşımın anonim bir yıldıza dönüşür.',
+  en: {
+    enter3d: 'Enter the 3D Universe',
+    introTitle: 'What Is Emotion Universe?',
+    introBody: (
+      <>
+        Emotion Universe is a 3D interactive universe of feelings where you can share
+        what&apos;s inside you <strong>anonymously</strong>. There are separate planets
+        for love, happiness, hope, longing, sadness, anger, fear, regret, peace and
+        depression. Write your feelings, turn them into a star shining in the universe;
+        read other people&apos;s emotions and feel that you are not alone.
+      </>
+    ),
+    planetsTitle: 'Emotion Planets',
+    planetsSubtitle: 'Each planet represents an emotion. Choose the one you want to explore.',
+    cardFallback: (name) => `Share your ${name.toLowerCase()} feelings`,
+    taglines: {
+      mutluluk: 'Share your joy and happy moments',
+      ask: 'Write your feelings full of love and affection',
+      umut: 'Your hopes and wishes for the future',
+      huzur: 'Your moments of calm and inner peace',
+      ozlem: 'Your words full of longing and yearning',
+      huzun: 'Share your sadness and sorrow',
+      pismanlik: 'Pour out your regrets and what-ifs',
+      korku: 'Tell us about your fears and worries',
+      ofke: 'Let out your anger and frustration',
+      depresyon: 'You are not alone in your heaviest moods',
+    },
+    howTitle: 'How Does It Work?',
+    steps: [
+      {
+        title: 'Choose a planet',
+        desc: 'Each planet represents an emotion. Pick the one closest to how you feel.',
+      },
+      {
+        title: 'Write your feeling',
+        desc: 'Write what is inside you in a few sentences; your post becomes an anonymous star.',
+      },
+      {
+        title: 'Explore and connect',
+        desc: "Read other people's stars, and message anonymously if you want to.",
+      },
+    ],
+    faqTitle: 'Frequently Asked Questions',
+    faqs: [
+      {
+        q: 'What is Emotion Universe?',
+        a: 'Emotion Universe is a 3D interactive platform where you turn your feelings into stars and share them anonymously. Each planet represents an emotion; every feeling you share becomes a star shining in the universe.',
+      },
+      {
+        q: 'How does Emotion Universe work?',
+        a: 'You sign up for free, choose an emotion planet, write what is inside you in a few sentences, and your post becomes an anonymous star. You can also read other people’s emotions on the same planet.',
+      },
+      {
+        q: 'Are the posts really anonymous?',
+        a: 'Yes. A star shows only the feeling text and the date; who you are stays hidden. If you wish, you can start messaging someone anonymously.',
+      },
+      {
+        q: 'Is Emotion Universe free?',
+        a: 'Yes, it is completely free. After signing up you can share a set number of stars each day and read other people’s emotions without any limit.',
+      },
+    ],
   },
-  {
-    n: 3,
-    title: 'Keşfet ve bağ kur',
-    desc: 'Başkalarının yıldızlarını oku, istersen anonim olarak mesajlaş.',
-  },
-]
-
-const HOME_FAQS = [
-  {
-    q: 'Duygu Evreni nedir?',
-    a: 'Duygu Evreni, duygularını anonim olarak yıldızlara dönüştürüp paylaşabileceğin 3D interaktif bir platformdur. Her gezegen bir duyguyu temsil eder; paylaştığın her his evrende parlayan bir yıldız olur.',
-  },
-  {
-    q: 'Duygu Evreni nasıl çalışır?',
-    a: 'Ücretsiz kayıt olursun, bir duygu gezegeni seçersin, içindekileri birkaç cümleyle yazarsın ve paylaşımın anonim bir yıldıza dönüşür. Aynı gezegende başkalarının duygularını da okuyabilirsin.',
-  },
-  {
-    q: 'Paylaşımlar gerçekten anonim mi?',
-    a: 'Evet. Yıldızlarda yalnızca duygu metni ve tarih görünür; kim olduğun gizli kalır. Dilersen biriyle anonim olarak mesajlaşmaya başlayabilirsin.',
-  },
-  {
-    q: 'Duygu Evreni ücretsiz mi?',
-    a: 'Evet, tamamen ücretsizdir. Kayıt olduktan sonra her gün belirli sayıda yıldız paylaşabilir, sınırsızca başkalarının duygularını okuyabilirsin.',
-  },
-]
+}
 
 export function HomeSeoSections() {
+  const { language } = useTranslation()
+  const c = CONTENT[language === 'en' ? 'en' : 'tr']
+  const isEn = language === 'en'
+
   const faqLd = {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
-    mainEntity: HOME_FAQS.map((f) => ({
+    mainEntity: c.faqs.map((f) => ({
       '@type': 'Question',
       name: f.q,
       acceptedAnswer: { '@type': 'Answer', text: f.a },
@@ -68,84 +182,97 @@ export function HomeSeoSections() {
   }
 
   return (
-    <div className="relative bg-gradient-to-b from-black to-[#0A0E27] text-white">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }}
-      />
+    <>
+      {/* Header */}
+      <header className="border-b border-white/10">
+        <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-2">
+            <Image src="/logo.png" alt="Duygu Evreni" width={36} height={36} />
+            <span className="font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-purple-300 bg-clip-text text-transparent">
+              Duygu Evreni
+            </span>
+          </Link>
+          <Link
+            href="/"
+            className="rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+          >
+            {c.enter3d}
+          </Link>
+        </div>
+      </header>
 
-      {/* Hakkında / intro */}
-      <section id="hakkinda" className="max-w-4xl mx-auto px-4 py-16 sm:py-20">
-        <h1 className="text-3xl sm:text-4xl font-bold mb-5">
-          Duygu Evreni Nedir?
-        </h1>
-        <p className="text-lg text-white/75 leading-relaxed max-w-3xl">
-          Duygu Evreni, içindekileri <strong>anonim</strong> olarak paylaşabileceğin
-          3D interaktif bir duygu evrenidir. Aşk, mutluluk, umut, özlem, hüzün, öfke,
-          korku, pişmanlık, huzur ve depresyon için ayrı gezegenler var. Hislerini
-          yaz, evrende parlayan bir yıldıza dönüştür; başkalarının duygularını oku ve
-          yalnız olmadığını hisset.
-        </p>
-      </section>
+      <div className="relative bg-gradient-to-b from-black to-[#0A0E27] text-white">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }}
+        />
 
-      {/* Duygu gezegenleri */}
-      <section className="max-w-5xl mx-auto px-4 pb-16">
-        <h2 className="text-2xl font-bold mb-2">Duygu Gezegenleri</h2>
-        <p className="text-white/60 mb-8">
-          Her gezegen bir duyguyu temsil eder. Keşfetmek istediğin duyguyu seç.
-        </p>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {EMOTIONS.map((e) => (
-            <Link
-              key={e.slug}
-              href={`/gezegen/${e.slug}`}
-              className="group rounded-2xl border border-white/10 bg-white/[0.03] p-5 transition-colors hover:border-white/25 hover:bg-white/[0.06]"
-            >
-              <div className="flex items-center gap-3 mb-1.5">
-                <span
-                  className="inline-block h-3 w-3 rounded-full flex-shrink-0"
-                  style={{ backgroundColor: e.color }}
-                />
-                <h3 className="font-semibold text-lg">{e.name_tr}</h3>
+        {/* Hakkında / intro */}
+        <section id="hakkinda" className="max-w-4xl mx-auto px-4 py-16 sm:py-20">
+          <h1 className="text-3xl sm:text-4xl font-bold mb-5">{c.introTitle}</h1>
+          <p className="text-lg text-white/75 leading-relaxed max-w-3xl">{c.introBody}</p>
+        </section>
+
+        {/* Duygu gezegenleri */}
+        <section className="max-w-5xl mx-auto px-4 pb-16">
+          <h2 className="text-2xl font-bold mb-2">{c.planetsTitle}</h2>
+          <p className="text-white/60 mb-8">{c.planetsSubtitle}</p>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {EMOTIONS.map((e) => {
+              const name = isEn ? e.name_en : e.name_tr
+              return (
+                <Link
+                  key={e.slug}
+                  href={`/gezegen/${e.slug}`}
+                  className="group rounded-2xl border border-white/10 bg-white/[0.03] p-5 transition-colors hover:border-white/25 hover:bg-white/[0.06]"
+                >
+                  <div className="flex items-center gap-3 mb-1.5">
+                    <span
+                      className="inline-block h-3 w-3 rounded-full flex-shrink-0"
+                      style={{ backgroundColor: e.color }}
+                    />
+                    <h3 className="font-semibold text-lg">{name}</h3>
+                  </div>
+                  <p className="text-sm text-white/55 leading-relaxed">
+                    {c.taglines[e.slug] ?? c.cardFallback(name)}
+                  </p>
+                </Link>
+              )
+            })}
+          </div>
+        </section>
+
+        {/* Nasıl çalışır */}
+        <section className="max-w-4xl mx-auto px-4 pb-16">
+          <h2 className="text-2xl font-bold mb-8">{c.howTitle}</h2>
+          <div className="grid gap-8 sm:grid-cols-3">
+            {c.steps.map((s, i) => (
+              <div key={i}>
+                <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 text-lg font-bold">
+                  {i + 1}
+                </div>
+                <h3 className="font-semibold text-lg mb-1.5">{s.title}</h3>
+                <p className="text-sm text-white/60 leading-relaxed">{s.desc}</p>
               </div>
-              <p className="text-sm text-white/55 leading-relaxed">
-                {TAGLINES[e.slug] ?? `${e.name_tr} duygularını paylaş`}
-              </p>
-            </Link>
-          ))}
-        </div>
-      </section>
+            ))}
+          </div>
+        </section>
 
-      {/* Nasıl çalışır */}
-      <section className="max-w-4xl mx-auto px-4 pb-16">
-        <h2 className="text-2xl font-bold mb-8">Nasıl çalışır?</h2>
-        <div className="grid gap-8 sm:grid-cols-3">
-          {STEPS.map((s) => (
-            <div key={s.n}>
-              <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 text-lg font-bold">
-                {s.n}
+        {/* SSS */}
+        <section className="max-w-3xl mx-auto px-4 pb-16">
+          <h2 className="text-2xl font-bold mb-6">{c.faqTitle}</h2>
+          <div className="space-y-5">
+            {c.faqs.map((f) => (
+              <div key={f.q}>
+                <h3 className="font-semibold text-white/90 mb-1.5">{f.q}</h3>
+                <p className="text-white/65 leading-relaxed text-sm">{f.a}</p>
               </div>
-              <h3 className="font-semibold text-lg mb-1.5">{s.title}</h3>
-              <p className="text-sm text-white/60 leading-relaxed">{s.desc}</p>
-            </div>
-          ))}
-        </div>
-      </section>
+            ))}
+          </div>
+        </section>
 
-      {/* SSS */}
-      <section className="max-w-3xl mx-auto px-4 pb-16">
-        <h2 className="text-2xl font-bold mb-6">Sık Sorulan Sorular</h2>
-        <div className="space-y-5">
-          {HOME_FAQS.map((f) => (
-            <div key={f.q}>
-              <h3 className="font-semibold text-white/90 mb-1.5">{f.q}</h3>
-              <p className="text-white/65 leading-relaxed text-sm">{f.a}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <SiteFooter />
-    </div>
+        <SiteFooter />
+      </div>
+    </>
   )
 }

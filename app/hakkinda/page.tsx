@@ -1,6 +1,4 @@
 import type { Metadata } from 'next'
-import Link from 'next/link'
-import Image from 'next/image'
 import { HomeSeoSections } from '@/components/home/HomeSeoSections'
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.duyguevreni.com'
@@ -33,25 +31,8 @@ export const metadata: Metadata = {
 export default function HakkindaPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#0A0E27] to-black text-white">
-      {/* Header */}
-      <header className="border-b border-white/10">
-        <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <Image src="/logo.png" alt="Duygu Evreni" width={36} height={36} />
-            <span className="font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-purple-300 bg-clip-text text-transparent">
-              Duygu Evreni
-            </span>
-          </Link>
-          <Link
-            href="/"
-            className="rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90"
-          >
-            3D Evrene Gir
-          </Link>
-        </div>
-      </header>
-
-      {/* Tüm tanıtım içeriği (intro, duygu kartları, nasıl çalışır, SSS) + footer */}
+      {/* Header + tüm tanıtım içeriği (intro, kartlar, nasıl çalışır, SSS) + footer
+          — iki dilli (TR/EN); SSR Türkçe render eder, EN kullanıcı hydration sonrası İngilizce görür */}
       <HomeSeoSections />
     </div>
   )
