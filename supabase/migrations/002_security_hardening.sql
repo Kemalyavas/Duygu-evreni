@@ -128,3 +128,53 @@ revoke execute on function public.unhide_conversation_on_new_message() from anon
 --     conversations if you want these enforced at the DB level too.
 --   • Private DM / first-message content moderation (product/privacy decision).
 -- ----------------------------------------------------------------------------
+
+
+-- ----------------------------------------------------------------------------
+-- G. profiles UPDATE lockdown — *** CRITICAL privilege-escalation fix ***
+--
+-- VERIFIED 2026-06-02 against the live DB: role `authenticated` holds UPDATE on
+-- profiles.is_admin AND is_banned, and the UPDATE policy is
+-- USING/WITH CHECK (auth.uid() = id). So ANY logged-in user can run
+--   PATCH /rest/v1/profiles?id=eq.<self>   { "is_admin": true }
+-- and instantly become an admin (or un-ban themselves, or reset their own
+-- daily counters). This restricts client UPDATE to only the columns the app
+-- legitimately writes. SAFE to apply now (the app updates only these columns).
+-- *** APPLY THIS ASAP — independent of everything else. ***
+-- ----------------------------------------------------------------------------
+revoke update on public.profiles from anon, authenticated;
+grant  update (username, show_username_in_chats, daily_stars_added,
+               daily_views_used, daily_message_requests_sent, last_reset_date)
+       on public.profiles to authenticated;
+
+
+-- ----------------------------------------------------------------------------
+-- H. profiles SELECT PII exposure (F1) — *** CRITICAL data exposure ***
+--
+-- VERIFIED: anon AND authenticated can SELECT email, last_ip, is_admin,
+-- is_banned, banned_reason on ALL profile rows (policy "Public profiles are
+-- viewable by everyone" USING (true) + column grants). Anyone holding the
+-- public anon key can dump every user's email + IP, and join any authored
+-- star (stars.user_id) back to a real identity — fatal for an anonymity app.
+--
+-- H1 (READY, safe): stop the logged-out `anon` role from reading PII at all.
+--     Anonymous visitors need at most public-safe columns.
+revoke select on public.profiles from anon;
+grant  select (id, username, show_username_in_chats) on public.profiles to anon;
+
+-- H2 (NEEDS APP CHANGES — do NOT apply blind): authenticated users can still
+--     read every other user's email/IP/admin flags. Robust fix:
+--       1) drop the public USING(true) SELECT policy on profiles;
+--       2) add self-only read:
+--            CREATE POLICY profiles_self_select ON public.profiles
+--              FOR SELECT TO authenticated USING (auth.uid() = id);
+--       3) expose public-safe columns via a view for joins:
+--            CREATE VIEW public.public_profiles AS
+--              SELECT id, username, show_username_in_chats FROM public.profiles;
+--            GRANT SELECT ON public.public_profiles TO anon, authenticated;
+--       4) repoint the client joins (useConversations / useMessages /
+--          useNotifications / MessageRequestModal) from profiles!fkey(...) to
+--          public_profiles and verify PostgREST embedding still resolves.
+--     Requires app changes + testing — schedule as a follow-up, then drop the
+--     broad column grants on profiles for `authenticated` too.
+-- ----------------------------------------------------------------------------
