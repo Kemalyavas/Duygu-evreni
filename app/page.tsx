@@ -435,7 +435,7 @@ function HomePageContent() {
           href="/hakkinda"
           className="hidden sm:inline-flex text-sm font-medium text-white/60 hover:text-white transition-colors"
         >
-          Hakkında
+          {language === 'en' ? 'About' : 'Hakkında'}
         </Link>
         <LanguageSwitcher />
         <MusicToggle />
