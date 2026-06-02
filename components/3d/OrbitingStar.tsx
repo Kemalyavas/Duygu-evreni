@@ -215,6 +215,18 @@ export function OrbitingStars({
   const tempScale = useMemo(() => new THREE.Vector3(), [])
   const tempColor = useMemo(() => new THREE.Color(), [])
 
+  // Scratch vectors for the raycast (avoid per-star allocations on every mousemove)
+  const rayScratch = useMemo(() => ({ toStar: new THREE.Vector3(), projPoint: new THREE.Vector3() }), [])
+
+  // Track previous hover so instance colors are only re-uploaded when hover changes
+  const prevHoveredRef = useRef<number | null>(null)
+
+  // Index of the selected star (memoized — was an O(N) findIndex inside useFrame)
+  const selectedIndex = useMemo(
+    () => (selectedStarId ? stars.findIndex(s => s.id === selectedStarId) : -1),
+    [stars, selectedStarId]
+  )
+
   // Update instance matrices and colors every frame
   useFrame(({ clock }) => {
     const normalMesh = normalMeshRef.current
@@ -230,10 +242,9 @@ export function OrbitingStars({
       appearProgressRef.current = 1 - Math.pow(1 - rawProgress, 3)
     }
 
-    // Find selected star index
-    const selectedIndex = selectedStarId
-      ? stars.findIndex(s => s.id === selectedStarId)
-      : -1
+    // Billboard quaternion is identical for every star — compute once per frame
+    tempQuaternion.copy(camera.quaternion)
+    const hoverChanged = hoveredIndex !== prevHoveredRef.current
 
     // Update all stars
     stars.forEach((star, starIndex) => {
@@ -273,9 +284,6 @@ export function OrbitingStars({
         starPositionsRef.current[starIndex].set(worldX, worldY, worldZ)
       }
 
-      // Billboard rotation (face camera)
-      tempQuaternion.copy(camera.quaternion)
-
       // Scale with pulse effect - only for unread stars
       const isRead = readStarIds?.has(stars[starIndex].id) ?? false
       // Read stars don't pulse - they're "consumed"
@@ -302,30 +310,31 @@ export function OrbitingStars({
       tempMatrix.compose(tempPosition, tempQuaternion, tempScale)
 
       if (mappingInfo.isRead && readMesh) {
+        // Read-star colors are static (set once on init) — only the matrix animates.
         readMesh.setMatrixAt(mappingInfo.instanceIndex, tempMatrix)
-        tempColor.copy(dimColor)
-        readMesh.setColorAt(mappingInfo.instanceIndex, tempColor)
       } else if (!mappingInfo.isRead && normalMesh) {
         normalMesh.setMatrixAt(mappingInfo.instanceIndex, tempMatrix)
-        tempColor.copy(isHovered ? brightColor : baseColor)
-        normalMesh.setColorAt(mappingInfo.instanceIndex, tempColor)
+        // Only the hovered star's color differs — re-write colors only when hover changed.
+        if (hoverChanged) {
+          tempColor.copy(isHovered ? brightColor : baseColor)
+          normalMesh.setColorAt(mappingInfo.instanceIndex, tempColor)
+        }
       }
     })
 
-    // Mark matrices as needing update
+    // Matrices animate every frame; colors only change on hover (read colors are static).
     if (normalMesh && normalIndices.length > 0) {
       normalMesh.instanceMatrix.needsUpdate = true
-      if (normalMesh.instanceColor) {
+      if (hoverChanged && normalMesh.instanceColor) {
         normalMesh.instanceColor.needsUpdate = true
       }
     }
 
     if (readMesh && readIndices.length > 0) {
       readMesh.instanceMatrix.needsUpdate = true
-      if (readMesh.instanceColor) {
-        readMesh.instanceColor.needsUpdate = true
-      }
     }
+
+    prevHoveredRef.current = hoveredIndex
 
     // Update selected star highlight position (subtle glow only)
     if (selectedIndex >= 0 && starPositionsRef.current[selectedIndex]) {
@@ -392,15 +401,14 @@ export function OrbitingStars({
     starPositionsRef.current.forEach((pos, index) => {
       if (!pos) return
 
-      // Distance from ray to point
-      const starPos = pos.clone()
-      const toStar = starPos.sub(ray.origin)
-      const projLength = toStar.dot(ray.direction)
+      // Distance from ray to point — reuse scratch vectors (no per-star allocations)
+      rayScratch.toStar.copy(pos).sub(ray.origin)
+      const projLength = rayScratch.toStar.dot(ray.direction)
 
       if (projLength < 0) return // Behind camera
 
-      const projPoint = ray.origin.clone().add(ray.direction.clone().multiplyScalar(projLength))
-      const distance = projPoint.distanceTo(starPositionsRef.current[index])
+      rayScratch.projPoint.copy(ray.direction).multiplyScalar(projLength).add(ray.origin)
+      const distance = rayScratch.projPoint.distanceTo(pos)
 
       // Scale-adjusted hit radius (tighter for precision)
       const scale = starScalesRef.current[index] || 0.07
@@ -419,13 +427,13 @@ export function OrbitingStars({
   useEffect(() => {
     const canvas = gl.domElement
 
-    const handleMouseMove = (e: MouseEvent) => {
-      const rect = canvas.getBoundingClientRect()
-      const x = e.clientX - rect.left
-      const y = e.clientY - rect.top
-
-      const closest = findClosestStar(x, y)
-
+    // Coalesce mousemove → at most one raycast per animation frame
+    let moveRaf = 0
+    let lastMoveX = 0
+    let lastMoveY = 0
+    const processMove = () => {
+      moveRaf = 0
+      const closest = findClosestStar(lastMoveX, lastMoveY)
       if (closest !== null) {
         setHoveredIndex(closest)
         canvas.style.cursor = 'pointer'
@@ -433,6 +441,12 @@ export function OrbitingStars({
         setHoveredIndex(null)
         canvas.style.cursor = 'auto'
       }
+    }
+    const handleMouseMove = (e: MouseEvent) => {
+      const rect = canvas.getBoundingClientRect()
+      lastMoveX = e.clientX - rect.left
+      lastMoveY = e.clientY - rect.top
+      if (moveRaf === 0) moveRaf = requestAnimationFrame(processMove)
     }
 
     const handleClick = (e: MouseEvent) => {
@@ -486,6 +500,7 @@ export function OrbitingStars({
     canvas.addEventListener('touchend', handleTouchEnd)
 
     return () => {
+      if (moveRaf) cancelAnimationFrame(moveRaf)
       canvas.removeEventListener('mousemove', handleMouseMove)
       canvas.removeEventListener('click', handleClick)
       // Note: passive option must match when removing event listeners

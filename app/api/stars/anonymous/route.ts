@@ -166,6 +166,17 @@ export async function POST(request: NextRequest) {
 
     // IP check
     const ip = getClientIP(request)
+
+    // Reject banned IPs (the anonymous path previously skipped this check)
+    const { data: bannedIp } = await admin
+      .from('banned_ips')
+      .select('id')
+      .eq('ip_address', ip)
+      .maybeSingle()
+    if (bannedIp) {
+      return NextResponse.json({ error: 'Erişiminiz kısıtlanmış.' }, { status: 403 })
+    }
+
     if (!checkAnonRateLimit(ip)) {
       return NextResponse.json(
         { error: 'Giriş yapmadan günde sadece 1 yıldız paylaşabilirsin. Daha fazlası için kayıt ol!' },

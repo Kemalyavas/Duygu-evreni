@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react'
+import { createContext, useContext, useState, useEffect, useCallback, useMemo, type ReactNode } from 'react'
 import tr from './translations/tr.json'
 import en from './translations/en.json'
 
@@ -80,6 +80,12 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     return result
   }, [language])
 
+  // Stable context value so every useTranslation consumer doesn't re-render on each provider render
+  const value = useMemo(
+    () => ({ language, setLanguage, t, translations: translations[language] }),
+    [language, setLanguage, t]
+  )
+
   // Prevent hydration mismatch by not rendering until mounted
   if (!mounted) {
     return (
@@ -90,7 +96,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, t, translations: translations[language] }}>
+    <LanguageContext.Provider value={value}>
       {children}
     </LanguageContext.Provider>
   )

@@ -188,7 +188,7 @@ export function NotificationList({ onClose, showHeader = true }: NotificationLis
                   *,
                   star:stars(id, content, planet_id),
                   initiator:profiles!conversations_initiator_id_fkey(id, username, show_username_in_chats),
-                  owner:profiles!conversations_star_owner_id_fkey(id, username, show_username_in_chats)
+                  star_owner:profiles!conversations_star_owner_id_fkey(id, username, show_username_in_chats)
                 `,
                 filter: `id=eq.${notification.conversation_id}`,
                 single: true,

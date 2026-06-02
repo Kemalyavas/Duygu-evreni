@@ -1,9 +1,9 @@
 'use client'
 
 import { useState, useCallback, useEffect, useRef } from 'react'
-import { supabaseFetch, supabaseInsert } from '@/lib/supabase/fetch'
+import { supabaseFetch } from '@/lib/supabase/fetch'
 import { createClient } from '@/lib/supabase/client'
-import type { Star, StarCreateInput } from '@/types'
+import type { Star } from '@/types'
 
 // Hook to fetch actual star counts per planet from database
 export function useStarCounts() {
@@ -16,7 +16,18 @@ export function useStarCounts() {
       setLoading(true)
       const supabase = createClient()
 
-      // First get all planet IDs
+      // Fast path: one grouped query via RPC (single round-trip, single scan).
+      const { data: rpcData, error: rpcError } = await supabase.rpc('get_planet_star_counts')
+      if (!rpcError && Array.isArray(rpcData)) {
+        const counts: Record<string, number> = {}
+        for (const row of rpcData as { planet_id: string; count: number }[]) {
+          counts[row.planet_id] = Number(row.count)
+        }
+        if (isMountedRef.current) setStarCounts(counts)
+        return counts
+      }
+
+      // Fallback (e.g. before the RPC migration is applied): per-planet count.
       const { data: planets, error: planetsError } = await supabase
         .from('planets')
         .select('id')
@@ -25,13 +36,9 @@ export function useStarCounts() {
         console.error('Error fetching planets:', planetsError)
         return {}
       }
-
-      // Check if still mounted before proceeding
       if (!isMountedRef.current) return {}
 
-      // Get count for each planet using exact count
       const counts: Record<string, number> = {}
-
       await Promise.all(
         planets.map(async (planet: { id: string }) => {
           const { count, error } = await supabase
@@ -45,7 +52,6 @@ export function useStarCounts() {
         })
       )
 
-      // Only update state if still mounted
       if (isMountedRef.current) {
         setStarCounts(counts)
       }
@@ -178,60 +184,11 @@ export function useStars() {
     }
   }, [])
 
-  const createStar = useCallback(async (input: StarCreateInput) => {
-    try {
-      setLoading(true)
-      setError(null)
-
-      // Get current user and session (need access token for RLS)
-      const supabase = createClient()
-      const { data: { session } } = await supabase.auth.getSession()
-
-      if (!session?.user) {
-        throw new Error('Giriş yapmanız gerekiyor')
-      }
-
-      const { data, error: insertError } = await supabaseInsert<Star>(
-        'stars',
-        {
-          user_id: session.user.id,
-          planet_id: input.planet_id,
-          content: input.content,
-          position_x: input.position_x,
-          position_y: input.position_y,
-          position_z: input.position_z,
-        },
-        session.access_token // Pass access token for RLS
-      )
-
-      if (insertError) {
-        throw new Error(insertError)
-      }
-
-      if (data && isMountedRef.current) {
-        setStars((prev) => [data, ...prev])
-      }
-
-      return data
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Yıldız oluşturulamadı'
-      if (isMountedRef.current) {
-        setError(message)
-      }
-      throw new Error(message)
-    } finally {
-      if (isMountedRef.current) {
-        setLoading(false)
-      }
-    }
-  }, [])
-
   return {
     stars,
     loading,
     error,
     fetchStarsByPlanet,
     fetchAllStars,
-    createStar,
   }
 }

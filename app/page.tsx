@@ -11,7 +11,7 @@ import { useTranslation } from '@/lib/i18n'
 import { Onboarding } from '@/components/Onboarding'
 import { StarCreationModal } from '@/components/StarCreationModal'
 import { StarViewPanel } from '@/components/StarViewPanel'
-import { MessageRequestModal, ChatPanel } from '@/components/messaging'
+import { MessageRequestModal } from '@/components/messaging'
 import { useAuth, usePlanets, useStars, useStarCounts, useDailyLimit, useReadStars, useMobile, useSoundEffects } from '@/lib/hooks'
 import type { Planet, Star } from '@/types'
 import { HomeSeoLinks } from '@/components/home/HomeSeoLinks'
@@ -74,6 +74,27 @@ function UniverseLoader() {
   )
 }
 
+// Shown when planets fail to load (instead of an infinite loader)
+function UniverseError({ onRetry }: { onRetry: () => void }) {
+  return (
+    <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-b from-[#0A0E27] to-black text-center px-6">
+      <div className="relative z-10 flex flex-col items-center gap-4 max-w-sm">
+        <img src="/logo.png" alt="Duygu Evreni" className="w-16 h-16 opacity-80" />
+        <p className="text-white/80 text-base font-medium">Evren yüklenemedi</p>
+        <p className="text-white/50 text-sm">
+          Gezegenler yüklenirken bir sorun oluştu. Lütfen tekrar dene.
+        </p>
+        <button
+          onClick={onRetry}
+          className="mt-2 px-5 py-2.5 rounded-lg bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium transition-colors"
+        >
+          Tekrar Dene
+        </button>
+      </div>
+    </div>
+  )
+}
+
 // Dynamic import for 3D component (client-side only)
 const UnifiedUniverse = dynamic(
   () => import('@/components/3d/UnifiedUniverse').then((mod) => mod.UnifiedUniverse),
@@ -99,7 +120,7 @@ function HomePageContent() {
       router.replace('/kullanici-adi')
     }
   }, [authLoading, user, profile, router])
-  const { planets, loading: planetsLoading, error: planetsError } = usePlanets()
+  const { planets, loading: planetsLoading, error: planetsError, refetch: refetchPlanets } = usePlanets()
   const { stars, loading: starsLoading, fetchAllStars, fetchStarsByPlanet } = useStars()
   const { starCounts, refetchCounts } = useStarCounts()
   const { remainingStars, isAdmin, incrementViewCount } = useDailyLimit()
@@ -432,7 +453,9 @@ function HomePageContent() {
 
       {/* 3D Universe - Full screen */}
       <div className="absolute inset-0">
-        {planetsLoading || planets.length === 0 ? (
+        {planetsError && planets.length === 0 ? (
+          <UniverseError onRetry={refetchPlanets} />
+        ) : planetsLoading || planets.length === 0 ? (
           <UniverseLoader />
         ) : (
           <ErrorBoundary>
@@ -611,8 +634,7 @@ function HomePageContent() {
       {/* Message Request Modal */}
       <MessageRequestModal />
 
-      {/* Chat Panel */}
-      <ChatPanel />
+      {/* Chat Panel is mounted once globally in Providers (avoids duplicate realtime subscriptions) */}
     </div>
   )
 }

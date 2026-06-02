@@ -456,9 +456,18 @@ export function UnifiedUniverse({
     }
   }, [activeMobileTooltipId])
 
+  // Pause the render loop when the tab is hidden (saves CPU/battery on all devices)
+  const [docHidden, setDocHidden] = useState(false)
+  useEffect(() => {
+    const onVis = () => setDocHidden(document.hidden)
+    document.addEventListener('visibilitychange', onVis)
+    return () => document.removeEventListener('visibilitychange', onVis)
+  }, [])
+
   return (
     <div className="w-full h-full bg-gradient-to-b from-[#0a0a15] to-[#000000] relative">
       <Canvas
+        frameloop={docHidden ? 'never' : 'always'}
         dpr={isMobile ? 1 : [1, 2]}
         gl={{
           antialias: true,

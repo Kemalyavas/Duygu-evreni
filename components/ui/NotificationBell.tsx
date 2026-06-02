@@ -2,11 +2,12 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useStore } from '@/lib/store/useStore'
+import { useNotifications } from '@/lib/hooks'
 import { NotificationList } from './NotificationList'
 
 export function NotificationBell() {
-  const { unreadNotificationsCount } = useStore()
+  // Own the subscription so the badge stays live wherever the bell is mounted
+  const { unreadCount } = useNotifications()
   const [isOpen, setIsOpen] = useState(false)
   const panelRef = useRef<HTMLDivElement>(null)
 
@@ -51,7 +52,7 @@ export function NotificationBell() {
 
         {/* Badge */}
         <AnimatePresence>
-          {unreadNotificationsCount > 0 && (
+          {unreadCount > 0 && (
             <motion.span
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
@@ -59,14 +60,14 @@ export function NotificationBell() {
               className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-cyan-500 flex items-center justify-center"
             >
               <span className="text-white text-[10px] font-bold">
-                {unreadNotificationsCount > 99 ? '99+' : unreadNotificationsCount}
+                {unreadCount > 99 ? '99+' : unreadCount}
               </span>
             </motion.span>
           )}
         </AnimatePresence>
 
         {/* Pulse animasyonu */}
-        {unreadNotificationsCount > 0 && (
+        {unreadCount > 0 && (
           <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] rounded-full bg-cyan-500 animate-ping opacity-75" />
         )}
       </button>
