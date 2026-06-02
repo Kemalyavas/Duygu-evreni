@@ -11,9 +11,13 @@ import { ORBIT, UI_ANIMATION } from '@/lib/constants/animation'
 import { useMobile } from '@/lib/hooks/useMobile'
 import { useTranslation } from '@/lib/i18n'
 
+// Planet GLBs are Draco-compressed; decoder is self-hosted in /public/draco/
+// (no external CDN). Keep this path in sync with the useGLTF call below.
+const DRACO_PATH = '/draco/'
+
 // Preload all planet models immediately when this module loads
 Object.values(PLANET_MODELS).forEach((path) => {
-  useGLTF.preload(path)
+  useGLTF.preload(path, DRACO_PATH)
 })
 
 interface Planet3DProps {
@@ -231,7 +235,7 @@ function CustomPlanetModel({
   floatOffset?: number
 }) {
   const groupRef = useRef<THREE.Group>(null)
-  const { scene } = useGLTF(modelPath)
+  const { scene } = useGLTF(modelPath, DRACO_PATH)
   const initialY = useRef<number | null>(null)
 
   const clonedScene = useMemo(() => scene.clone(), [scene])
