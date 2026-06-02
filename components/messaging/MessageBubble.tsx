@@ -1,7 +1,8 @@
 'use client'
 
 import { formatDistanceToNow } from 'date-fns'
-import { tr } from 'date-fns/locale'
+import { tr, enUS } from 'date-fns/locale'
+import { useTranslation } from '@/lib/i18n'
 import type { MessageWithSender } from '@/types'
 
 interface MessageBubbleProps {
@@ -10,6 +11,7 @@ interface MessageBubbleProps {
 }
 
 export function MessageBubble({ message, isOwn }: MessageBubbleProps) {
+  const { language } = useTranslation()
   return (
     <div className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}>
       <div
@@ -23,7 +25,7 @@ export function MessageBubble({ message, isOwn }: MessageBubbleProps) {
           {message.content}
         </p>
         <p className={`text-[10px] mt-1 ${isOwn ? 'text-cyan-400/60' : 'text-white/40'}`}>
-          {formatDistanceToNow(new Date(message.created_at), { addSuffix: true, locale: tr })}
+          {formatDistanceToNow(new Date(message.created_at), { addSuffix: true, locale: language === 'en' ? enUS : tr })}
         </p>
       </div>
     </div>
