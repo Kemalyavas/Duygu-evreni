@@ -1,9 +1,39 @@
+'use client'
+
 import Link from 'next/link'
 import { EMOTIONS } from '@/lib/constants/emotions'
+import { useTranslation } from '@/lib/i18n'
 
-// Görünür, sayfa genelinde iç linkleme footer'ı (SEO: link mesh + keşif).
-// Sunucu bileşeni — HTML'e doğrudan basılır, arama motorları takip eder.
+// Visible site-wide internal-linking footer (SEO: link mesh + discovery).
+//
+// i18n: selects copy by `language` (not t()), so SSR + the pre-mount render
+// stay Turkish — the emotion-link mesh and legal links remain in the crawled
+// HTML for tr SEO — while EN users get an English footer after hydration.
+
+const FOOTER = {
+  tr: {
+    tagline:
+      'Duygularını anonim olarak yıldızlara dönüştürüp paylaşabileceğin 3D interaktif bir evren.',
+    planets: 'Duygu Gezegenleri',
+    universe3d: '3D Evren',
+    about: 'Nedir?',
+    privacy: 'Gizlilik Politikası',
+  },
+  en: {
+    tagline:
+      'A 3D interactive universe where you turn your feelings into stars and share them anonymously.',
+    planets: 'Emotion Planets',
+    universe3d: '3D Universe',
+    about: 'About',
+    privacy: 'Privacy Policy',
+  },
+}
+
 export function SiteFooter() {
+  const { language } = useTranslation()
+  const isEn = language === 'en'
+  const f = isEn ? FOOTER.en : FOOTER.tr
+
   return (
     <footer className="border-t border-white/10 bg-black/40">
       <div className="max-w-5xl mx-auto px-4 py-10">
@@ -13,13 +43,12 @@ export function SiteFooter() {
               Duygu Evreni
             </p>
             <p className="mt-2 text-sm text-white/50 max-w-xs leading-relaxed">
-              Duygularını anonim olarak yıldızlara dönüştürüp paylaşabileceğin 3D
-              interaktif bir evren.
+              {f.tagline}
             </p>
           </div>
 
-          <nav aria-label="Duygu gezegenleri">
-            <p className="text-sm font-semibold text-white/70 mb-3">Duygu Gezegenleri</p>
+          <nav aria-label={f.planets}>
+            <p className="text-sm font-semibold text-white/70 mb-3">{f.planets}</p>
             <ul className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
               {EMOTIONS.map((e) => (
                 <li key={e.slug}>
@@ -27,7 +56,7 @@ export function SiteFooter() {
                     href={`/gezegen/${e.slug}`}
                     className="text-white/60 hover:text-white transition-colors"
                   >
-                    {e.name_tr}
+                    {isEn ? e.name_en : e.name_tr}
                   </Link>
                 </li>
               ))}
@@ -39,13 +68,13 @@ export function SiteFooter() {
           <span>© {new Date().getFullYear()} Duygu Evreni</span>
           <div className="flex items-center gap-4">
             <Link href="/" className="hover:text-white/70 transition-colors">
-              3D Evren
+              {f.universe3d}
             </Link>
             <Link href="/hakkinda" className="hover:text-white/70 transition-colors">
-              Nedir?
+              {f.about}
             </Link>
             <Link href="/gizlilik" className="hover:text-white/70 transition-colors">
-              Gizlilik Politikası
+              {f.privacy}
             </Link>
           </div>
         </div>
