@@ -22,17 +22,15 @@ export function Modal({
   const modalRef = useRef<HTMLDivElement>(null)
   const previousActiveElement = useRef<HTMLElement | null>(null)
 
-  // Close on escape key
-  const handleEscape = useCallback(
-    (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        onClose()
-      }
-    },
-    [onClose]
-  )
+  // Keep the latest onClose in a ref so the open/close effect below does NOT
+  // re-run on every parent render (a changing onClose identity used to re-run the
+  // effect and steal focus from inputs on each keystroke).
+  const onCloseRef = useRef(onClose)
+  useEffect(() => {
+    onCloseRef.current = onClose
+  })
 
-  // Focus trap - keep focus within modal
+  // Focus trap - keep focus within the modal while tabbing. Stable (no deps).
   const handleTabKey = useCallback((e: KeyboardEvent) => {
     if (e.key !== 'Tab' || !modalRef.current) return
 
@@ -59,32 +57,40 @@ export function Modal({
     }
   }, [])
 
+  // Open/close side-effects — runs ONLY when isOpen flips (not on every render).
   useEffect(() => {
-    if (isOpen) {
-      // Store previously focused element
-      previousActiveElement.current = document.activeElement as HTMLElement
+    if (!isOpen) return
 
-      document.addEventListener('keydown', handleEscape)
-      document.addEventListener('keydown', handleTabKey)
-      document.body.style.overflow = 'hidden'
+    // Store the element to restore focus to on close
+    previousActiveElement.current = document.activeElement as HTMLElement
 
-      // Focus first focusable element in modal
-      setTimeout(() => {
-        const firstFocusable = modalRef.current?.querySelector<HTMLElement>(
-          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-        )
-        firstFocusable?.focus()
-      }, 50)
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onCloseRef.current()
+        return
+      }
+      handleTabKey(e)
     }
-    return () => {
-      document.removeEventListener('keydown', handleEscape)
-      document.removeEventListener('keydown', handleTabKey)
-      document.body.style.overflow = 'unset'
 
+    document.addEventListener('keydown', onKeyDown)
+    document.body.style.overflow = 'hidden'
+
+    // Focus the first field once on open — prefer a text field over the close button
+    const focusTimer = setTimeout(() => {
+      const el = modalRef.current?.querySelector<HTMLElement>(
+        'textarea, input, select, button, [href], [tabindex]:not([tabindex="-1"])'
+      )
+      el?.focus()
+    }, 50)
+
+    return () => {
+      clearTimeout(focusTimer)
+      document.removeEventListener('keydown', onKeyDown)
+      document.body.style.overflow = 'unset'
       // Restore focus to previously focused element
       previousActiveElement.current?.focus()
     }
-  }, [isOpen, handleEscape, handleTabKey])
+  }, [isOpen, handleTabKey])
 
   const modalTitleId = 'modal-title'
 
