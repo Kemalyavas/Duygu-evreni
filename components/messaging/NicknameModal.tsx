@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNicknames } from '@/lib/hooks'
+import { useModalA11y } from '@/lib/hooks/useModalA11y'
 import { useTranslation } from '@/lib/i18n'
 
 interface NicknameModalProps {
@@ -70,6 +71,8 @@ export function NicknameModal({
     }
   }
 
+  const dialogRef = useModalA11y<HTMLDivElement>(isOpen, handleClose)
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -81,6 +84,10 @@ export function NicknameModal({
           onClick={handleClose}
         >
           <motion.div
+            ref={dialogRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="nickname-modal-title"
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.9, opacity: 0 }}
@@ -90,7 +97,7 @@ export function NicknameModal({
             {/* Header */}
             <div className="p-4 border-b border-white/10">
               <div className="flex items-center justify-between">
-                <h3 className="text-white font-medium">{t('nickname.title')}</h3>
+                <h3 id="nickname-modal-title" className="text-white font-medium">{t('nickname.title')}</h3>
                 <button
                   onClick={handleClose}
                   className="p-1 rounded-full hover:bg-white/10 text-white/60 hover:text-white transition-colors"

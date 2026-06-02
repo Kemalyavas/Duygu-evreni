@@ -57,7 +57,21 @@
     "requirements": "3-20 karakter, sadece harf, rakam ve alt çizgi",
     "taken": "Bu kullanıcı adı zaten alınmış",
     "invalid": "Geçersiz kullanıcı adı formatı",
+    "errorMinLength": "Kullanıcı adı en az 3 karakter olmalı",
+    "errorMaxLength": "Kullanıcı adı en fazla 20 karakter olabilir",
+    "errorInvalidChars": "Sadece harf, rakam ve alt çizgi kullanılabilir",
+    "errorTaken": "Bu kullanıcı adı zaten alınmış",
+    "errorGeneric": "Kullanıcı adı kaydedilemedi",
     "success": "Kullanıcı adı kaydedildi!"
+  },
+  "errorPages": {
+    "errorTitle": "Bir Yıldız Kayboldu",
+    "errorDescription": "Evrenimizde beklenmedik bir şey oldu. Endişelenme, yıldızların hâlâ yerinde.",
+    "retry": "Tekrar Dene",
+    "backHome": "Ana Sayfaya Dön",
+    "errorCode": "Hata Kodu",
+    "notFoundTitle": "Sayfa bulunamadı",
+    "notFoundDescription": "Aradığınız sayfa mevcut değil veya taşınmış olabilir."
   },
   "nav": {
     "universe": "Evren",
@@ -167,7 +181,9 @@
     "tapToGoToStar": "Yıldıza gitmek için dokun",
     "chatStarted": "Sohbet başladı",
     "userBlocked": "Bu kullanıcıyı engellediniz",
-    "blocked": "Engellendi"
+    "blocked": "Engellendi",
+    "waitingAcceptance": "İsteğin gönderildi. Karşı tarafın kabul etmesi bekleniyor.",
+    "pendingRequestHint": "Bu bir mesaj isteği. Yanıtlamak için önce isteği kabul et."
   },
   "menu": {
     "setNickname": "Takma Ad Ver",

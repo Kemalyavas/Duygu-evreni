@@ -224,6 +224,16 @@ function HomePageContent() {
     }
   }, [searchParams, focusedPlanetId])
 
+  // Bad deep-link recovery: if ?planet=<id> doesn't match a real planet once
+  // planets have loaded, fall back to the universe view and clean the URL.
+  useEffect(() => {
+    if (planetsLoading || planets.length === 0 || !focusedPlanetId) return
+    if (!planets.some((p) => p.id === focusedPlanetId)) {
+      setFocusedPlanetId(null)
+      window.history.replaceState(null, '', '/')
+    }
+  }, [planetsLoading, planets, focusedPlanetId])
+
   // Handle star from URL - wait for stars to be visually ready, then delay before selecting
   useEffect(() => {
     if (starIdFromUrl && stars.length > 0 && starsVisuallyReady) {

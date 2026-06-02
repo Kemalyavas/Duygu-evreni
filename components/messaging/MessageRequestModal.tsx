@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from '@/components/ui'
 import { useStore } from '@/lib/store/useStore'
 import { useConversations } from '@/lib/hooks'
+import { useModalA11y } from '@/lib/hooks/useModalA11y'
 import { useTranslation } from '@/lib/i18n'
 
 const MAX_MESSAGE_LENGTH = 500
@@ -61,6 +62,8 @@ export function MessageRequestModal() {
     setSuccess(false)
   }
 
+  const dialogRef = useModalA11y<HTMLDivElement>(isMessageRequestModalOpen, handleClose)
+
   if (!isMessageRequestModalOpen) return null
 
   return (
@@ -73,6 +76,10 @@ export function MessageRequestModal() {
         onClick={handleClose}
       >
         <motion.div
+          ref={dialogRef}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="msgreq-modal-title"
           initial={{ scale: 0.95, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.95, opacity: 0 }}
@@ -104,7 +111,7 @@ export function MessageRequestModal() {
             <>
               {/* Header */}
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-white text-lg font-semibold">{t('messageRequest.title')}</h2>
+                <h2 id="msgreq-modal-title" className="text-white text-lg font-semibold">{t('messageRequest.title')}</h2>
                 <button
                   onClick={handleClose}
                   className="text-white/60 hover:text-white p-1 rounded-lg hover:bg-white/10 transition-colors"

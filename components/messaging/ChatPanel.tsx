@@ -271,6 +271,19 @@ export function ChatPanel() {
 
   const otherUserId = otherUser?.id
 
+  // A conversation is writable only once accepted. Until then show a status
+  // notice instead of the message input — the DB RLS also rejects messages to
+  // non-accepted conversations, so an input here would just fail silently.
+  const isPendingConversation = activeConversation.status !== 'accepted'
+  const isConversationInitiator = activeConversation.initiator_id === user?.id
+  const pendingNotice = (
+    <div className="p-4 border-t border-white/10 bg-white/5">
+      <p className="text-white/60 text-sm text-center">
+        {isConversationInitiator ? t('chat.waitingAcceptance') : t('chat.pendingRequestHint')}
+      </p>
+    </div>
+  )
+
   // Check if other user is blocked
   const isOtherUserBlocked = otherUserId
     ? blockedUsers.some(b => b.blocked_id === otherUserId)
@@ -511,6 +524,8 @@ export function ChatPanel() {
               </button>
             </div>
           </div>
+        ) : isPendingConversation ? (
+          pendingNotice
         ) : (
           <MessageInput onSend={sendMessage} disabled={loading} />
         )}
@@ -708,6 +723,8 @@ export function ChatPanel() {
               </button>
             </div>
           </div>
+        ) : isPendingConversation ? (
+          pendingNotice
         ) : (
           <MessageInput onSend={sendMessage} disabled={loading} />
         )}

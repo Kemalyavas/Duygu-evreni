@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useBlocking } from '@/lib/hooks'
 import { useTranslation } from '@/lib/i18n'
+import { useModalA11y } from '@/lib/hooks/useModalA11y'
 import type { ReportReason } from '@/types'
 
 interface ReportModalProps {
@@ -57,6 +58,8 @@ export function ReportModal({ isOpen, onClose, userId, conversationId }: ReportM
     }
   }
 
+  const dialogRef = useModalA11y<HTMLDivElement>(isOpen, handleClose)
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -68,6 +71,10 @@ export function ReportModal({ isOpen, onClose, userId, conversationId }: ReportM
           onClick={handleClose}
         >
           <motion.div
+            ref={dialogRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="report-modal-title"
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.9, opacity: 0 }}
@@ -77,7 +84,7 @@ export function ReportModal({ isOpen, onClose, userId, conversationId }: ReportM
             {/* Header */}
             <div className="p-4 border-b border-white/10">
               <div className="flex items-center justify-between">
-                <h3 className="text-white font-medium">{t('report.title')}</h3>
+                <h3 id="report-modal-title" className="text-white font-medium">{t('report.title')}</h3>
                 <button
                   onClick={handleClose}
                   className="p-1 rounded-full hover:bg-white/10 text-white/60 hover:text-white transition-colors"

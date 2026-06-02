@@ -57,7 +57,21 @@
     "requirements": "3-20 characters, only letters, numbers and underscore",
     "taken": "This username is already taken",
     "invalid": "Invalid username format",
+    "errorMinLength": "Username must be at least 3 characters",
+    "errorMaxLength": "Username can be at most 20 characters",
+    "errorInvalidChars": "Only letters, numbers and underscore allowed",
+    "errorTaken": "This username is already taken",
+    "errorGeneric": "Could not save username",
     "success": "Username saved!"
+  },
+  "errorPages": {
+    "errorTitle": "A Star Got Lost",
+    "errorDescription": "Something unexpected happened in our universe. Don't worry, the stars are still in place.",
+    "retry": "Try Again",
+    "backHome": "Back to Home",
+    "errorCode": "Error Code",
+    "notFoundTitle": "Page not found",
+    "notFoundDescription": "The page you're looking for doesn't exist or may have moved."
   },
   "nav": {
     "universe": "Universe",
@@ -167,7 +181,9 @@
     "tapToGoToStar": "Tap to go to star",
     "chatStarted": "Chat started",
     "userBlocked": "You have blocked this user",
-    "blocked": "Blocked"
+    "blocked": "Blocked",
+    "waitingAcceptance": "Request sent. Waiting for the other person to accept.",
+    "pendingRequestHint": "This is a message request. Accept it first to reply."
   },
   "menu": {
     "setNickname": "Set Nickname",

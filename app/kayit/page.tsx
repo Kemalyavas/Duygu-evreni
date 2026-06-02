@@ -90,14 +90,20 @@ export default function SignupPage() {
     setSuccess(false)
     setLoading(true)
 
-    if (username.length < 2) {
-      setError(t('username.invalid'))
+    if (username.length < 3) {
+      setError(t('username.errorMinLength'))
       setLoading(false)
       return
     }
 
     if (username.length > 20) {
-      setError(t('username.invalid'))
+      setError(t('username.errorMaxLength'))
+      setLoading(false)
+      return
+    }
+
+    if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+      setError(t('username.errorInvalidChars'))
       setLoading(false)
       return
     }

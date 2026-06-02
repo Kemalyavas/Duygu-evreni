@@ -4,6 +4,7 @@ import { useEffect } from 'react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { Button } from '@/components/ui'
+import { useTranslation } from '@/lib/i18n'
 
 export default function Error({
   error,
@@ -12,6 +13,8 @@ export default function Error({
   error: Error & { digest?: string }
   reset: () => void
 }) {
+  const { t } = useTranslation()
+
   useEffect(() => {
     // Log error to console in development
     console.error('Page error:', error)
@@ -30,11 +33,11 @@ export default function Error({
         </div>
 
         <h1 className="text-2xl font-bold text-white mb-3">
-          Bir Yıldız Kayboldu
+          {t('errorPages.errorTitle')}
         </h1>
 
         <p className="text-white/60 mb-8">
-          Evrenimizde beklenmedik bir şey oldu. Endişelenme, yıldızların hâlâ yerinde.
+          {t('errorPages.errorDescription')}
         </p>
 
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
@@ -42,12 +45,12 @@ export default function Error({
             variant="primary"
             onClick={() => reset()}
           >
-            Tekrar Dene
+            {t('errorPages.retry')}
           </Button>
 
           <Link href="/">
             <Button variant="secondary" className="w-full sm:w-auto">
-              Ana Sayfaya Dön
+              {t('errorPages.backHome')}
             </Button>
           </Link>
         </div>
@@ -55,7 +58,7 @@ export default function Error({
         {/* Subtle error code for debugging */}
         {error.digest && (
           <p className="mt-8 text-xs text-white/20 font-mono">
-            Hata Kodu: {error.digest}
+            {t('errorPages.errorCode')}: {error.digest}
           </p>
         )}
       </motion.div>

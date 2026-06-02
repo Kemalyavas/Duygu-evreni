@@ -2,7 +2,8 @@
 
 import { motion } from 'framer-motion'
 import { format } from 'date-fns'
-import { tr } from 'date-fns/locale'
+import { tr, enUS } from 'date-fns/locale'
+import { useTranslation } from '@/lib/i18n'
 
 interface StarListItemProps {
   star: {
@@ -17,9 +18,12 @@ interface StarListItemProps {
 }
 
 export function StarListItem({ star, isSelected, onClick }: StarListItemProps) {
+  const { language } = useTranslation()
   const formattedDate = (() => {
     try {
-      return format(new Date(star.created_at), 'd MMM yyyy', { locale: tr })
+      return format(new Date(star.created_at), 'd MMM yyyy', {
+        locale: language === 'en' ? enUS : tr,
+      })
     } catch {
       return ''
     }
