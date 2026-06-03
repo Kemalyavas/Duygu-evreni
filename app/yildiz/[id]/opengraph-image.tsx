@@ -33,13 +33,13 @@ export default async function Image({ params }: Params) {
   const { id } = await params
   const { name, color } = await getEmotion(id)
 
-  // Deterministic starfield (no Math.random → stable image / cacheable)
-  const stars = Array.from({ length: 60 }, (_, i) => {
-    const a = (i * 99.13) % 100
-    const b = (i * 47.71) % 100
-    const s = ((i * 13) % 3) + 1.5
-    const o = 0.25 + ((i * 7) % 60) / 100
-    return { left: `${a}%`, top: `${b}%`, size: s, opacity: o }
+  // Deterministic, well-scattered starfield (quadratic mix avoids diagonal banding)
+  const stars = Array.from({ length: 70 }, (_, i) => {
+    const left = (i * 167 + i * i * 13) % 100
+    const top = (i * 97 + i * i * 29) % 100
+    const sizePx = ((i * 17) % 3) + 1.5
+    const opacity = 0.2 + ((i * 7) % 60) / 100
+    return { left: `${left}%`, top: `${top}%`, sizePx, opacity }
   })
 
   return new ImageResponse(
@@ -51,9 +51,10 @@ export default async function Image({ params }: Params) {
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          justifyContent: 'center',
-          background:
-            'linear-gradient(135deg, #06070f 0%, #0A0E27 45%, #06070f 100%)',
+          justifyContent: 'flex-start',
+          paddingTop: 78,
+          paddingBottom: 52,
+          background: 'linear-gradient(135deg, #06070f 0%, #0A0E27 45%, #06070f 100%)',
           position: 'relative',
         }}
       >
@@ -65,8 +66,8 @@ export default async function Image({ params }: Params) {
               position: 'absolute',
               left: st.left,
               top: st.top,
-              width: st.size,
-              height: st.size,
+              width: st.sizePx,
+              height: st.sizePx,
               borderRadius: '50%',
               background: 'white',
               opacity: st.opacity,
@@ -74,26 +75,26 @@ export default async function Image({ params }: Params) {
           />
         ))}
 
-        {/* emotion-colored ambient glow */}
+        {/* emotion-colored ambient glow behind the orb */}
         <div
           style={{
             position: 'absolute',
-            width: 760,
-            height: 760,
+            width: 720,
+            height: 720,
             borderRadius: '50%',
-            background: `radial-gradient(circle, ${color}40 0%, ${color}14 45%, transparent 70%)`,
-            top: 100,
+            background: `radial-gradient(circle, ${color}3a 0%, ${color}12 45%, transparent 70%)`,
+            top: -130,
           }}
         />
 
         {/* glowing planet orb (the emotion) */}
         <div
           style={{
-            width: 300,
-            height: 300,
+            width: 232,
+            height: 232,
             borderRadius: '50%',
             background: `radial-gradient(circle at 34% 30%, #ffffff 0%, ${color} 34%, ${color}cc 66%, ${color}44 100%)`,
-            boxShadow: `0 0 130px 24px ${color}66, inset -28px -28px 70px rgba(0,0,0,0.55)`,
+            boxShadow: `0 0 120px 22px ${color}66, inset -26px -26px 64px rgba(0,0,0,0.55)`,
             display: 'flex',
           }}
         />
@@ -101,12 +102,12 @@ export default async function Image({ params }: Params) {
         {/* emotion name */}
         <div
           style={{
-            marginTop: 56,
-            fontSize: 88,
+            marginTop: 52,
+            fontSize: 92,
             fontWeight: 800,
             color: 'white',
             letterSpacing: -1,
-            textShadow: `0 0 40px ${color}aa`,
+            textShadow: `0 0 44px ${color}aa`,
             display: 'flex',
           }}
         >
@@ -116,20 +117,19 @@ export default async function Image({ params }: Params) {
         {/* tagline */}
         <div
           style={{
-            marginTop: 8,
+            marginTop: 10,
             fontSize: 30,
-            color: 'rgba(255,255,255,0.62)',
+            color: 'rgba(255,255,255,0.6)',
             display: 'flex',
           }}
         >
           evrende bir yıldız
         </div>
 
-        {/* brand wordmark */}
+        {/* brand wordmark — pinned to the bottom of the flow (no overlap) */}
         <div
           style={{
-            position: 'absolute',
-            bottom: 44,
+            marginTop: 'auto',
             fontSize: 30,
             fontWeight: 700,
             background: 'linear-gradient(90deg, #c084fc, #f472b6, #60a5fa)',
