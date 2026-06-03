@@ -5,6 +5,7 @@ import { formatDistanceToNow } from 'date-fns'
 import { tr, enUS } from 'date-fns/locale'
 import { MessageRequestButton } from '@/components/messaging'
 import { ShareButtons } from '@/components/ShareButtons'
+import { StarHeartButton } from '@/components/StarHeartButton'
 import { useTranslation } from '@/lib/i18n'
 import type { Star } from '@/types'
 
@@ -79,6 +80,11 @@ export function StarViewPanel({ star, onClose, planetColor = '#ffffff' }: StarVi
               {/* Message Button */}
               <MessageRequestButton star={star} />
 
+              {/* Heart: save (device) + resonance count (public) */}
+              <div className="pt-3">
+                <StarHeartButton key={star.id} star={star} />
+              </div>
+
               {/* Share Button */}
               <div className="pt-3">
                 <ShareButtons
@@ -146,6 +152,11 @@ export function StarViewPanel({ star, onClose, planetColor = '#ffffff' }: StarVi
 
               {/* Message Button */}
               <MessageRequestButton star={star} />
+
+              {/* Heart: save (device) + resonance count (public) */}
+              <div className="pt-3">
+                <StarHeartButton key={star.id} star={star} />
+              </div>
 
               {/* Share Button */}
               <div className="pt-3">

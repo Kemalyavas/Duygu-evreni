@@ -309,5 +309,16 @@
     "refreshToRetry": "Sayfayı yenileyerek tekrar deneyin.",
     "musicOff": "Müziği Kapat",
     "musicOn": "Müziği Aç"
+  },
+  "favorites": {
+    "title": "Yıldızlar",
+    "launcher": "Yıldızlar",
+    "myFavorites": "Favorilerim",
+    "featured": "Öne Çıkanlar",
+    "save": "Kaydet",
+    "saved": "Kaydedildi",
+    "loading": "Yükleniyor...",
+    "empty": "Henüz favori yıldızın yok. Bir yıldıza dokun ve kalple kaydet.",
+    "emptyFeatured": "Henüz öne çıkan yıldız yok. İlk dokunuşu sen yap."
   }
 }

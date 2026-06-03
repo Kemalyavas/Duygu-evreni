@@ -15,6 +15,7 @@ import { MessageRequestModal } from '@/components/messaging'
 import { useAuth, usePlanets, useStars, useStarCounts, useDailyLimit, useReadStars, useMobile, useSoundEffects } from '@/lib/hooks'
 import type { Planet, Star } from '@/types'
 import { HomeSeoLinks } from '@/components/home/HomeSeoLinks'
+import { FavoritesPanel } from '@/components/FavoritesPanel'
 
 // Static star positions for loading screen (avoids hydration mismatch)
 const LOADER_STARS = [
@@ -131,6 +132,7 @@ function HomePageContent() {
   const [focusedPlanetId, setFocusedPlanetId] = useState<string | null>(planetIdFromUrl)
   const [selectedStar, setSelectedStar] = useState<Star | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isFavoritesOpen, setIsFavoritesOpen] = useState(false)
   // Lazy initialize from localStorage to avoid useEffect setState
   const [hasClickedStar, setHasClickedStar] = useState(() => {
     if (typeof window === 'undefined') return true
@@ -361,6 +363,13 @@ function HomePageContent() {
     setSelectedStar(null)
   }, [])
 
+  // Fly to a star from the favorites / featured panel. Reuses the existing
+  // URL-driven wiring (planet sync effect + ?star= auto-select) — no new nav logic.
+  const handleNavigateToStar = useCallback((planetId: string, starId: string) => {
+    setIsFavoritesOpen(false)
+    router.push(`/?planet=${planetId}&star=${starId}`)
+  }, [router])
+
   const handleStarCreated = useCallback((newStar: Star) => {
     playAddStar()
     if (focusedPlanetId) {
@@ -506,6 +515,28 @@ function HomePageContent() {
         )}
       </AnimatePresence>
 
+      {/* Favorites / Featured launcher — universe mode only (clear of the
+          planet-mode bottom buttons and the chat bubble at bottom-right).
+          Icon-only on mobile so it never overlaps the centered "select planet" hint. */}
+      <AnimatePresence>
+        {!isInPlanetMode && !planetsLoading && planets.length > 0 && (
+          <motion.button
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            transition={{ delay: 1.1 }}
+            onClick={() => setIsFavoritesOpen(true)}
+            aria-label={t('favorites.title')}
+            className="absolute bottom-8 left-4 z-20 flex items-center gap-2 rounded-xl border border-white/10 bg-black/50 p-3 text-white/80 shadow-lg backdrop-blur-md transition-colors hover:border-white/20 hover:text-white sm:px-4 sm:py-2.5"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="#ff4d6d" stroke="#ff4d6d" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+            </svg>
+            <span className="hidden text-sm font-medium sm:inline">{t('favorites.launcher')}</span>
+          </motion.button>
+        )}
+      </AnimatePresence>
+
       {/* Planet mode UI */}
       <AnimatePresence>
         {isInPlanetMode && focusedPlanet && (
@@ -645,6 +676,14 @@ function HomePageContent() {
 
       {/* Message Request Modal */}
       <MessageRequestModal />
+
+      {/* Favorites / Featured panel */}
+      <FavoritesPanel
+        isOpen={isFavoritesOpen}
+        onClose={() => setIsFavoritesOpen(false)}
+        planets={planets}
+        onNavigate={handleNavigateToStar}
+      />
 
       {/* Chat Panel is mounted once globally in Providers (avoids duplicate realtime subscriptions) */}
     </div>

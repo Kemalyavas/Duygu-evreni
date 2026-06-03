@@ -22,6 +22,9 @@ export interface Star {
   position_y: number
   position_z: number
   created_at: string
+  // Public, anonymous "resonance" counter (heart taps). Optional so older
+  // fetches / pre-migration rows are safe. See migration 005_star_resonance.sql.
+  resonance_count?: number
 }
 
 export interface Profile {

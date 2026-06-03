@@ -309,5 +309,16 @@
     "refreshToRetry": "Refresh the page to try again.",
     "musicOff": "Turn off music",
     "musicOn": "Turn on music"
+  },
+  "favorites": {
+    "title": "Stars",
+    "launcher": "Stars",
+    "myFavorites": "Favorites",
+    "featured": "Featured",
+    "save": "Save",
+    "saved": "Saved",
+    "loading": "Loading...",
+    "empty": "No favorites yet. Tap a star and save it with a heart.",
+    "emptyFeatured": "No featured stars yet. Be the first to tap."
   }
 }
