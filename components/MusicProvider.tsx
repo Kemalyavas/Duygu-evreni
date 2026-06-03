@@ -67,11 +67,10 @@ export function MusicProvider({ children }: { children: ReactNode }) {
     const audio = new Audio(MUSIC_PATH)
     audio.loop = true
     audio.volume = DEFAULT_VOLUME
-    // 'none' (not 'auto'): the 21.8 MB track must NOT be fetched on mount —
-    // on mobile music defaults OFF yet 'auto' still downloaded the whole file,
-    // and on desktop it competed with the planet GLBs during first paint.
-    // play() (on first interaction / toggle) loads it on demand when enabled.
-    audio.preload = 'none'
+    // Desktop (music defaults ON) preloads so the toggle is INSTANT — otherwise
+    // clicking it kicks off the full ~20 MB download and the button hangs on a
+    // spinner. Mobile (music defaults OFF) skips the download until the user opts in.
+    audio.preload = isMobile() ? 'none' : 'auto'
 
     // Named handlers for proper cleanup
     const handleCanPlayThrough = () => setIsLoaded(true)
