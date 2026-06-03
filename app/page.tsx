@@ -145,6 +145,9 @@ function HomePageContent() {
 
   // Keşfet için son ziyaret edilen yıldızları tutan ref (tekrar gitmeyi önlemek için)
   const recentlyExploredStarsRef = useRef<string[]>([])
+  // Star requested from the favorites/featured panel, pending until its planet's
+  // stars load + the vortex settles (panel nav uses window.history, not the router).
+  const pendingStarRef = useRef<string | null>(null)
 
   // Welcome message for first-time visitors to Umut planet
   const UMUT_PLANET_ID = '1ad9ca47-4ead-4a55-aa3a-5d048fd9f6c5'
@@ -251,6 +254,21 @@ function HomePageContent() {
       return () => clearTimeout(timer)
     }
   }, [starIdFromUrl, stars, starsVisuallyReady, markAsRead])
+
+  // Flush a star requested from the favorites/featured panel once its planet's
+  // stars are loaded and the vortex has settled (ref-driven, see handleNavigateToStar).
+  useEffect(() => {
+    const pendingId = pendingStarRef.current
+    if (!pendingId || stars.length === 0 || !starsVisuallyReady) return
+    const star = stars.find((s) => s.id === pendingId)
+    if (!star || star.planet_id !== focusedPlanetId) return
+    const timer = setTimeout(() => {
+      setSelectedStar(star)
+      markAsRead(star.id)
+      pendingStarRef.current = null
+    }, 800)
+    return () => clearTimeout(timer)
+  }, [stars, starsVisuallyReady, focusedPlanetId, markAsRead])
 
   // Planet click - update URL with shallow routing
   const handlePlanetClick = useCallback((planet: Planet) => {
@@ -363,12 +381,26 @@ function HomePageContent() {
     setSelectedStar(null)
   }, [])
 
-  // Fly to a star from the favorites / featured panel. Reuses the existing
-  // URL-driven wiring (planet sync effect + ?star= auto-select) — no new nav logic.
+  // Fly to a star from the favorites / featured panel. Planet nav uses the same
+  // window.history pattern as the rest of the app (router.push desyncs
+  // useSearchParams here); the pending ref selects the star once its planet is ready.
   const handleNavigateToStar = useCallback((planetId: string, starId: string) => {
     setIsFavoritesOpen(false)
-    router.push(`/?planet=${planetId}&star=${starId}`)
-  }, [router])
+    pendingStarRef.current = starId
+    if (focusedPlanetId === planetId) {
+      // Already on this planet: select now if ready (the effect covers the rest).
+      const star = stars.find((s) => s.id === starId)
+      if (star && starsVisuallyReady) {
+        setSelectedStar(star)
+        markAsRead(star.id)
+        pendingStarRef.current = null
+      }
+    } else {
+      setFocusedPlanetId(planetId)
+      recentlyExploredStarsRef.current = []
+      window.history.pushState(null, '', `?planet=${planetId}&star=${starId}`)
+    }
+  }, [focusedPlanetId, stars, starsVisuallyReady, markAsRead])
 
   const handleStarCreated = useCallback((newStar: Star) => {
     playAddStar()
