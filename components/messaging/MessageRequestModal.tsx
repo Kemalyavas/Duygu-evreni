@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from '@/components/ui'
 import { useStore } from '@/lib/store/useStore'
+import { useShallow } from 'zustand/react/shallow'
 import { useConversations } from '@/lib/hooks'
 import { useModalA11y } from '@/lib/hooks/useModalA11y'
 import { useTranslation } from '@/lib/i18n'
@@ -18,7 +19,14 @@ export function MessageRequestModal() {
   const [remainingRequests, setRemainingRequests] = useState(5)
   const { t } = useTranslation()
 
-  const { selectedStar, isMessageRequestModalOpen, setMessageRequestModalOpen, triggerConversationCreated } = useStore()
+  const { selectedStar, isMessageRequestModalOpen, setMessageRequestModalOpen, triggerConversationCreated } = useStore(
+    useShallow((s) => ({
+      selectedStar: s.selectedStar,
+      isMessageRequestModalOpen: s.isMessageRequestModalOpen,
+      setMessageRequestModalOpen: s.setMessageRequestModalOpen,
+      triggerConversationCreated: s.triggerConversationCreated,
+    }))
+  )
   const { sendMessageRequest, getRemainingRequests, maxDailyRequests } = useConversations()
 
   // Kalan istek sayısını al

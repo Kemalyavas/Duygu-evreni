@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { supabaseUpdate, supabaseFetch, createClient } from '@/lib/supabase/fetch'
 import { useStore } from '@/lib/store/useStore'
+import { useShallow } from 'zustand/react/shallow'
 import { type Profile, PROFILE_SELECT_COLUMNS } from '@/types'
 
 const MAX_DAILY_STARS = 3
@@ -33,7 +34,9 @@ export function useDailyLimit() {
   const [error, setError] = useState<string | null>(null)
   const [isAdmin, setIsAdmin] = useState(false)
   const [adminChecked, setAdminChecked] = useState(false)
-  const { profile, setProfile, user } = useStore()
+  const { profile, setProfile, user } = useStore(
+    useShallow((s) => ({ profile: s.profile, setProfile: s.setProfile, user: s.user }))
+  )
   const hasChecked = useRef(false)
 
   // Use refs to avoid stale closures and infinite loops

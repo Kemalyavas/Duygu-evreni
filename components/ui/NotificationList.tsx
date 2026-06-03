@@ -166,7 +166,7 @@ export function NotificationList({ onClose, showHeader = true }: NotificationLis
     deleteNotification,
   } = useNotifications()
   const { conversations } = useConversations()
-  const { setActiveConversation } = useStore()
+  const setActiveConversation = useStore((s) => s.setActiveConversation)
 
   const handleNotificationClick = async (notification: NotificationWithSender) => {
     // Sohbet varsa, direkt sohbeti aç (sayfa fark etmez)

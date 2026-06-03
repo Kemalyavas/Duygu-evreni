@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui'
 import { useStore } from '@/lib/store/useStore'
+import { useShallow } from 'zustand/react/shallow'
 import { useAuth, useConversations } from '@/lib/hooks'
 import { supabaseFetch, createClient } from '@/lib/supabase/fetch'
 import type { Star, ConversationWithDetails } from '@/types'
@@ -13,7 +14,15 @@ interface MessageRequestButtonProps {
 
 export function MessageRequestButton({ star }: MessageRequestButtonProps) {
   const { user } = useAuth()
-  const { setMessageRequestModalOpen, setSelectedStar, setActiveConversation, setMessagingPanelOpen, lastConversationCreatedAt } = useStore()
+  const { setMessageRequestModalOpen, setSelectedStar, setActiveConversation, setMessagingPanelOpen, lastConversationCreatedAt } = useStore(
+    useShallow((s) => ({
+      setMessageRequestModalOpen: s.setMessageRequestModalOpen,
+      setSelectedStar: s.setSelectedStar,
+      setActiveConversation: s.setActiveConversation,
+      setMessagingPanelOpen: s.setMessagingPanelOpen,
+      lastConversationCreatedAt: s.lastConversationCreatedAt,
+    }))
+  )
   const { checkExistingConversation } = useConversations()
   const [existingConversationId, setExistingConversationId] = useState<string | null>(null)
   const [checking, setChecking] = useState(true)

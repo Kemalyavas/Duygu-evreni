@@ -4,6 +4,7 @@ import { useEffect, useCallback, useState, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { supabaseFetch } from '@/lib/supabase/fetch'
 import { useStore } from '@/lib/store/useStore'
+import { useShallow } from 'zustand/react/shallow'
 import { resetDailyLimitCache } from './useDailyLimit'
 import { type Profile, PROFILE_SELECT_COLUMNS } from '@/types'
 import type { AuthChangeEvent, Session } from '@supabase/supabase-js'
@@ -42,7 +43,14 @@ async function checkIPBan(): Promise<{ banned: boolean; reason?: string }> {
 }
 
 export function useAuth() {
-  const { user, profile, setUser, setProfile } = useStore()
+  const { user, profile, setUser, setProfile } = useStore(
+    useShallow((s) => ({
+      user: s.user,
+      profile: s.profile,
+      setUser: s.setUser,
+      setProfile: s.setProfile,
+    }))
+  )
   const [isLoading, setIsLoading] = useState(!authChecked)
   const supabaseRef = useRef(createClient())
 

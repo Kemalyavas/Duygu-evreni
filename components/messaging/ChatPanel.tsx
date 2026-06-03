@@ -4,6 +4,7 @@ import { useEffect, useRef, useMemo, useCallback, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useStore } from '@/lib/store/useStore'
+import { useShallow } from 'zustand/react/shallow'
 import { useMessages, useAuth, useMobile, useBlocking, useNicknames } from '@/lib/hooks'
 import { useTranslation } from '@/lib/i18n'
 import { MessageBubble } from './MessageBubble'
@@ -168,7 +169,16 @@ export function ChatPanel() {
     setActiveConversation,
     isChatCompact,
     setChatCompact,
-  } = useStore()
+  } = useStore(
+    useShallow((s) => ({
+      activeConversation: s.activeConversation,
+      isMessagingPanelOpen: s.isMessagingPanelOpen,
+      setMessagingPanelOpen: s.setMessagingPanelOpen,
+      setActiveConversation: s.setActiveConversation,
+      isChatCompact: s.isChatCompact,
+      setChatCompact: s.setChatCompact,
+    }))
+  )
   const { messages, sendMessage, loading, markAsRead } = useMessages(activeConversation?.id || null)
   const { blockUser, unblockUser, blockedUsers, fetchBlockedUsers } = useBlocking()
   const { nicknames, fetchNicknames, getNickname } = useNicknames()

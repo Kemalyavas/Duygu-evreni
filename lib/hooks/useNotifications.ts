@@ -34,7 +34,7 @@ export function useNotifications() {
   const isMountedRef = useRef(true)
   const channelRef = useRef<ReturnType<ReturnType<typeof createClient>['channel']> | null>(null)
 
-  const { setUnreadNotificationsCount } = useStore()
+  const setUnreadNotificationsCount = useStore((s) => s.setUnreadNotificationsCount)
 
   // Bildirimleri getir
   const fetchNotifications = useCallback(async () => {

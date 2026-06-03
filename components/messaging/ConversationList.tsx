@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { formatDistanceToNow } from 'date-fns'
 import { tr, enUS } from 'date-fns/locale'
 import { useStore } from '@/lib/store/useStore'
+import { useShallow } from 'zustand/react/shallow'
 import { useAuth, useBlocking, useNicknames } from '@/lib/hooks'
 import { useTranslation } from '@/lib/i18n'
 import type { ConversationWithDetails } from '@/types'
@@ -17,7 +18,13 @@ interface ConversationListProps {
 export function ConversationList({ conversations, onSelect, onDelete }: ConversationListProps) {
   const { user } = useAuth()
   const { t, language } = useTranslation()
-  const { activeConversation, setActiveConversation, setMessagingPanelOpen } = useStore()
+  const { activeConversation, setActiveConversation, setMessagingPanelOpen } = useStore(
+    useShallow((s) => ({
+      activeConversation: s.activeConversation,
+      setActiveConversation: s.setActiveConversation,
+      setMessagingPanelOpen: s.setMessagingPanelOpen,
+    }))
+  )
   const { blockedUsers, fetchBlockedUsers } = useBlocking()
   const { nicknames, fetchNicknames, getNickname } = useNicknames()
   const [deletingId, setDeletingId] = useState<string | null>(null)
