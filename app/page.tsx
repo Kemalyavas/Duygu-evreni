@@ -397,7 +397,7 @@ function HomePageContent() {
   const isInPlanetMode = !!focusedPlanetId
 
   return (
-    <div className="relative h-screen w-screen overflow-hidden bg-gradient-to-b from-[#0A0E27] to-black">
+    <div className="relative h-dvh w-screen overflow-hidden bg-gradient-to-b from-[#0A0E27] to-black">
       {/* Onboarding for first-time visitors */}
       {!isInPlanetMode && <Onboarding />}
 
