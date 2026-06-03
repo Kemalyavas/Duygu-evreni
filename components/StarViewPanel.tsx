@@ -82,8 +82,7 @@ export function StarViewPanel({ star, onClose, planetColor = '#ffffff' }: StarVi
               {/* Share Button */}
               <div className="pt-3">
                 <ShareButtons
-                  url={`/?planet=${star.planet_id}&star=${star.id}`}
-                  text={star.content}
+                  url={`/yildiz/${star.id}`}
                 />
               </div>
 
@@ -151,8 +150,7 @@ export function StarViewPanel({ star, onClose, planetColor = '#ffffff' }: StarVi
               {/* Share Button */}
               <div className="pt-3">
                 <ShareButtons
-                  url={`/?planet=${star.planet_id}&star=${star.id}`}
-                  text={star.content}
+                  url={`/yildiz/${star.id}`}
                 />
               </div>
 

@@ -120,7 +120,7 @@ export function StarCreationModal({
     // Success!
     const newStar = data.star as Star
     setCreatedStar(newStar)
-    setShareUrl(data.shareUrl || `/?planet=${planet.id}&star=${newStar.id}`)
+    setShareUrl(`/yildiz/${newStar.id}`)
     setAnonymousStarShared(newStar.id, planet.id)
     setContent('')
     setShowSuccess(true)
@@ -249,7 +249,7 @@ export function StarCreationModal({
             {/* Share buttons */}
             <div className="space-y-3">
               <p className="text-sm text-white/60 font-medium">{t('star.shareYourStar')}</p>
-              <ShareButtons url={shareUrl} text={createdStar.content} />
+              <ShareButtons url={shareUrl} />
             </div>
 
             {/* Register CTA */}
