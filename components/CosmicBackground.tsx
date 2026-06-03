@@ -40,8 +40,8 @@ export function CosmicBackground({ accent, accentSecondary }: CosmicBackgroundPr
   // Energetic, cohesive multi-hue palette. With an emotion accent we lean into
   // it but keep two brand hues so it reads as "emotion-tinted cosmos".
   const [h1, h2, h3, h4] = accent
-    ? [accent, accentSecondary ?? '#3B82F6', accent, '#7C3AED']
-    : ['#7C3AED', '#2DD4BF', '#EC4899', '#3B82F6'] // violet · teal · magenta · blue
+    ? [accent, accentSecondary ?? '#56D4D9', accent, '#3457B8']
+    : ['#FFB14E', '#56D4D9', '#FF6F61', '#3457B8'] // amber · ice-cyan · coral · deep blue
 
   const blob = (color: string, alpha: string): CSSProperties => ({
     background: `radial-gradient(circle, ${color}${alpha} 0%, ${color}00 70%)`,
@@ -54,7 +54,7 @@ export function CosmicBackground({ accent, accentSecondary }: CosmicBackgroundPr
         className="absolute inset-0"
         style={{
           background:
-            'radial-gradient(125% 95% at 50% 0%, #141033 0%, #0B0A1F 42%, #050610 100%)',
+            'radial-gradient(125% 95% at 50% 0%, #0F1424 0%, #0A0D18 45%, #05070D 100%)',
         }}
       />
 

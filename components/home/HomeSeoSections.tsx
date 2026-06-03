@@ -212,15 +212,15 @@ export function HomeSeoSections() {
 
       <div className="relative z-10">
         {/* Sticky glass header */}
-        <header className="sticky top-0 z-20 border-b border-white/10 bg-[#0b0a1f]/55 backdrop-blur-xl">
+        <header className="sticky top-0 z-20 border-b border-white/10 bg-[#0A0D18]/60 backdrop-blur-xl">
           <div className="mx-auto flex h-16 max-w-5xl items-center justify-between px-4">
             <Link href="/" className="flex items-center gap-2">
               <Image src="/logo.png" alt="Duygu Evreni" width={36} height={36} />
-              <span className="cosmic-text font-display text-xl font-semibold">Duygu Evreni</span>
+              <span className="bg-gradient-to-r from-[#FFD79A] via-[#FFB14E] to-[#FF6F61] bg-clip-text text-xl font-bold text-transparent">Duygu Evreni</span>
             </Link>
             <Link
               href="/"
-              className="btn-glow rounded-full bg-gradient-to-r from-[#7C3AED] via-[#EC4899] to-[#3B82F6] px-5 py-2 text-sm font-semibold text-white transition-transform hover:scale-[1.03]"
+              className="rounded-full bg-gradient-to-r from-[#FFB14E] to-[#FF6F61] shadow-[0_6px_24px_-6px_rgba(255,140,80,0.55)] hover:shadow-[0_10px_34px_-6px_rgba(255,140,80,0.75)] px-5 py-2 text-sm font-semibold text-white transition-all hover:scale-[1.03]"
             >
               {c.enter3d}
             </Link>
@@ -235,16 +235,9 @@ export function HomeSeoSections() {
           animate="show"
           className="mx-auto max-w-4xl px-4 pb-16 pt-20 sm:pt-28"
         >
-          <motion.span
-            variants={fadeUp}
-            className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-1.5 text-xs font-medium uppercase tracking-[0.2em] text-white/70 backdrop-blur-sm"
-          >
-            <span className="h-1.5 w-1.5 animate-soft-pulse rounded-full bg-[#EC4899]" />
-            {isEn ? 'Emotion Universe' : 'Duygu Evreni'}
-          </motion.span>
           <motion.h1
             variants={fadeUp}
-            className="cosmic-text font-display text-5xl font-semibold leading-[1.05] tracking-tight sm:text-7xl"
+            className="text-5xl font-bold leading-[1.08] tracking-tight text-white sm:text-7xl"
           >
             {c.introTitle}
           </motion.h1>
@@ -257,7 +250,7 @@ export function HomeSeoSections() {
           <motion.div variants={fadeUp}>
             <Link
               href="/"
-              className="btn-glow mt-8 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#7C3AED] via-[#EC4899] to-[#3B82F6] px-6 py-3 text-sm font-semibold text-white transition-transform hover:scale-[1.03]"
+              className="mt-8 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#FFB14E] to-[#FF6F61] shadow-[0_6px_24px_-6px_rgba(255,140,80,0.55)] hover:shadow-[0_10px_34px_-6px_rgba(255,140,80,0.75)] px-6 py-3 text-sm font-semibold text-white transition-all hover:scale-[1.03]"
             >
               {c.enter3d}
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.2}>
@@ -274,7 +267,7 @@ export function HomeSeoSections() {
             initial="hidden"
             whileInView="show"
             viewport={{ once: true, margin: '-60px' }}
-            className="font-display text-3xl font-semibold sm:text-4xl"
+            className="text-3xl font-semibold text-white sm:text-4xl"
           >
             {c.planetsTitle}
           </motion.h2>
@@ -347,7 +340,7 @@ export function HomeSeoSections() {
             initial="hidden"
             whileInView="show"
             viewport={{ once: true, margin: '-60px' }}
-            className="mb-8 font-display text-3xl font-semibold sm:text-4xl"
+            className="mb-8 text-3xl font-semibold text-white sm:text-4xl"
           >
             {c.howTitle}
           </motion.h2>
@@ -365,8 +358,8 @@ export function HomeSeoSections() {
                 className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 backdrop-blur-sm transition-colors hover:border-white/20"
               >
                 <div
-                  className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-[#7C3AED] to-[#EC4899] text-lg font-bold"
-                  style={{ boxShadow: '0 0 24px rgba(124,58,237,0.45)' }}
+                  className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-[#FFB14E] to-[#FF6F61] text-lg font-bold text-[#1a1205]"
+                  style={{ boxShadow: '0 0 24px rgba(255,140,80,0.4)' }}
                 >
                   {i + 1}
                 </div>
@@ -384,7 +377,7 @@ export function HomeSeoSections() {
             initial="hidden"
             whileInView="show"
             viewport={{ once: true, margin: '-60px' }}
-            className="mb-6 font-display text-3xl font-semibold sm:text-4xl"
+            className="mb-6 text-3xl font-semibold text-white sm:text-4xl"
           >
             {c.faqTitle}
           </motion.h2>

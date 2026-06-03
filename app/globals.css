@@ -249,11 +249,6 @@ h1, h2, h3, h4, h5, h6 {
   .pointer-spotlight { display: block; }
 }
 
-/* Distinctive display face for hero + section titles (set in layout.tsx) */
-.font-display {
-  font-family: var(--font-display), Georgia, 'Times New Roman', serif;
-}
-
 /* Custom scrollbar for webkit browsers */
 ::-webkit-scrollbar {
   width: 8px;

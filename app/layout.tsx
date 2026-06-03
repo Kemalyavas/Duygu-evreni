@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
-import { Inter, Plus_Jakarta_Sans, Fraunces } from "next/font/google";
+import { Inter, Plus_Jakarta_Sans } from "next/font/google";
 import { Providers } from "@/components/Providers";
 import { HomePageJsonLd } from "@/components/seo/JsonLd";
 import "./globals.css";
@@ -14,14 +14,6 @@ const inter = Inter({
 
 const plusJakarta = Plus_Jakarta_Sans({
   variable: "--font-jakarta",
-  subsets: ["latin", "latin-ext"],
-  display: "swap",
-});
-
-// Distinctive display serif for hero + section titles (escapes the generic
-// all-sans "AI" look). Variable, optical-sizing, full Turkish via latin-ext.
-const fraunces = Fraunces({
-  variable: "--font-display",
   subsets: ["latin", "latin-ext"],
   display: "swap",
 });
@@ -119,7 +111,7 @@ export default function RootLayout({
         <link rel="dns-prefetch" href={process.env.NEXT_PUBLIC_SUPABASE_URL} />
       </head>
       <body
-        className={`${inter.variable} ${plusJakarta.variable} ${fraunces.variable} antialiased`}
+        className={`${inter.variable} ${plusJakarta.variable} antialiased`}
       >
         <Providers>
           {children}
