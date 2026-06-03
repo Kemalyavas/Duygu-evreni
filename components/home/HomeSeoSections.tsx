@@ -212,15 +212,15 @@ export function HomeSeoSections() {
 
       <div className="relative z-10">
         {/* Sticky glass header */}
-        <header className="sticky top-0 z-20 border-b border-white/10 bg-[#0A0D18]/60 backdrop-blur-xl">
-          <div className="mx-auto flex h-16 max-w-5xl items-center justify-between px-4">
+        <header className="absolute inset-x-0 top-0 z-20">
+          <div className="flex h-16 items-center justify-between px-3 sm:px-5">
             <Link href="/" className="flex items-center gap-2">
               <Image src="/logo.png" alt="Duygu Evreni" width={36} height={36} />
               <span className="bg-gradient-to-r from-[#FFD79A] via-[#FFB14E] to-[#FF6F61] bg-clip-text text-xl font-bold text-transparent">Duygu Evreni</span>
             </Link>
             <Link
               href="/"
-              className="rounded-full bg-gradient-to-r from-[#FFB14E] to-[#FF6F61] shadow-[0_6px_24px_-6px_rgba(255,140,80,0.55)] hover:shadow-[0_10px_34px_-6px_rgba(255,140,80,0.75)] px-5 py-2 text-sm font-semibold text-white transition-all hover:scale-[1.03]"
+              className="rounded-full bg-gradient-to-r from-[#3366E8] to-[#2CB6D6] shadow-[0_6px_24px_-6px_rgba(51,102,232,0.5)] hover:shadow-[0_10px_34px_-6px_rgba(51,102,232,0.7)] px-5 py-2 text-sm font-semibold text-white transition-all hover:scale-[1.03]"
             >
               {c.enter3d}
             </Link>
@@ -250,7 +250,7 @@ export function HomeSeoSections() {
           <motion.div variants={fadeUp}>
             <Link
               href="/"
-              className="mt-8 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#FFB14E] to-[#FF6F61] shadow-[0_6px_24px_-6px_rgba(255,140,80,0.55)] hover:shadow-[0_10px_34px_-6px_rgba(255,140,80,0.75)] px-6 py-3 text-sm font-semibold text-white transition-all hover:scale-[1.03]"
+              className="mt-8 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#3366E8] to-[#2CB6D6] shadow-[0_6px_24px_-6px_rgba(51,102,232,0.5)] hover:shadow-[0_10px_34px_-6px_rgba(51,102,232,0.7)] px-6 py-3 text-sm font-semibold text-white transition-all hover:scale-[1.03]"
             >
               {c.enter3d}
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.2}>
