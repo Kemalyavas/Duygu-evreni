@@ -559,9 +559,7 @@ function HomePageContent() {
               </div>
             </motion.div>
 
-            {/* Bottom action buttons — hidden on mobile while a star panel is
-                open (the bottom sheet would otherwise overlap & block them). */}
-            {!(isMobile && selectedStar) && (
+            {/* Bottom action buttons */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -607,7 +605,6 @@ function HomePageContent() {
                 {t('universe.shareStar')} {user ? (isAdmin ? '(∞)' : `(${remainingStars} ${t('universe.starsRemaining')})`) : ''}
               </Button>
             </motion.div>
-            )}
 
             {/* Hint prompt - only shows until user clicks their first star */}
             {!hasClickedStar && !selectedStar && stars.filter(s => s.planet_id === focusedPlanetId).length > 0 && (

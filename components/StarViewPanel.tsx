@@ -101,7 +101,7 @@ export function StarViewPanel({ star, onClose, planetColor = '#ffffff' }: StarVi
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="md:hidden fixed left-0 right-0 bottom-20 bg-[#0d0d1a]/95 backdrop-blur-xl border-t border-white/10 z-30 rounded-3xl max-h-[50vh] shadow-2xl mx-3"
+            className="md:hidden fixed left-0 right-0 bottom-28 bg-[#0d0d1a]/95 backdrop-blur-xl border-t border-white/10 z-30 rounded-3xl max-h-[50vh] shadow-2xl mx-3 overflow-y-auto"
           >
             {/* Drag handle */}
             <div className="flex justify-center py-3">
