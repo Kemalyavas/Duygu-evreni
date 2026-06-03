@@ -142,6 +142,7 @@ function HomePageContent() {
   const [hasStartedLoading, setHasStartedLoading] = useState(false) // Track if loading has started for current planet
   const [starsVisuallyReady, setStarsVisuallyReady] = useState(false) // Track when stars are visible (after vortex)
   const [isNavigatingToStar, setIsNavigatingToStar] = useState(false) // Track star navigation animation
+  const [sceneReady, setSceneReady] = useState(false) // 3D scene (stars + planet models) visually ready
 
   // Keşfet için son ziyaret edilen yıldızları tutan ref (tekrar gitmeyi önlemek için)
   const recentlyExploredStarsRef = useRef<string[]>([])
@@ -196,6 +197,12 @@ function HomePageContent() {
   // Callback when stars become visible (after vortex animation)
   const handleStarsReady = useCallback(() => {
     setStarsVisuallyReady(true)
+  }, [])
+
+  // Universe is visually ready (background stars + planet GLB models loaded).
+  // Keeps the branded loader up until then so no empty-starfield flash shows.
+  const handleSceneReady = useCallback(() => {
+    setSceneReady(true)
   }, [])
 
   // Track when loading starts for current planet
@@ -508,25 +515,35 @@ function HomePageContent() {
       <div className="absolute inset-0">
         {planetsError && planets.length === 0 ? (
           <UniverseError onRetry={refetchPlanets} />
-        ) : planetsLoading || planets.length === 0 ? (
-          <UniverseLoader />
         ) : (
-          <ErrorBoundary>
-            <UnifiedUniverse
-              planets={planets}
-              stars={stars}
-              focusedPlanetId={focusedPlanetId}
-              onPlanetClick={handlePlanetClick}
-              onStarClick={handleStarClick}
-              onBackToUniverse={handleBackToUniverse}
-              selectedStarId={selectedStar?.id}
-              readStarIds={readStarIds}
-              starCounts={starCounts}
-              starsLoading={starsLoading && !initialLoadComplete}
-              onStarsReady={handleStarsReady}
-              isMobile={isMobile}
-            />
-          </ErrorBoundary>
+          <>
+            {!(planetsLoading || planets.length === 0) && (
+              <ErrorBoundary>
+                <UnifiedUniverse
+                  planets={planets}
+                  stars={stars}
+                  focusedPlanetId={focusedPlanetId}
+                  onPlanetClick={handlePlanetClick}
+                  onStarClick={handleStarClick}
+                  onBackToUniverse={handleBackToUniverse}
+                  selectedStarId={selectedStar?.id}
+                  readStarIds={readStarIds}
+                  starCounts={starCounts}
+                  starsLoading={starsLoading && !initialLoadComplete}
+                  onStarsReady={handleStarsReady}
+                  onSceneReady={handleSceneReady}
+                  isMobile={isMobile}
+                />
+              </ErrorBoundary>
+            )}
+            {/* Branded loader stays until the 3D scene (stars + planet models) is
+                actually ready, so the user never sees an empty starfield first. */}
+            {(planetsLoading || planets.length === 0 || !sceneReady) && (
+              <div className="absolute inset-0 z-10">
+                <UniverseLoader />
+              </div>
+            )}
+          </>
         )}
       </div>
 

@@ -46,6 +46,7 @@ interface UnifiedUniverseProps {
   starCounts?: Record<string, number>
   starsLoading?: boolean
   onStarsReady?: () => void
+  onSceneReady?: () => void
   isMobile?: boolean
 }
 
@@ -73,6 +74,7 @@ interface SceneProps {
   onSelectedStarPosition?: (position: [number, number, number]) => void
   isFocusedOnStar?: boolean
   onStarsReady?: () => void
+  onSceneReady?: () => void
   isMobile?: boolean
   activeMobileTooltipId: string | null
   setActiveMobileTooltipId: (id: string | null) => void
@@ -102,6 +104,7 @@ function Scene({
   onSelectedStarPosition,
   isFocusedOnStar,
   onStarsReady,
+  onSceneReady,
   isMobile,
   activeMobileTooltipId,
   setActiveMobileTooltipId,
@@ -137,6 +140,12 @@ function Scene({
 
     return () => clearTimeout(maxTimer)
   }, [progress, active])
+
+  // Tell the parent the universe is visually ready (stars + planet models), so
+  // the branded loader can hand off without ever showing an empty starfield.
+  useEffect(() => {
+    if (planetsVisible) onSceneReady?.()
+  }, [planetsVisible, onSceneReady])
 
   // Track which planets have completed vortex animation
   const [starsReadyToShow, setStarsReadyToShow] = useState<Record<string, boolean>>({})
@@ -429,6 +438,7 @@ export function UnifiedUniverse({
   starCounts,
   starsLoading,
   onStarsReady,
+  onSceneReady,
   isMobile = false,
 }: UnifiedUniverseProps) {
   // Track which planet's mobile tooltip is showing (only one at a time)
@@ -501,6 +511,7 @@ export function UnifiedUniverse({
             onSelectedStarPosition={handleSelectedStarPosition}
             isFocusedOnStar={isFocusedOnStar}
             onStarsReady={onStarsReady}
+            onSceneReady={onSceneReady}
             isMobile={isMobile}
             activeMobileTooltipId={activeMobileTooltipId}
             setActiveMobileTooltipId={setActiveMobileTooltipId}
