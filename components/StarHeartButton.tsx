@@ -6,9 +6,9 @@ import { useFavorites } from '@/lib/hooks'
 import { useTranslation } from '@/lib/i18n'
 import type { Star } from '@/types'
 
-// Heart = save (personal favorite, device-local) + resonance count (public).
-// One gesture: tapping saves the star AND, the first time on this device,
-// increments the public resonance counter.
+// Heart = save (personal favorite, device-local) + resonance count (public),
+// a fully reversible toggle: turning it ON adds +1 to the public count, turning
+// it OFF removes it (-1). So un-hearting also pulls the star from "Öne Çıkanlar".
 export function StarHeartButton({ star }: { star: Star }) {
   const { t } = useTranslation()
   const { isFavorite, toggleFavorite } = useFavorites()
@@ -20,8 +20,8 @@ export function StarHeartButton({ star }: { star: Star }) {
     if (busy) return
     setBusy(true)
     try {
-      const { resonated } = await toggleFavorite(star.id)
-      if (resonated) setCount((c) => c + 1)
+      const { delta } = await toggleFavorite(star.id)
+      if (delta !== 0) setCount((c) => Math.max(0, c + delta))
     } finally {
       setBusy(false)
     }
