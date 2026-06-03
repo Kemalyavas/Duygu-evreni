@@ -5,6 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { EMOTIONS } from '@/lib/constants/emotions'
 import { SiteFooter } from '@/components/SiteFooter'
+import { CosmicBackground } from '@/components/CosmicBackground'
 import { useTranslation } from '@/lib/i18n'
 
 // Visible, server-rendered marketing content for /hakkinda.
@@ -182,41 +183,58 @@ export function HomeSeoSections() {
   }
 
   return (
-    <>
-      {/* Header */}
-      <header className="border-b border-white/10">
-        <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <Image src="/logo.png" alt="Duygu Evreni" width={36} height={36} />
-            <span className="font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-purple-300 bg-clip-text text-transparent">
-              Duygu Evreni
-            </span>
-          </Link>
+    <div className="relative min-h-dvh text-white">
+      <CosmicBackground />
+
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }}
+      />
+
+      <div className="relative z-10">
+        {/* Sticky glass header */}
+        <header className="sticky top-0 z-20 border-b border-white/10 bg-[#0b0a1f]/55 backdrop-blur-xl">
+          <div className="mx-auto flex h-16 max-w-5xl items-center justify-between px-4">
+            <Link href="/" className="flex items-center gap-2">
+              <Image src="/logo.png" alt="Duygu Evreni" width={36} height={36} />
+              <span className="cosmic-text font-heading text-lg font-bold">Duygu Evreni</span>
+            </Link>
+            <Link
+              href="/"
+              className="btn-glow rounded-full bg-gradient-to-r from-[#7C3AED] via-[#EC4899] to-[#3B82F6] px-5 py-2 text-sm font-semibold text-white transition-transform hover:scale-[1.03]"
+            >
+              {c.enter3d}
+            </Link>
+          </div>
+        </header>
+
+        {/* Hero / intro */}
+        <section id="hakkinda" className="mx-auto max-w-4xl px-4 pb-16 pt-20 sm:pt-28">
+          <span className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-1.5 text-xs font-medium uppercase tracking-[0.2em] text-white/70 backdrop-blur-sm">
+            <span className="h-1.5 w-1.5 animate-soft-pulse rounded-full bg-[#EC4899]" />
+            {isEn ? 'Emotion Universe' : 'Duygu Evreni'}
+          </span>
+          <h1 className="cosmic-text font-heading text-4xl font-extrabold leading-[1.1] tracking-tight sm:text-6xl">
+            {c.introTitle}
+          </h1>
+          <p className="mt-6 max-w-2xl text-lg leading-relaxed text-white/75 sm:text-xl">
+            {c.introBody}
+          </p>
           <Link
             href="/"
-            className="rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+            className="btn-glow mt-8 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#7C3AED] via-[#EC4899] to-[#3B82F6] px-6 py-3 text-sm font-semibold text-white transition-transform hover:scale-[1.03]"
           >
             {c.enter3d}
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+            </svg>
           </Link>
-        </div>
-      </header>
-
-      <div className="relative bg-gradient-to-b from-black to-[#0A0E27] text-white">
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }}
-        />
-
-        {/* Hakkında / intro */}
-        <section id="hakkinda" className="max-w-4xl mx-auto px-4 py-16 sm:py-20">
-          <h1 className="text-3xl sm:text-4xl font-bold mb-5">{c.introTitle}</h1>
-          <p className="text-lg text-white/75 leading-relaxed max-w-3xl">{c.introBody}</p>
         </section>
 
-        {/* Duygu gezegenleri */}
-        <section className="max-w-5xl mx-auto px-4 pb-16">
-          <h2 className="text-2xl font-bold mb-2">{c.planetsTitle}</h2>
-          <p className="text-white/60 mb-8">{c.planetsSubtitle}</p>
+        {/* Emotion planets — each card themed to its own color */}
+        <section className="mx-auto max-w-5xl px-4 pb-20">
+          <h2 className="font-heading text-2xl font-bold sm:text-3xl">{c.planetsTitle}</h2>
+          <p className="mb-8 mt-2 text-white/60">{c.planetsSubtitle}</p>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {EMOTIONS.map((e) => {
               const name = isEn ? e.name_en : e.name_tr
@@ -224,48 +242,79 @@ export function HomeSeoSections() {
                 <Link
                   key={e.slug}
                   href={`/gezegen/${e.slug}`}
-                  className="group rounded-2xl border border-white/10 bg-white/[0.03] p-5 transition-colors hover:border-white/25 hover:bg-white/[0.06]"
+                  className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] p-5 transition-all duration-300 hover:-translate-y-1 hover:border-white/20"
                 >
-                  <div className="flex items-center gap-3 mb-1.5">
-                    <span
-                      className="inline-block h-3 w-3 rounded-full flex-shrink-0"
-                      style={{ backgroundColor: e.color }}
-                    />
-                    <h3 className="font-semibold text-lg">{name}</h3>
+                  {/* emotion-tinted glow */}
+                  <div
+                    className="pointer-events-none absolute inset-0 opacity-45 transition-opacity duration-300 group-hover:opacity-100"
+                    style={{ background: `radial-gradient(150px circle at 12% -10%, ${e.color}26, transparent 60%)` }}
+                  />
+                  {/* top accent line in the emotion's color */}
+                  <div
+                    className="pointer-events-none absolute inset-x-0 top-0 h-px opacity-60 transition-opacity duration-300 group-hover:opacity-100"
+                    style={{ background: `linear-gradient(90deg, transparent, ${e.color}, transparent)` }}
+                  />
+                  <div className="relative">
+                    <div className="mb-2 flex items-center gap-3">
+                      <span
+                        className="h-3.5 w-3.5 flex-shrink-0 rounded-full"
+                        style={{ backgroundColor: e.color, boxShadow: `0 0 12px 2px ${e.color}aa` }}
+                      />
+                      <h3 className="text-lg font-semibold">{name}</h3>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="ml-auto h-4 w-4 -translate-x-1 text-white/40 opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                      </svg>
+                    </div>
+                    <p className="text-sm leading-relaxed text-white/60">
+                      {c.taglines[e.slug] ?? c.cardFallback(name)}
+                    </p>
                   </div>
-                  <p className="text-sm text-white/55 leading-relaxed">
-                    {c.taglines[e.slug] ?? c.cardFallback(name)}
-                  </p>
                 </Link>
               )
             })}
           </div>
         </section>
 
-        {/* Nasıl çalışır */}
-        <section className="max-w-4xl mx-auto px-4 pb-16">
-          <h2 className="text-2xl font-bold mb-8">{c.howTitle}</h2>
-          <div className="grid gap-8 sm:grid-cols-3">
+        {/* How it works */}
+        <section className="mx-auto max-w-4xl px-4 pb-20">
+          <h2 className="mb-8 font-heading text-2xl font-bold sm:text-3xl">{c.howTitle}</h2>
+          <div className="grid gap-5 sm:grid-cols-3">
             {c.steps.map((s, i) => (
-              <div key={i}>
-                <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 text-lg font-bold">
+              <div
+                key={i}
+                className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 backdrop-blur-sm transition-colors hover:border-white/20"
+              >
+                <div
+                  className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-[#7C3AED] to-[#EC4899] text-lg font-bold"
+                  style={{ boxShadow: '0 0 24px rgba(124,58,237,0.45)' }}
+                >
                   {i + 1}
                 </div>
-                <h3 className="font-semibold text-lg mb-1.5">{s.title}</h3>
-                <p className="text-sm text-white/60 leading-relaxed">{s.desc}</p>
+                <h3 className="mb-1.5 text-lg font-semibold">{s.title}</h3>
+                <p className="text-sm leading-relaxed text-white/60">{s.desc}</p>
               </div>
             ))}
           </div>
         </section>
 
-        {/* SSS */}
-        <section className="max-w-3xl mx-auto px-4 pb-16">
-          <h2 className="text-2xl font-bold mb-6">{c.faqTitle}</h2>
-          <div className="space-y-5">
+        {/* FAQ */}
+        <section className="mx-auto max-w-3xl px-4 pb-20">
+          <h2 className="mb-6 font-heading text-2xl font-bold sm:text-3xl">{c.faqTitle}</h2>
+          <div className="space-y-3">
             {c.faqs.map((f) => (
-              <div key={f.q}>
-                <h3 className="font-semibold text-white/90 mb-1.5">{f.q}</h3>
-                <p className="text-white/65 leading-relaxed text-sm">{f.a}</p>
+              <div
+                key={f.q}
+                className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 backdrop-blur-sm transition-colors hover:border-white/20"
+              >
+                <h3 className="mb-1.5 font-semibold text-white/90">{f.q}</h3>
+                <p className="text-sm leading-relaxed text-white/65">{f.a}</p>
               </div>
             ))}
           </div>
@@ -273,6 +322,6 @@ export function HomeSeoSections() {
 
         <SiteFooter />
       </div>
-    </>
+    </div>
   )
 }

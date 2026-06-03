@@ -29,11 +29,8 @@ export const metadata: Metadata = {
 }
 
 export default function HakkindaPage() {
-  return (
-    <div className="min-h-screen bg-gradient-to-b from-[#0A0E27] to-black text-white">
-      {/* Header + tüm tanıtım içeriği (intro, kartlar, nasıl çalışır, SSS) + footer
-          — iki dilli (TR/EN); SSR Türkçe render eder, EN kullanıcı hydration sonrası İngilizce görür */}
-      <HomeSeoSections />
-    </div>
-  )
+  // HomeSeoSections is self-contained: it renders the CosmicBackground, the full
+  // bilingual marketing content (intro, cards, how-it-works, FAQ) and the footer.
+  // SSR renders Turkish; EN users see English after hydration (no mismatch).
+  return <HomeSeoSections />
 }

@@ -185,6 +185,24 @@ h1, h2, h3, h4, h5, h6 {
   animation: soft-pulse 3s ease-in-out infinite;
 }
 
+/* Cosmic background motion (CosmicBackground.tsx) — slow, calm, GPU-cheap.
+   Auto-frozen under prefers-reduced-motion by the global rule below. */
+@keyframes nebula-drift-a {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(4%, 3%, 0) scale(1.08); }
+}
+@keyframes nebula-drift-b {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1.05); }
+  50% { transform: translate3d(-5%, -2%, 0) scale(1); }
+}
+@keyframes star-twinkle {
+  0%, 100% { opacity: var(--star-o, 0.4); }
+  50% { opacity: 0.08; }
+}
+.nebula-drift-a { animation: nebula-drift-a 26s ease-in-out infinite; will-change: transform; }
+.nebula-drift-b { animation: nebula-drift-b 32s ease-in-out infinite; will-change: transform; }
+.star-twinkle { animation: star-twinkle 4.5s ease-in-out infinite; }
+
 /* Custom scrollbar for webkit browsers */
 ::-webkit-scrollbar {
   width: 8px;
@@ -248,7 +266,10 @@ h1, h2, h3, h4, h5, h6 {
     scroll-behavior: auto !important;
   }
   .animate-float,
-  .animate-soft-pulse {
+  .animate-soft-pulse,
+  .nebula-drift-a,
+  .nebula-drift-b,
+  .star-twinkle {
     animation: none !important;
   }
 }
