@@ -1,7 +1,7 @@
 // Duygu içerik sayfaları için statik kaynak (SEO).
 // Her duygu, /gezegen/<slug> içerik sayfasının kaynağıdır.
 // DB'deki planet kaydıyla `name_tr` üzerinden eşleşir (UUID gerekmez).
-// ÖNEMLI: Burada kullanıcı yıldızları (kişisel itiraflar) YOK — sadece editoryal,
+// ÖNEMLI: Burada kullanıcı yıldızları (kişisel itiraflar) YOK, sadece editoryal,
 // kalıcı (evergreen) içerik. Kişisel/hassas içerik Google'a açılmaz.
 //
 // i18n: `metaTitle/metaDescription/keywords` SADECE Türkçe (sayfa Türkçe-canonical,
@@ -22,7 +22,7 @@ export interface EmotionContent {
   heading: string
   /** Sayfa H1 başlığı (EN) */
   heading_en: string
-  /** <title> için (kök şablon "| Duygu Evreni" ekler) — TR (canonical) */
+  /** <title> için (kök şablon "| Duygu Evreni" ekler), TR (canonical) */
   metaTitle: string
   metaDescription: string
   keywords: string[]
@@ -84,15 +84,15 @@ export const EMOTIONS: EmotionContent[] = [
     name_tr: 'Mutluluk',
     name_en: 'Happiness',
     color: '#FFD700',
-    heading: 'Mutluluk — Sevincini Paylaş',
-    heading_en: 'Happiness — Share Your Joy',
-    metaTitle: 'Mutluluk Duyguları — Sevincini Yıldızlara Dönüştür',
+    heading: 'Mutluluk: Sevincini Paylaş',
+    heading_en: 'Happiness: Share Your Joy',
+    metaTitle: 'Mutluluk Duyguları: Sevincini Yıldızlara Dönüştür',
     metaDescription:
       'Mutluluk anlarını paylaş, sevincini bir yıldıza dönüştür. Duygu Evreni Mutluluk gezegeninde neşeni anonim olarak yaz ve başkalarının mutluluklarını oku.',
     keywords: ['mutluluk sözleri', 'mutluluk paylaşımı', 'sevinç', 'mutlu anlar', 'neşe'],
     lead: 'Mutluluk, paylaştıkça çoğalan bir duygudur. Küçük bir an, beklenmedik bir haber ya da uzun süredir beklenen bir başarı; hepsi yazıya döküldüğünde daha kalıcı hâle gelir.',
     lead_en:
-      'Happiness is a feeling that grows the more you share it. A small moment, unexpected news, or a long-awaited success — all of them become more lasting once they are put into words.',
+      'Happiness is a feeling that grows the more you share it. A small moment, unexpected news, or a long-awaited success, all of them become more lasting once they are put into words.',
     body: [
       'Sevincimizi anlatmak, o anı yeniden yaşamamızı ve başkalarına da iyi gelmesini sağlar. Araştırmalar, olumlu deneyimleri paylaşmanın iyi oluş hâlini artırdığını gösterir. Duygu Evreni Mutluluk gezegeni, tam da bunun için bir alan sunar.',
       'Burada mutluluğunu birkaç cümleyle yazarsın ve paylaşımın evrende parlayan bir yıldıza dönüşür. İsim vermene gerek yok; her paylaşım anonimdir. Aynı gezegende başkalarının mutluluk anlarını da okuyabilir, onların sevincine ortak olabilirsin.',
@@ -122,9 +122,9 @@ export const EMOTIONS: EmotionContent[] = [
     name_tr: 'Aşk',
     name_en: 'Love',
     color: '#FF69B4',
-    heading: 'Aşk — Sevgini Yıldızlara Yaz',
-    heading_en: 'Love — Write Your Affection to the Stars',
-    metaTitle: 'Aşk ve Sevgi Sözleri — Duygularını Paylaş',
+    heading: 'Aşk: Sevgini Yıldızlara Yaz',
+    heading_en: 'Love: Write Your Affection to the Stars',
+    metaTitle: 'Aşk ve Sevgi Sözleri: Duygularını Paylaş',
     metaDescription:
       'Aşk ve sevgi duygularını anonim olarak paylaş. Duygu Evreni Aşk gezegeninde kalbindekileri yıldıza dönüştür, başkalarının aşk dolu paylaşımlarını oku.',
     keywords: ['aşk sözleri', 'sevgi sözleri', 'aşk duyguları', 'romantik sözler', 'aşk mesajları'],
@@ -160,15 +160,15 @@ export const EMOTIONS: EmotionContent[] = [
     name_tr: 'Umut',
     name_en: 'Hope',
     color: '#20D9D2',
-    heading: 'Umut — Geleceğe Dair Dileklerini Paylaş',
-    heading_en: 'Hope — Share Your Wishes for the Future',
-    metaTitle: 'Umut Sözleri ve Mesajları — Dileklerini Paylaş',
+    heading: 'Umut: Geleceğe Dair Dileklerini Paylaş',
+    heading_en: 'Hope: Share Your Wishes for the Future',
+    metaTitle: 'Umut Sözleri ve Mesajları: Dileklerini Paylaş',
     metaDescription:
       'Umutlarını ve geleceğe dair dileklerini paylaş. Duygu Evreni Umut gezegeninde beklentilerini bir yıldıza dönüştür, başkalarının umutlarından güç al.',
     keywords: ['umut sözleri', 'umut mesajları', 'gelecek', 'dilek', 'umutlu sözler'],
     lead: 'Umut, en zor anlarda bile bizi ayakta tutan duygudur. Geleceğe dair bir dilek, küçük bir beklenti ya da içten bir temenni; hepsi paylaşıldığında güç kazanır.',
     lead_en:
-      'Hope is the feeling that keeps us standing even in the hardest moments. A wish for the future, a small expectation, or a heartfelt hope — all of them gain strength when shared.',
+      'Hope is the feeling that keeps us standing even in the hardest moments. A wish for the future, a small expectation, or a heartfelt hope, all of them gain strength when shared.',
     body: [
       'Umutlarımızı yazıya dökmek, onları daha gerçek ve ulaşılabilir hissettirir. Duygu Evreni Umut gezegeni, geleceğe dair dileklerini anonim olarak paylaşabileceğin bir alandır.',
       'Yazdığın her umut, evrende parlayan bir yıldıza dönüşür. Aynı gezegende başkalarının umutlarını okumak, zor günlerde yalnız olmadığını ve herkesin bir şeyler beklediğini hatırlatır.',
@@ -198,9 +198,9 @@ export const EMOTIONS: EmotionContent[] = [
     name_tr: 'Huzur',
     name_en: 'Peace',
     color: '#86EFAC',
-    heading: 'Huzur — Sükunet Anlarını Paylaş',
-    heading_en: 'Peace — Share Your Moments of Calm',
-    metaTitle: 'Huzur ve İç Huzuru — Sükunet Anlarını Paylaş',
+    heading: 'Huzur: Sükunet Anlarını Paylaş',
+    heading_en: 'Peace: Share Your Moments of Calm',
+    metaTitle: 'Huzur ve İç Huzuru: Sükunet Anlarını Paylaş',
     metaDescription:
       'İç huzurunu ve sükunet anlarını paylaş. Duygu Evreni Huzur gezegeninde dinginlik hissini bir yıldıza dönüştür, başkalarının huzur veren paylaşımlarını oku.',
     keywords: ['huzur', 'sükunet', 'iç huzuru', 'huzur sözleri', 'dinginlik'],
@@ -236,9 +236,9 @@ export const EMOTIONS: EmotionContent[] = [
     name_tr: 'Özlem',
     name_en: 'Longing',
     color: '#A855F7',
-    heading: 'Özlem — Hasretini Anlat',
-    heading_en: 'Longing — Tell Us What You Miss',
-    metaTitle: 'Özlem ve Hasret Sözleri — Duygularını Paylaş',
+    heading: 'Özlem: Hasretini Anlat',
+    heading_en: 'Longing: Tell Us What You Miss',
+    metaTitle: 'Özlem ve Hasret Sözleri: Duygularını Paylaş',
     metaDescription:
       'Özlemini ve hasretini paylaş. Duygu Evreni Özlem gezegeninde içindeki hasreti bir yıldıza dönüştür, aynı duyguyu yaşayanların paylaşımlarını oku.',
     keywords: ['özlem sözleri', 'hasret sözleri', 'özlem mesajları', 'özlem', 'hasret'],
@@ -274,9 +274,9 @@ export const EMOTIONS: EmotionContent[] = [
     name_tr: 'Hüzün',
     name_en: 'Sadness',
     color: '#4A5FDD',
-    heading: 'Hüzün — İçindeki Kederi Paylaş',
-    heading_en: 'Sadness — Share the Sorrow Inside You',
-    metaTitle: 'Hüzünlü Sözler — Üzüntünü Paylaş',
+    heading: 'Hüzün: İçindeki Kederi Paylaş',
+    heading_en: 'Sadness: Share the Sorrow Inside You',
+    metaTitle: 'Hüzünlü Sözler: Üzüntünü Paylaş',
     metaDescription:
       'Üzüntünü ve hüznünü paylaş. Duygu Evreni Hüzün gezegeninde içindeki kederi bir yıldıza dönüştür, aynı duyguyu yaşayanların yanında olduğunu hisset.',
     keywords: ['hüzünlü sözler', 'üzüntü', 'keder', 'hüzün mesajları', 'hüzün'],
@@ -301,7 +301,7 @@ export const EMOTIONS: EmotionContent[] = [
     faqs_en: [
       {
         q: 'Will sharing my sadness make me feel better?',
-        a: 'Yes — expressing emotions instead of suppressing them usually helps. Sharing your sorrow in a space where you will not be judged lightens the weight inside you a little.',
+        a: 'Yes, expressing emotions instead of suppressing them usually helps. Sharing your sorrow in a space where you will not be judged lightens the weight inside you a little.',
       },
       ...commonFaqsEn('Sadness'),
     ],
@@ -312,9 +312,9 @@ export const EMOTIONS: EmotionContent[] = [
     name_tr: 'Pişmanlık',
     name_en: 'Regret',
     color: '#8B4513',
-    heading: 'Pişmanlık — Vicdanını Hafiflet',
-    heading_en: 'Regret — Ease Your Conscience',
-    metaTitle: 'Pişmanlık Sözleri — İçini Dök',
+    heading: 'Pişmanlık: Vicdanını Hafiflet',
+    heading_en: 'Regret: Ease Your Conscience',
+    metaTitle: 'Pişmanlık Sözleri: İçini Dök',
     metaDescription:
       'Pişmanlıklarını paylaş, içini dök. Duygu Evreni Pişmanlık gezegeninde geçmişe dair duygularını bir yıldıza dönüştür ve vicdanını hafiflet.',
     keywords: ['pişmanlık sözleri', 'pişmanlık', 'vicdan', 'keşke', 'geçmiş pişmanlıkları'],
@@ -350,9 +350,9 @@ export const EMOTIONS: EmotionContent[] = [
     name_tr: 'Korku',
     name_en: 'Fear',
     color: '#9333EA',
-    heading: 'Korku — Endişelerini Paylaş',
-    heading_en: 'Fear — Share Your Worries',
-    metaTitle: 'Korku ve Kaygı — Endişelerini Paylaş',
+    heading: 'Korku: Endişelerini Paylaş',
+    heading_en: 'Fear: Share Your Worries',
+    metaTitle: 'Korku ve Kaygı: Endişelerini Paylaş',
     metaDescription:
       'Korkularını ve kaygılarını paylaş. Duygu Evreni Korku gezegeninde içindeki endişeyi bir yıldıza dönüştür, aynı duyguyu yaşayanların yanında olduğunu hisset.',
     keywords: ['korku', 'kaygı', 'endişe', 'korku sözleri', 'kaygı paylaşımı'],
@@ -388,9 +388,9 @@ export const EMOTIONS: EmotionContent[] = [
     name_tr: 'Öfke',
     name_en: 'Anger',
     color: '#FF4444',
-    heading: 'Öfke — Kızgınlığını Dışa Vur',
-    heading_en: 'Anger — Let Out Your Frustration',
-    metaTitle: 'Öfke ve Kızgınlık — Duygularını Boşalt',
+    heading: 'Öfke: Kızgınlığını Dışa Vur',
+    heading_en: 'Anger: Let Out Your Frustration',
+    metaTitle: 'Öfke ve Kızgınlık: Duygularını Boşalt',
     metaDescription:
       'Öfkeni ve kızgınlığını sağlıklı bir şekilde dışa vur. Duygu Evreni Öfke gezegeninde içindeki sinirini bir yıldıza dönüştür, birikmiş duygularını boşalt.',
     keywords: ['öfke sözleri', 'kızgınlık', 'sinir', 'öfke', 'hayal kırıklığı'],
@@ -426,9 +426,9 @@ export const EMOTIONS: EmotionContent[] = [
     name_tr: 'Depresyon',
     name_en: 'Depression',
     color: '#64748B',
-    heading: 'Depresyon — Yalnız Değilsin',
-    heading_en: 'Depression — You Are Not Alone',
-    metaTitle: 'Depresyon ve Ağır Ruh Halleri — Yalnız Değilsin',
+    heading: 'Depresyon: Yalnız Değilsin',
+    heading_en: 'Depression: You Are Not Alone',
+    metaTitle: 'Depresyon ve Ağır Ruh Halleri: Yalnız Değilsin',
     metaDescription:
       'Ağır ruh hâllerini paylaş, yalnız olmadığını hisset. Duygu Evreni Depresyon gezegeninde içindekileri anonim olarak yazabilir, başkalarının paylaşımlarından destek bulabilirsin.',
     keywords: ['depresyon', 'yalnızlık', 'ağır ruh hali', 'depresyondaki hisler', 'umutsuzluk'],
@@ -452,7 +452,7 @@ export const EMOTIONS: EmotionContent[] = [
     ],
     faqs_en: [
       {
-        q: 'I feel terrible — can I pour my heart out here?',
+        q: 'I feel terrible, can I pour my heart out here?',
         a: 'Yes, you can write what is inside you without being judged and without giving your name. It may bring relief; but remember that sharing is not a substitute for professional support. If you are struggling, we encourage you to reach out to a professional.',
       },
       ...commonFaqsEn('Depression'),

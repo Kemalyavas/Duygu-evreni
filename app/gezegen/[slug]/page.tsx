@@ -3,6 +3,7 @@ import { notFound, redirect } from 'next/navigation'
 import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { EMOTION_SLUGS, getEmotionBySlug } from '@/lib/constants/emotions'
 import { PlanetArticle } from '@/components/PlanetArticle'
+import { CosmicBackground } from '@/components/CosmicBackground'
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.duyguevreni.com'
 
@@ -122,7 +123,8 @@ export default async function PlanetContentPage({ params }: Params) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#0A0E27] to-black text-white">
+    <div className="relative min-h-dvh text-white">
+      <CosmicBackground accent={emotion.color} />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}

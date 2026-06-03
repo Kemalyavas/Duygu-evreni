@@ -123,14 +123,14 @@ export default function KullaniciAdiPage() {
   // Show loading while checking auth
   if (!user) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-[#0A0E27] to-black flex items-center justify-center">
+      <div className="min-h-screen bg-[#080B14] flex items-center justify-center">
         <p className="text-white/60 animate-pulse">{t('common.loading')}</p>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#0A0E27] to-black flex items-center justify-center px-4 relative">
+    <div className="min-h-screen bg-[#080B14] flex items-center justify-center px-4 relative">
       {/* Language Switcher */}
       <div className="absolute top-4 right-4">
         <LanguageSwitcher />
@@ -143,7 +143,7 @@ export default function KullaniciAdiPage() {
       >
         {/* Logo/Icon */}
         <div className="text-center mb-8">
-          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-cyan-500/20 to-purple-500/20 flex items-center justify-center mx-auto mb-4 border border-white/10">
+          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-cyan-500/20 to-blue-500/20 flex items-center justify-center mx-auto mb-4 border border-white/10">
             <svg className="w-10 h-10 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
             </svg>

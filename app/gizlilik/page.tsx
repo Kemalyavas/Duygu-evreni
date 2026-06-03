@@ -3,12 +3,14 @@
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { MusicToggle } from '@/components/ui'
+import { CosmicBackground } from '@/components/CosmicBackground'
 
 export default function PrivacyPage() {
   const router = useRouter()
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#0A0E27] to-black">
+    <div className="relative min-h-dvh">
+      <CosmicBackground />
       {/* Back button */}
       <button
         onClick={() => router.back()}

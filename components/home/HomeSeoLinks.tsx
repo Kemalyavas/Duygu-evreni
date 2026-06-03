@@ -10,7 +10,7 @@ import { EMOTIONS } from '@/lib/constants/emotions'
 export function HomeSeoLinks() {
   return (
     <section className="sr-only" aria-hidden="false">
-      <h1>Duygu Evreni — Duygularını Yıldızlara Dönüştür</h1>
+      <h1>Duygu Evreni: Duygularını Yıldızlara Dönüştür</h1>
       <p>
         Duygu Evreni, duygularını anonim olarak yıldızlara dönüştürüp
         paylaşabileceğin 3D interaktif bir platformdur. Aşk, mutluluk, umut,

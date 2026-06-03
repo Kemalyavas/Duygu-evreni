@@ -13,6 +13,7 @@ import { PendingRequestsList, ConversationList } from '@/components/messaging'
 import { useAuth, usePlanets, useDailyLimit, useConversations, useNotifications } from '@/lib/hooks'
 import { useStore } from '@/lib/store/useStore'
 import { createClient } from '@/lib/supabase/client'
+import { CosmicBackground } from '@/components/CosmicBackground'
 
 interface PlanetStats {
   planet_id: string
@@ -212,7 +213,8 @@ function ProfilPageContent() {
   }))
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#0A0E27] to-black">
+    <div className="relative min-h-dvh">
+      <CosmicBackground />
       <Navbar />
 
       <div className="pt-24 pb-12 px-4 max-w-2xl mx-auto">
@@ -503,7 +505,7 @@ function ProfilPageContent() {
 export default function ProfilPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-gradient-to-b from-slate-900 via-purple-900/20 to-slate-900 flex items-center justify-center">
+      <div className="min-h-screen bg-[#080B14] flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-white/20 border-t-cyan-400 rounded-full animate-spin" />
       </div>
     }>

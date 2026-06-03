@@ -101,7 +101,7 @@ export default function PasswordResetPage() {
   // Loading state
   if (isValidSession === null) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#0A0E27] to-black">
+      <div className="min-h-screen flex items-center justify-center bg-[#080B14]">
         <div className="text-white animate-pulse">{t('common.loading')}</div>
       </div>
     )
@@ -110,7 +110,7 @@ export default function PasswordResetPage() {
   // Invalid session
   if (!isValidSession) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#0A0E27] to-black px-4">
+      <div className="min-h-screen flex items-center justify-center bg-[#080B14] px-4">
         {/* Header with LanguageSwitcher */}
         <div className="fixed top-4 right-4 z-50">
           <LanguageSwitcher />
@@ -142,7 +142,7 @@ export default function PasswordResetPage() {
   // Success state
   if (success) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#0A0E27] to-black px-4">
+      <div className="min-h-screen flex items-center justify-center bg-[#080B14] px-4">
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -164,7 +164,7 @@ export default function PasswordResetPage() {
 
   // Password reset form
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#0A0E27] to-black px-4">
+    <div className="min-h-screen flex items-center justify-center bg-[#080B14] px-4">
       {/* Header with LanguageSwitcher */}
       <div className="fixed top-4 right-4 z-50">
         <LanguageSwitcher />

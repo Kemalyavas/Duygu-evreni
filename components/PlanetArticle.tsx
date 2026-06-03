@@ -59,11 +59,11 @@ export function PlanetArticle({ slug, starCount, planetId }: PlanetArticleProps)
   return (
     <>
       {/* Header */}
-      <header className="border-b border-white/10">
+      <header>
         <div className="max-w-3xl mx-auto px-4 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
             <Image src="/logo.png" alt="Duygu Evreni" width={36} height={36} />
-            <span className="font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-purple-300 bg-clip-text text-transparent">
+            <span className="font-bold bg-gradient-to-r from-[#FFD79A] via-[#FFB14E] to-[#FF6F61] bg-clip-text text-transparent">
               Duygu Evreni
             </span>
           </Link>
@@ -108,7 +108,7 @@ export function PlanetArticle({ slug, starCount, planetId }: PlanetArticleProps)
         <div className="my-10">
           <Link
             href={exploreHref}
-            className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 px-6 py-3 font-semibold text-white shadow-lg shadow-purple-500/25 transition-opacity hover:opacity-90"
+            className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#3366E8] to-[#2CB6D6] px-6 py-3 font-semibold text-white shadow-[0_6px_24px_-6px_rgba(51,102,232,0.5)] transition-all hover:scale-[1.03]"
           >
             {c.exploreCta(name)}
           </Link>
@@ -144,7 +144,7 @@ export function PlanetArticle({ slug, starCount, planetId }: PlanetArticleProps)
             ))}
           </ul>
           <p className="mt-6">
-            <Link href="/" className="text-purple-300 hover:text-purple-200">
+            <Link href="/" className="text-[#2CB6D6] hover:text-[#5BD3E0]">
               {c.exploreAll}
             </Link>
           </p>
