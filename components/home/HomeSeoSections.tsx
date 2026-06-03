@@ -3,6 +3,7 @@
 import type { ReactNode } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { motion, type Variants } from 'framer-motion'
 import { EMOTIONS } from '@/lib/constants/emotions'
 import { SiteFooter } from '@/components/SiteFooter'
 import { CosmicBackground } from '@/components/CosmicBackground'
@@ -167,6 +168,24 @@ const CONTENT: Record<'tr' | 'en', SeoContent> = {
   },
 }
 
+// Orchestrated entrance — staggered reveal (respects reduced-motion via the
+// app-wide <MotionConfig reducedMotion="user">).
+const stagger: Variants = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.07 } },
+}
+const fadeUp: Variants = {
+  hidden: { opacity: 0, y: 18 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.55, ease: 'easeOut' } },
+}
+
+// Desktop pointer spotlight: track the cursor over the planet grid as CSS vars.
+function trackSpotlight(e: React.MouseEvent<HTMLDivElement>) {
+  const r = e.currentTarget.getBoundingClientRect()
+  e.currentTarget.style.setProperty('--mx', `${e.clientX - r.left}px`)
+  e.currentTarget.style.setProperty('--my', `${e.clientY - r.top}px`)
+}
+
 export function HomeSeoSections() {
   const { language } = useTranslation()
   const c = CONTENT[language === 'en' ? 'en' : 'tr']
@@ -197,7 +216,7 @@ export function HomeSeoSections() {
           <div className="mx-auto flex h-16 max-w-5xl items-center justify-between px-4">
             <Link href="/" className="flex items-center gap-2">
               <Image src="/logo.png" alt="Duygu Evreni" width={36} height={36} />
-              <span className="cosmic-text font-heading text-lg font-bold">Duygu Evreni</span>
+              <span className="cosmic-text font-display text-xl font-semibold">Duygu Evreni</span>
             </Link>
             <Link
               href="/"
@@ -209,86 +228,140 @@ export function HomeSeoSections() {
         </header>
 
         {/* Hero / intro */}
-        <section id="hakkinda" className="mx-auto max-w-4xl px-4 pb-16 pt-20 sm:pt-28">
-          <span className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-1.5 text-xs font-medium uppercase tracking-[0.2em] text-white/70 backdrop-blur-sm">
+        <motion.section
+          id="hakkinda"
+          variants={stagger}
+          initial="hidden"
+          animate="show"
+          className="mx-auto max-w-4xl px-4 pb-16 pt-20 sm:pt-28"
+        >
+          <motion.span
+            variants={fadeUp}
+            className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-1.5 text-xs font-medium uppercase tracking-[0.2em] text-white/70 backdrop-blur-sm"
+          >
             <span className="h-1.5 w-1.5 animate-soft-pulse rounded-full bg-[#EC4899]" />
             {isEn ? 'Emotion Universe' : 'Duygu Evreni'}
-          </span>
-          <h1 className="cosmic-text font-heading text-4xl font-extrabold leading-[1.1] tracking-tight sm:text-6xl">
-            {c.introTitle}
-          </h1>
-          <p className="mt-6 max-w-2xl text-lg leading-relaxed text-white/75 sm:text-xl">
-            {c.introBody}
-          </p>
-          <Link
-            href="/"
-            className="btn-glow mt-8 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#7C3AED] via-[#EC4899] to-[#3B82F6] px-6 py-3 text-sm font-semibold text-white transition-transform hover:scale-[1.03]"
+          </motion.span>
+          <motion.h1
+            variants={fadeUp}
+            className="cosmic-text font-display text-5xl font-semibold leading-[1.05] tracking-tight sm:text-7xl"
           >
-            {c.enter3d}
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-            </svg>
-          </Link>
-        </section>
+            {c.introTitle}
+          </motion.h1>
+          <motion.p
+            variants={fadeUp}
+            className="mt-6 max-w-2xl text-lg leading-relaxed text-white/75 sm:text-xl"
+          >
+            {c.introBody}
+          </motion.p>
+          <motion.div variants={fadeUp}>
+            <Link
+              href="/"
+              className="btn-glow mt-8 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#7C3AED] via-[#EC4899] to-[#3B82F6] px-6 py-3 text-sm font-semibold text-white transition-transform hover:scale-[1.03]"
+            >
+              {c.enter3d}
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              </svg>
+            </Link>
+          </motion.div>
+        </motion.section>
 
-        {/* Emotion planets — each card themed to its own color */}
+        {/* Emotion planets — each card themed to its own color, with a desktop cursor spotlight */}
         <section className="mx-auto max-w-5xl px-4 pb-20">
-          <h2 className="font-heading text-2xl font-bold sm:text-3xl">{c.planetsTitle}</h2>
+          <motion.h2
+            variants={fadeUp}
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true, margin: '-60px' }}
+            className="font-display text-3xl font-semibold sm:text-4xl"
+          >
+            {c.planetsTitle}
+          </motion.h2>
           <p className="mb-8 mt-2 text-white/60">{c.planetsSubtitle}</p>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {EMOTIONS.map((e) => {
-              const name = isEn ? e.name_en : e.name_tr
-              return (
-                <Link
-                  key={e.slug}
-                  href={`/gezegen/${e.slug}`}
-                  className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] p-5 transition-all duration-300 hover:-translate-y-1 hover:border-white/20"
-                >
-                  {/* emotion-tinted glow */}
-                  <div
-                    className="pointer-events-none absolute inset-0 opacity-45 transition-opacity duration-300 group-hover:opacity-100"
-                    style={{ background: `radial-gradient(150px circle at 12% -10%, ${e.color}26, transparent 60%)` }}
-                  />
-                  {/* top accent line in the emotion's color */}
-                  <div
-                    className="pointer-events-none absolute inset-x-0 top-0 h-px opacity-60 transition-opacity duration-300 group-hover:opacity-100"
-                    style={{ background: `linear-gradient(90deg, transparent, ${e.color}, transparent)` }}
-                  />
-                  <div className="relative">
-                    <div className="mb-2 flex items-center gap-3">
-                      <span
-                        className="h-3.5 w-3.5 flex-shrink-0 rounded-full"
-                        style={{ backgroundColor: e.color, boxShadow: `0 0 12px 2px ${e.color}aa` }}
+
+          <div className="group/grid relative" onMouseMove={trackSpotlight}>
+            <div
+              className="pointer-spotlight pointer-events-none absolute -inset-3 z-20 rounded-[2rem] opacity-0 transition-opacity duration-500 group-hover/grid:opacity-100"
+              style={{ background: 'radial-gradient(320px circle at var(--mx) var(--my), rgba(255,255,255,0.07), transparent 72%)' }}
+            />
+            <motion.div
+              variants={stagger}
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: true, margin: '-60px' }}
+              className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+            >
+              {EMOTIONS.map((e) => {
+                const name = isEn ? e.name_en : e.name_tr
+                return (
+                  <motion.div key={e.slug} variants={fadeUp}>
+                    <Link
+                      href={`/gezegen/${e.slug}`}
+                      className="group relative block h-full overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] p-5 transition-all duration-300 hover:-translate-y-1 hover:border-white/20"
+                    >
+                      {/* emotion-tinted glow */}
+                      <div
+                        className="pointer-events-none absolute inset-0 opacity-45 transition-opacity duration-300 group-hover:opacity-100"
+                        style={{ background: `radial-gradient(150px circle at 12% -10%, ${e.color}26, transparent 60%)` }}
                       />
-                      <h3 className="text-lg font-semibold">{name}</h3>
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="ml-auto h-4 w-4 -translate-x-1 text-white/40 opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        strokeWidth={2}
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                      </svg>
-                    </div>
-                    <p className="text-sm leading-relaxed text-white/60">
-                      {c.taglines[e.slug] ?? c.cardFallback(name)}
-                    </p>
-                  </div>
-                </Link>
-              )
-            })}
+                      {/* top accent line in the emotion's color */}
+                      <div
+                        className="pointer-events-none absolute inset-x-0 top-0 h-px opacity-60 transition-opacity duration-300 group-hover:opacity-100"
+                        style={{ background: `linear-gradient(90deg, transparent, ${e.color}, transparent)` }}
+                      />
+                      <div className="relative">
+                        <div className="mb-2 flex items-center gap-3">
+                          <span
+                            className="h-3.5 w-3.5 flex-shrink-0 rounded-full"
+                            style={{ backgroundColor: e.color, boxShadow: `0 0 12px 2px ${e.color}aa` }}
+                          />
+                          <h3 className="text-lg font-semibold">{name}</h3>
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="ml-auto h-4 w-4 -translate-x-1 text-white/40 opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            strokeWidth={2}
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                          </svg>
+                        </div>
+                        <p className="text-sm leading-relaxed text-white/60">
+                          {c.taglines[e.slug] ?? c.cardFallback(name)}
+                        </p>
+                      </div>
+                    </Link>
+                  </motion.div>
+                )
+              })}
+            </motion.div>
           </div>
         </section>
 
         {/* How it works */}
         <section className="mx-auto max-w-4xl px-4 pb-20">
-          <h2 className="mb-8 font-heading text-2xl font-bold sm:text-3xl">{c.howTitle}</h2>
-          <div className="grid gap-5 sm:grid-cols-3">
+          <motion.h2
+            variants={fadeUp}
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true, margin: '-60px' }}
+            className="mb-8 font-display text-3xl font-semibold sm:text-4xl"
+          >
+            {c.howTitle}
+          </motion.h2>
+          <motion.div
+            variants={stagger}
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true, margin: '-60px' }}
+            className="grid gap-5 sm:grid-cols-3"
+          >
             {c.steps.map((s, i) => (
-              <div
+              <motion.div
                 key={i}
+                variants={fadeUp}
                 className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 backdrop-blur-sm transition-colors hover:border-white/20"
               >
                 <div
@@ -299,14 +372,22 @@ export function HomeSeoSections() {
                 </div>
                 <h3 className="mb-1.5 text-lg font-semibold">{s.title}</h3>
                 <p className="text-sm leading-relaxed text-white/60">{s.desc}</p>
-              </div>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         </section>
 
         {/* FAQ */}
         <section className="mx-auto max-w-3xl px-4 pb-20">
-          <h2 className="mb-6 font-heading text-2xl font-bold sm:text-3xl">{c.faqTitle}</h2>
+          <motion.h2
+            variants={fadeUp}
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true, margin: '-60px' }}
+            className="mb-6 font-display text-3xl font-semibold sm:text-4xl"
+          >
+            {c.faqTitle}
+          </motion.h2>
           <div className="space-y-3">
             {c.faqs.map((f) => (
               <div
