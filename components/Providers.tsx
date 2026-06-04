@@ -5,6 +5,7 @@ import { AuthHandler } from './AuthHandler'
 import { MusicProvider } from './MusicProvider'
 import { ChatPanel } from './messaging/ChatPanel'
 import { LanguageProvider } from '@/lib/i18n'
+import { NotificationsProvider } from '@/lib/hooks'
 
 interface ProvidersProps {
   children: React.ReactNode
@@ -20,10 +21,14 @@ export function Providers({ children }: ProvidersProps) {
       {/* reducedMotion="user" makes all framer-motion animations respect the OS setting */}
       <MotionConfig reducedMotion="user">
         <MusicProvider>
-          <AuthHandler />
-          {children}
-          {/* Global Chat Panel - tüm sayfalarda görünür */}
-          <ChatPanel />
+          {/* Single global notifications source (one realtime channel + fetch
+              + sound) shared by the bell, panel, list and profile. */}
+          <NotificationsProvider>
+            <AuthHandler />
+            {children}
+            {/* Global Chat Panel - tüm sayfalarda görünür */}
+            <ChatPanel />
+          </NotificationsProvider>
         </MusicProvider>
       </MotionConfig>
     </LanguageProvider>

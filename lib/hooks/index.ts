@@ -15,4 +15,4 @@ export { useBlocking } from './useBlocking'
 export { useNicknames } from './useNicknames'
 
 // Bildirim hooks
-export { useNotifications } from './useNotifications'
+export { useNotifications, NotificationsProvider } from './useNotifications'

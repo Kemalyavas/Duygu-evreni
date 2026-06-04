@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useEffect, useRef } from 'react'
+import { useState, useCallback, useEffect, useRef, createContext, useContext, createElement, type ReactNode } from 'react'
 import { supabaseFetch, supabaseUpdate } from '@/lib/supabase/fetch'
 import { createClient } from '@/lib/supabase/client'
 import type { AuthChangeEvent } from '@supabase/supabase-js'
@@ -27,7 +27,7 @@ function playNotificationSound() {
   }
 }
 
-export function useNotifications() {
+function useNotificationsState() {
   const [notifications, setNotifications] = useState<NotificationWithSender[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -340,4 +340,34 @@ export function useNotifications() {
     markAllAsRead,
     deleteNotification,
   }
+}
+
+// --- Single global source -------------------------------------------------
+// Notifications were previously a per-component hook, so every place that
+// showed the bell/panel/list opened its OWN realtime channel + fetch + sound.
+// Now ONE provider (mounted in Providers) holds the subscription and all
+// consumers read it via context.
+
+type NotificationsValue = ReturnType<typeof useNotificationsState>
+
+const NotificationsContext = createContext<NotificationsValue | null>(null)
+
+export function NotificationsProvider({ children }: { children: ReactNode }) {
+  const value = useNotificationsState()
+  return createElement(NotificationsContext.Provider, { value }, children)
+}
+
+const NOOP_NOTIFICATIONS: NotificationsValue = {
+  notifications: [],
+  unreadCount: 0,
+  loading: false,
+  error: null,
+  fetchNotifications: async () => [],
+  markAsRead: async () => {},
+  markAllAsRead: async () => {},
+  deleteNotification: async () => {},
+}
+
+export function useNotifications(): NotificationsValue {
+  return useContext(NotificationsContext) ?? NOOP_NOTIFICATIONS
 }

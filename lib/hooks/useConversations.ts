@@ -3,7 +3,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
 import { supabaseFetch, supabaseInsert, supabaseUpdate, createClient } from '@/lib/supabase/fetch'
 import { moderateContent } from '@/lib/moderation'
-import type { Conversation, ConversationWithDetails } from '@/types'
+import type { Conversation, ConversationWithDetails, Message } from '@/types'
 
 const MAX_DAILY_REQUESTS = 5
 
@@ -43,17 +43,41 @@ export function useConversations() {
       // Filter out hidden conversations for current user
       const visibleConversations = (data || []).filter(conv => {
         const isInitiator = conv.initiator_id === session.user.id
-        if (isInitiator) {
-          return !conv.hidden_by_initiator
-        } else {
-          return !conv.hidden_by_owner
-        }
+        return isInitiator ? !conv.hidden_by_initiator : !conv.hidden_by_owner
       })
 
-      if (isMountedRef.current) {
-        setConversations(visibleConversations)
+      // Enrich with last-message preview + unread count in a SINGLE round-trip
+      // (RPC, no N+1). Best-effort: on failure we still show the conversations.
+      let enriched: ConversationWithDetails[] = visibleConversations
+      if (visibleConversations.length > 0) {
+        try {
+          const ids = visibleConversations.map((c) => c.id)
+          const { data: meta } = await supabase.rpc('get_conversation_meta', { p_conv_ids: ids })
+          const metaMap = new Map(
+            ((meta as { conversation_id: string; last_content: string | null; unread_count: number }[] | null) ?? [])
+              .map((m) => [m.conversation_id, m])
+          )
+          enriched = visibleConversations.map((c) => {
+            const m = metaMap.get(c.id)
+            // Fall back to the opener (first_message) when no reply exists yet.
+            const previewText = m?.last_content ?? c.first_message ?? null
+            return {
+              ...c,
+              last_message: previewText
+                ? ({ content: previewText } as unknown as Message)
+                : undefined,
+              unread_count: m ? Number(m.unread_count) : 0,
+            }
+          })
+        } catch {
+          // enrichment is best-effort
+        }
       }
-      return visibleConversations
+
+      if (isMountedRef.current) {
+        setConversations(enriched)
+      }
+      return enriched
     } catch (err) {
       if (isMountedRef.current) {
         setError(err instanceof Error ? err.message : 'Sohbetler yüklenemedi')
