@@ -159,7 +159,7 @@ export function ConversationList({ conversations, onSelect, onDelete }: Conversa
               </div>
 
               {/* Unread indicator - hide for blocked */}
-              {!isBlocked && conv.unread_count && conv.unread_count > 0 && (
+              {!isBlocked && (conv.unread_count ?? 0) > 0 && (
                 <div className="w-5 h-5 rounded-full bg-cyan-500 flex items-center justify-center flex-shrink-0">
                   <span className="text-white text-xs font-medium">{conv.unread_count}</span>
                 </div>
